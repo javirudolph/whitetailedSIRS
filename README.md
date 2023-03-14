@@ -6,7 +6,12 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of whitetailedSIRS is to …
+The goal of whitetailedSIRS is to provide a simple package to generate
+epidemic projections in white tailed deer populations using a
+**S**usceptible-**I**nfected-**R**ecovered-**S**usceptible (SIRS)
+modeling framework. The outputs of this package are ggplot friendly, and
+for the most part, we use a list-column workflow when working with
+multiple simulations.
 
 ## Installation
 
@@ -20,36 +25,81 @@ devtools::install_github("javirudolph/whitetailedSIRS")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example to run a simple projection using the base
+function:
 
 ``` r
 library(whitetailedSIRS)
 ## basic example code
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+example_inits <- c(S_wild = 1, 
+                   I_wild = 0, 
+                   R_wild = 0,
+                   S_captive = 1,
+                   I_captive = 0,
+                   R_captive = 0)
+
+# length of time to run this for  
+example_times <-  seq(0, 500, by = 1)
+
+# The parameters we are using in the simulation
+example_params <- c(alpha_immunity = 0.03,
+                    beta_aero_ww = 0.01,
+                    beta_aero_cw = 0.01,
+                    beta_aero_cc = 0.02,
+                    beta_aero_hw = 0.01,
+                    beta_dc_ww = 0.01,
+                    beta_dc_cw = 0.01,
+                    beta_dc_cc = 0.01,
+                    beta_dc_hc = 0.2,
+                    phi_cw = 0,
+                    phi_wc = 0,
+                    gamma_recov = 0.01,
+                    I_human = 0.05)
 ```
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/v1/examples>.
+``` r
+library(deSolve)
+library(rootSolve)
 
-You can also embed plots, for example:
+example_out <- ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs)
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+example_eq <- runsteady(y = example_inits, parms = example_params, func = whitetailedSIRS::simple_sirs)
+```
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+``` r
+library(tidyverse)
+example_out %>% 
+   as_tibble() %>% 
+   pivot_longer(-time, names_to = "compartment", values_to = "proportion") %>% 
+   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
+   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
+          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
+   ggplot(aes(x = time, y = proportion, color = sir_type, linetype = pop_type)) +
+   geom_line() +
+   labs(title = "SIR dynamics", y = "Proportion of population", x = "Time in days",
+        color = "SIR", linetype = "Population type") +
+   theme_bw()
+```
+
+<img src="man/figures/README-viz_results-1.png" width="100%" />
+
+``` r
+example_eq$y %>% 
+   as_tibble_row() %>% 
+   pivot_longer(cols = everything(), names_to = "compartment", values_to = "proportion") %>% 
+   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
+   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
+          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
+   ggplot(aes(x = sir_type, 
+              alpha = pop_type,
+              y = proportion, fill = sir_type)) +
+   geom_col(position = "dodge") +
+   labs(title = "Equilibrium proportions", x = "Compartment", alpha = "Population type", fill = "SIR") +
+   scale_alpha_discrete(range = c(1, 0.4)) +
+   theme_bw()
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
