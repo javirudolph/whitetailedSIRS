@@ -20,8 +20,8 @@ simple_sirs <- function(time, state, parameters){
          (phi_cw * S_captive) -
          (phi_wc * S_wild)
 
-      dI_wild <- (S_wild * ((beta_aero_ww*I_wild) + (beta_dc_ww*I_wild) +
-                               (beta_aero_cw*I_captive) + (beta_dc_cw*I_captive) +
+      dI_wild <- (S_wild * ((beta_aero_ww * I_wild) + (beta_dc_ww * I_wild) +
+                               (beta_aero_cw * I_captive) + (beta_dc_cw * I_captive) +
                                (beta_aero_hw * I_human))) +
          (phi_cw * I_captive) -
          (phi_wc * I_wild) -
