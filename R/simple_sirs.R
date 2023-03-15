@@ -38,13 +38,13 @@ simple_sirs <- function(time, state, parameters){
       dS_captive <- alpha_immunity * R_captive -
          (S_captive * ((beta_aero_cc * I_captive) + (beta_dc_cc *I_captive) +
                           (beta_aero_cw * I_wild) + (beta_dc_cw * I_wild) +
-                          (beta_dc_hc * I_human))) -
+                          (beta_aero_hc * I_human))) -
          (phi_cw * S_captive) +
          (phi_wc * S_wild)
 
       dI_captive <- (S_captive * ((beta_aero_cc * I_captive) + (beta_dc_cc *I_captive) +
                                      (beta_aero_cw*I_wild) + (beta_dc_cw * I_wild) +
-                                     (beta_dc_hc * I_human))) -
+                                     (beta_aero_hc * I_human))) -
          (phi_cw * I_captive) +
          (phi_wc * I_wild) -
          (gamma_recov * I_captive)

@@ -2,4 +2,5 @@
 
 export(calc_contact_rate)
 export(calc_nu_aero)
+export(calc_nu_dc)
 export(simple_sirs)

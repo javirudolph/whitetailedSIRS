@@ -1,4 +1,17 @@
-calc_nu_dc<- function(V_DC = NULL,
+#' Calculate transmission for direct contact
+#'
+#' @param V_DC
+#' @param C_nu
+#' @param pfu_conv
+#' @param k
+#' @param nsamples
+#' @param seed
+#'
+#' @return
+#' @export
+#'
+#' @examples
+calc_nu_dc <- function(V_DC = NULL,
                       C_nu = NULL,
                       pfu_conv = NULL,
                       k = NULL,

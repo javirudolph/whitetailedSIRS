@@ -1,0 +1,182 @@
+---
+title: "example_values"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{example_values}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message=FALSE}
+library(whitetailedSIRS)
+library(tidyverse)
+```
+
+
+As a first example, we will use the defaults for all the values, and run one projection of the SIRS model. These defaults are produced as random draws from the expert elicitation data.
+
+
+First, load the data, and generate a random sample for each of the parameters: 
+
+```{r}
+set.seed(789)
+# load data from package
+elicitation_data <- whitetailedSIRS::elicitation_data
+
+# establish number of samples to draw from distributions
+nsamples <- 100
+
+# bind samples to the elicitation df
+elicitation_data %>% 
+   # create a random sample using the parameters depending on the specified distribution
+   mutate(my_sample = if_else(family == "log-normal",
+                              pmap(list(mu, sd), function(mu, sd) rlnorm(nsamples, mu, sd)),
+                              pmap(list(mu, sd), 
+                                   function(mu, sd) greybox::rlogitnorm(nsamples, mu, sd)))) -> elicitation_data
+   
+# for this example, draw just one value for each parameter
+elicitation_data %>% 
+   transmute(parameter = parameter,
+             my_sample = map_dbl(my_sample, 1)) -> elicitation_sample
+head(elicitation_sample)
+
+```
+
+From this `elicitation_sample` we can use the values to start setting some of the parameters. We create a simple helper function to extract these values from the data frame. We extract parameters from the expert elicitation to feed into our functions that will later estimate transmission probabilities and contact rates.
+
+```{r}
+get_param_val <- function(my_param){
+   elicitation_sample %>% 
+      filter(parameter == my_param) %>% 
+      pull(my_sample)
+}
+```
+
+
+```{r}
+alpha_immunity <- 1 /get_param_val("Temporary Immunity")
+
+N_w <- rpois(1, 1000)
+
+C_nu <- get_param_val("Viral Load") * 10^5.6
+
+t_contact_deer_deer <- get_param_val("Deer Proximity Duration (minutes)") / 60
+t_contact_deer_human_rural <- get_param_val("Deer-Human Proximity Duration, Rural (minutes)") / 60
+t_contact_deer_human_suburb <- get_param_val("Deer-Human Proximity Duration, Suburban (minutes)") / 60
+t_contact_deer_human_capt <- get_param_val("Deer-Human Proximity Duration, Captive (minutes)") / 60
+
+r_deer <- get_param_val("Dose-Response")
+```
+
+```{r}
+c_ww <- calc_contact_rate()
+c_cc <- get_param_val("Deer-Deer Proximity Rate, Captive (per day)")
+c_cw <- 0.00072 / get_param_val("Direct Contact Probability")
+c_hw_rural <- get_param_val("Deer-Human Proximity Rate, Rural (per 120 days)") / 120
+c_hw_suburban <- get_param_val("Deer-Human Proximity Rate, Suburban (per 120 days)") / 120
+c_hc <- get_param_val("Deer-Human Proximity Rate, Captive (per 120 days)") /120
+```
+
+
+```{r}
+nu_aero_deer_deer <- calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_deer, r = r_deer)
+nu_aero_deer_human_rural <- calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_human_rural, r = r_deer)
+nu_aero_deer_human_capt <- calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_human_capt, r = r_deer)
+
+nu_dc_deer_deer <- calc_nu_dc(C_nu = C_nu)
+
+sigma_dc <- get_param_val("Direct Contact Probability")
+
+```
+
+```{r}
+beta_aero_ww <- c_ww * nu_aero_deer_deer
+beta_aero_cw <- c_cw * nu_aero_deer_deer
+beta_aero_cc <- c_cc * nu_aero_deer_deer
+beta_aero_hw <- c_hw_rural * nu_aero_deer_human_rural
+beta_aero_hc <- c_hc * nu_aero_deer_human_capt
+
+
+beta_dc_ww <- c_ww * sigma_dc * nu_dc_deer_deer
+beta_dc_cw <- c_cw * sigma_dc * nu_dc_deer_deer
+beta_dc_cc <- c_cc * sigma_dc * nu_dc_deer_deer
+```
+
+
+```{r}
+example_inits <- c(S_wild = 1, 
+                   I_wild = 0, 
+                   R_wild = 0,
+                   S_captive = 1,
+                   I_captive = 0,
+                   R_captive = 0)
+
+# length of time to run this for  
+example_times <-  seq(0, 120, by = 1)
+
+# The parameters we are using in the simulation
+example_params <- c(alpha_immunity = alpha_immunity,
+                    beta_aero_ww = beta_aero_ww,
+                    beta_aero_cw = beta_aero_cw,
+                    beta_aero_cc = beta_aero_cc,
+                    beta_aero_hw = beta_aero_hw,
+                    beta_aero_hc = beta_aero_hc,
+                    beta_dc_ww = beta_dc_ww,
+                    beta_dc_cw = beta_dc_cw,
+                    beta_dc_cc = beta_dc_cc,
+                    phi_cw = 0,
+                    phi_wc = 0,
+                    gamma_recov = 1/6,
+                    I_human = 0.05)
+
+```
+
+```{r run_ode}
+library(deSolve)
+library(rootSolve)
+
+example_out <- ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs)
+
+example_eq <- runsteady(y = example_inits, parms = example_params, func = whitetailedSIRS::simple_sirs)
+```
+
+```{r viz_results}
+
+example_out %>% 
+   as_tibble() %>% 
+   pivot_longer(-time, names_to = "compartment", values_to = "proportion") %>% 
+   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
+   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
+          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
+   ggplot(aes(x = time, y = proportion, color = sir_type, linetype = pop_type)) +
+   geom_line() +
+   labs(title = "SIR dynamics", y = "Proportion of population", x = "Time in days",
+        color = "SIR", linetype = "Population type") +
+   theme_bw()
+
+```
+
+```{r warning=FALSE}
+example_eq$y %>% 
+   as_tibble_row() %>% 
+   pivot_longer(cols = everything(), names_to = "compartment", values_to = "proportion") %>% 
+   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
+   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
+          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
+   ggplot(aes(x = sir_type, 
+              alpha = pop_type,
+              y = proportion, fill = sir_type)) +
+   geom_col(position = "dodge") +
+   labs(title = "Equilibrium proportions", x = "Compartment", alpha = "Population type", fill = "SIR") +
+   scale_alpha_discrete(range = c(1, 0.4)) +
+   ylim(0, 1) +
+   theme_bw()
+   
+```

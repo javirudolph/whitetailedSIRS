@@ -17,7 +17,7 @@ calc_nu_aero(
   t_contact = NULL,
   r = NULL,
   nsamples = NULL,
-  print_pars = TRUE,
+  print_pars = FALSE,
   seed = NULL
 )
 }

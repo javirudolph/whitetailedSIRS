@@ -46,7 +46,7 @@ calc_nu_aero <- function(AER = NULL,
                          t_contact = NULL,
                          r = NULL,
                          nsamples = NULL,
-                         print_pars = TRUE,
+                         print_pars = FALSE,
                          seed = NULL) {
 
    if(!is_null(seed)) set.seed(seed)

@@ -32,6 +32,9 @@ calc_beta_dc <- function(sigma_DC = NULL,
    # EQ 26
    beta_dc_cw <- c_cw * sigma_DC * nu_DC
 
+   # non in doc
+   beta_dc_hc <- c_hc * sigma_DC * nu_DC
+
    ## What to return depending on argument
    # default to ALL
    if (is_null(return_beta)) return_beta = "all"

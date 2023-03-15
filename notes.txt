@@ -1,9 +1,0 @@
-beta_aero_ww = c.wild*v.aero
-beta_dc_ww = c.wild*sigma.dc.wild*v.dc
-beta_aero_cw = c.fence*v.aero
-beta_dc_cw = c.fence*sigma.dc.wild*v.dc
-beta_aero_hw = c.wild.human*v.aero_wild.human
-beta_aero_cc = c.captive*v.aero
-beta_dc_cc = c.captive*sigma.dc.captive*v.dc
-beta_dc_cw = c.fence*sigma.dc.captive*v.dc
-beta_dc_hc = c.captive.human*v.aero.captive.human
