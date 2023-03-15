@@ -180,3 +180,7 @@ example_eq$y %>%
    theme_bw()
    
 ```
+
+
+Do worflow for 100 sampled parameters:
+
