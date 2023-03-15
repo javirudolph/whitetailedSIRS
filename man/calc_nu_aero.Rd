@@ -38,7 +38,7 @@ calc_nu_aero(
 
 \item{V_d}{exhaled droplet volume concentration; ml exhaled droplets/ \eqn{m^3}}
 
-\item{V_air}{fixed volume; \eqn(m^3)}
+\item{V_air}{fixed volume; \eqn{m^3}}
 
 \item{t_contact}{time of contact with contaminated airspace (hr)}
 

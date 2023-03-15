@@ -27,13 +27,13 @@ calc_contact_rate <- function(sigma_season = NULL,
       return(print("calculation is only setup for c_ww"))
    }
 
-   if(is_null(nsamples)) nsamples = 1
+   if(is.null(nsamples)) nsamples = 1
 
-   if (is_null(sigma_season)) sigma_season = rep(1, nsamples)
-   if (is_null(scaling_c))  scaling_c = rep(16.37, nsamples)
-   if (is_null(N_w)) N_w = rpois(nsamples,1000)
-   if (is_null(q)) q = rep(0.53, nsamples)
-   if (is_null(A_w)) A_w = rep(100, nsamples)
+   if (is.null(sigma_season)) sigma_season = rep(1, nsamples)
+   if (is.null(scaling_c))  scaling_c = rep(16.37, nsamples)
+   if (is.null(N_w)) N_w = rpois(nsamples,1000)
+   if (is.null(q)) q = rep(0.53, nsamples)
+   if (is.null(A_w)) A_w = rep(100, nsamples)
 
    c_ww <- sigma_season * scaling_c * (N_w^(1-q)/A_w)
    return(c_ww)

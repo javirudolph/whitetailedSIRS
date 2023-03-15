@@ -9,20 +9,20 @@ calc_beta_aero <- function(nu_aero = NULL,
                            return_beta = NULL,
                            seed = NULL){
 
-   if(!is_null(seed)) set.seed(seed)
-   if(is_null(nsamples)) nsamples = 1
+   if(!is.null(seed)) set.seed(seed)
+   if(is.null(nsamples)) nsamples = 1
 
    # Function will return all or one of the betas
 
    ####
    # If any of the parameters are set to NULL we use the defaults
-   if (is_null(nu_aero)) nu_aero = rep(0.5318192, nsamples) #from calc_nu_fx defaults w.seed = 123
-   if (is_null(nu_aero_human)) nu_aero_human = nu_aero
-   if (is_null(c_ww)) c_ww = calc_contact_rate_wild(nsamples = nsamples)
-   if (is_null(c_cc)) c_cc = rlnorm(nsamples, 3.470, 0.913)
-   if (is_null(c_cw)) c_cw = 0.00072 / greybox::rlogitnorm(nsamples, -1.457, 0.708)
-   if (is_null(c_hw)) c_hw = rlnorm(nsamples, -1.589, 1.7) / 120
-   if (is_null(c_hc)) c_hc = rlnorm(nsamples, 2.521, 1.132) / 120
+   if (is.null(nu_aero)) nu_aero = rep(0.5318192, nsamples) #from calc_nu_fx defaults w.seed = 123
+   if (is.null(nu_aero_human)) nu_aero_human = nu_aero
+   if (is.null(c_ww)) c_ww = calc_contact_rate_wild(nsamples = nsamples)
+   if (is.null(c_cc)) c_cc = rlnorm(nsamples, 3.470, 0.913)
+   if (is.null(c_cw)) c_cw = 0.00072 / greybox::rlogitnorm(nsamples, -1.457, 0.708)
+   if (is.null(c_hw)) c_hw = rlnorm(nsamples, -1.589, 1.7) / 120
+   if (is.null(c_hc)) c_hc = rlnorm(nsamples, 2.521, 1.132) / 120
 
    ## BODY - calculating the betas
    # Equation 17
@@ -42,7 +42,7 @@ calc_beta_aero <- function(nu_aero = NULL,
 
    ## What to return depending on argument
    # default to ALL
-   if (is_null(return_beta)) return_beta = "all"
+   if (is.null(return_beta)) return_beta = "all"
 
    if(return_beta == "all"){
       # list for all objects:

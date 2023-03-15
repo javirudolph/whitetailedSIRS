@@ -10,7 +10,7 @@
 #' @param IR inhalation rate; \eqn{m^3/hr}
 #' @param ER exhalation rate; \eqn{m^3/hr}
 #' @param V_d exhaled droplet volume concentration; ml exhaled droplets/ \eqn{m^3}
-#' @param V_air fixed volume; \eqn(m^3)
+#' @param V_air fixed volume; \eqn{m^3}
 #' @param t_contact time of contact with contaminated airspace (hr)
 #' @param r species-specific probability of infection from 1 quantum. Default is for r_deer with expert elicited values
 #' @param nsamples default to 1, but if specified > 1 will draw `nsamples` from the default distributions of parameters
@@ -49,22 +49,22 @@ calc_nu_aero <- function(AER = NULL,
                          print_pars = FALSE,
                          seed = NULL) {
 
-   if(!is_null(seed)) set.seed(seed)
-   if(is_null(nsamples)) nsamples = 1
+   if(!is.null(seed)) set.seed(seed)
+   if(is.null(nsamples)) nsamples = 1
 
    #### ----------------------------------------------------- ###
    # If any of the parameters are set to NULL we use the defaults
-   if (is_null(C_nu)) C_nu = rlnorm(nsamples, 0.216, 0.344) * 10^5.6
-   if (is_null(C_i))  C_i = rep(0.0014, nsamples)
-   if (is_null(IR)) IR = rep(0.846, nsamples)
-   if (is_null(ER)) ER = IR
-   if (is_null(V_d)) V_d = rep(0.009, nsamples)
-   if (is_null(V_air)) V_air = rep(7.07, nsamples)
-   if (is_null(t_contact)) t_contact = rlnorm(nsamples, 1.553, 1.272)
-   if (is_null(r)) r = rlnorm(nsamples, 0.2775, 0.272)
-   if (is_null(AER)) AER = rep(4, nsamples)
-   if (is_null(s)) s = rep(0.24, nsamples)
-   if (is_null(lambda)) lambda = rep(0.63, nsamples)
+   if (is.null(C_nu)) C_nu = rlnorm(nsamples, 0.216, 0.344) * 10^5.6
+   if (is.null(C_i))  C_i = rep(0.0014, nsamples)
+   if (is.null(IR)) IR = rep(0.846, nsamples)
+   if (is.null(ER)) ER = IR
+   if (is.null(V_d)) V_d = rep(0.009, nsamples)
+   if (is.null(V_air)) V_air = rep(7.07, nsamples)
+   if (is.null(t_contact)) t_contact = rlnorm(nsamples, 1.553, 1.272)
+   if (is.null(r)) r = rlnorm(nsamples, 0.2775, 0.272)
+   if (is.null(AER)) AER = rep(4, nsamples)
+   if (is.null(s)) s = rep(0.24, nsamples)
+   if (is.null(lambda)) lambda = rep(0.63, nsamples)
 
 
    ### BODY of function ---------------------------##

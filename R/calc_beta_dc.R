@@ -7,18 +7,18 @@ calc_beta_dc <- function(sigma_DC = NULL,
                          return_beta = NULL,
                          seed = NULL){
 
-   if(!is_null(seed)) set.seed(seed)
-   if(is_null(nsamples)) nsamples = 1
+   if(!is.null(seed)) set.seed(seed)
+   if(is.null(nsamples)) nsamples = 1
 
    # Function will return all or one of the betas
 
    #### ----------------------------------------------------- ###
    # If any of the parameters are set to NULL we use the defaults
-   if (is_null(sigma_DC)) sigma_DC = greybox::rlogitnorm(nsamples, -1.457, 0.708)
-   if (is_null(nu_DC)) nu_DC = rep(0.4658, nsamples) #from calc_nu_fx defaults w.seed = 123
-   if (is_null(c_ww)) c_ww = calc_contact_rate(nsamples = nsamples)
-   if (is_null(c_cc)) c_cc = rlnorm(nsamples, 3.470, 0.913)
-   if (is_null(c_cw)) c_cw = 0.00072 / greybox::rlogitnorm(nsamples, -1.457, 0.708)
+   if (is.null(sigma_DC)) sigma_DC = greybox::rlogitnorm(nsamples, -1.457, 0.708)
+   if (is.null(nu_DC)) nu_DC = rep(0.4658, nsamples) #from calc_nu_fx defaults w.seed = 123
+   if (is.null(c_ww)) c_ww = calc_contact_rate(nsamples = nsamples)
+   if (is.null(c_cc)) c_cc = rlnorm(nsamples, 3.470, 0.913)
+   if (is.null(c_cw)) c_cw = 0.00072 / greybox::rlogitnorm(nsamples, -1.457, 0.708)
 
 
    # BODY
@@ -37,7 +37,7 @@ calc_beta_dc <- function(sigma_DC = NULL,
 
    ## What to return depending on argument
    # default to ALL
-   if (is_null(return_beta)) return_beta = "all"
+   if (is.null(return_beta)) return_beta = "all"
 
    if(return_beta == "all"){
       # list for all objects:
