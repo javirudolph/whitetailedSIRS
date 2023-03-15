@@ -11,7 +11,8 @@ epidemic projections in white tailed deer populations using a
 **S**usceptible-**I**nfected-**R**ecovered-**S**usceptible (SIRS)
 modeling framework. The outputs of this package are ggplot friendly, and
 for the most part, we use a list-column workflow when working with
-multiple simulations.
+multiple simulations. Details on the model can be found in the
+vignettes.
 
 ## Installation
 
@@ -99,6 +100,7 @@ example_eq$y %>%
    geom_col(position = "dodge") +
    labs(title = "Equilibrium proportions", x = "Compartment", alpha = "Population type", fill = "SIR") +
    scale_alpha_discrete(range = c(1, 0.4)) +
+   ylim(0, 1) +
    theme_bw()
 ```
 
