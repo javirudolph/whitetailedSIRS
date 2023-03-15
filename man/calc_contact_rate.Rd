@@ -30,7 +30,7 @@ calc_contact_rate(
 \item{type_contact}{set to "c_ww" as is the only calculation done}
 }
 \value{
-a number or numeric vector if nsamples > 1
+returns a number or numeric vector if nsamples > 1
 }
 \description{
 Contact rate calculation for wild deer
