@@ -243,7 +243,7 @@ viroEli <- readRDS('./data/virologyEEDistParameters.RDS') #Virology panel
 deerEli <- readRDS('./data/DeerEEDistParameters.RDS') #Deer ecology panel
 ## function eliPars execute the random draw and keep it on appropiate
 ## shape for further procedures.
-ePars <- eliPars(viroEli = viroEli,deerEli = deerEli)
+ePars <- eliPars(viroEli = viroEli,deerEli = deerEli, seed = 23)
 
 
 parms <- parmsWeigth(runs,
@@ -399,3 +399,143 @@ javi_sir
 # same result! ok... functions work as they should.
 # fix issue in how they are getting into the function then
 # this is a matter of inputing the right parameters
+
+
+
+# 2nd approach -----------------
+set.seed(23)
+nsamples <- runs
+
+elicitation_data <- whitetailedSIRS::elicitation_data
+# bind samples to the elicitation df
+elicitation_data %>%
+   # create a random sample using the parameters depending on the specified distribution
+   mutate(my_sample = if_else(family == "log-normal",
+                              pmap(list(mu, sd), function(mu, sd) rlnorm(nsamples, mu, sd)),
+                              pmap(list(mu, sd),
+                                   function(mu, sd) greybox::rlogitnorm(nsamples, mu, sd)))) -> elicitation_data
+
+
+get_param_val <- function(my_param){
+   elicitation_data %>%
+      filter(parameter == my_param) %>%
+      unnest(cols = c(my_sample)) %>%
+      pull(my_sample)
+}
+
+alpha_immunity <- get_param_val('Temporary Immunity')
+hist(alpha_immunity)
+
+map_dbl(transPar, "alphaD") %>% hist()
+# found 1 issue: elicited temporary immunity needs to be inverted
+alpha_immunity <- 1 / alpha_immunity
+hist(alpha_immunity)
+
+# contact rates:
+map_dbl(transPar, "c.wild") %>% hist()
+
+c_ww <- contactRate(c = rep(16.37,runs),
+            q = rep(0.53,runs),
+            A = rep(100,runs),
+            N = rpois(runs,1000))
+hist(c_ww)
+
+
+c_cw <- 0.00072 / get_param_val("Direct Contact Probability")
+hist(c_cw)
+map_dbl(transPar, "c.fence") %>% hist()
+
+
+c_cc <- get_param_val("Deer-Deer Proximity Rate, Captive (per day)")
+hist(c_cc)
+map_dbl(transPar, "c.captive") %>% hist()
+
+
+c_hw <- get_param_val("Deer-Human Proximity Rate, Rural (per 120 days)") / 120
+hist(c_hw)
+map_dbl(transPar, "c.wild.human") %>% hist()
+
+
+c_hc <- get_param_val("Deer-Human Proximity Rate, Captive (per 120 days)") /120
+hist(c_hc)
+map_dbl(transPar, "c.captive.human") %>% hist()
+
+
+# nus
+
+
+#Cv and cv which is eq to my C_nu
+
+C_nu <- 10^5.6 * get_param_val("Viral Load")
+hist(C_nu)
+(10^5.6 * ePars$viralLoad) %>% hist()
+
+
+t_contact_deer_deer <- get_param_val("Deer Proximity Duration (minutes)")
+hist(t_contact_deer_deer)
+ePars$deerContDur %>% hist() #t.contact
+
+
+
+t_contact_deer_human_rural <- get_param_val("Deer-Human Proximity Duration, Rural (minutes)")
+hist(t_contact_deer_human_rural)
+ePars$deerHumanDurRural %>% hist() #tcontact.wild.human
+
+
+t_contact_deer_human_capt <- get_param_val("Deer-Human Proximity Duration, Captive (minutes)")
+hist(t_contact_deer_human_capt)
+ePars$deerHumanDurCapt %>% hist() #tcontact.captive.human
+
+
+r_deer <- get_param_val("Dose-Response")
+hist(r_deer)
+ePars$doseResponse %>% hist()
+
+# These are very different and I don't understand why
+nu_aero_deer_deer <- calc_nu_aero(AER = rep(4, nsamples),
+                                  s = rep(0.24, nsamples),
+                                  lambda = rep(0.63, nsamples),
+                                  C_nu = C_nu,
+                                  C_i = rep(0.0014, nsamples),
+                                  IR = rep(0.846, nsamples),
+                                  ER = rep(0.846, nsamples),
+                                  V_d = rep(0.009, nsamples),
+                                  V_air = rep(7.07, nsamples),
+                                  t_contact = t_contact_deer_deer,
+                                  r = r_deer)
+calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_deer, r = r_deer) %>% hist()
+hist(nu_aero_deer_deer)
+map_dbl(transPar, "v.aero") %>% hist()
+#try Fer's function with my parameters
+nu_aero_deer_deer_2 <- pinfectAerosol(exhalationRate = rep(0.846, nsamples), inhalationRate = rep(0.846, nsamples), sputumConc = C_nu, quantaConvo = rep(0.0014, nsamples), volDroplet = rep(0.009, nsamples), airVol = rep(7.07, nsamples), airRefresh = rep(4, nsamples), settleRate = rep(0.24, nsamples), decayRate = rep(0.63, nsamples), contactDuration = t_contact_deer_deer, r = r_deer)
+hist(nu_aero_deer_deer_2)
+# I get the sample plot, so the functions work fine. This is a matter of the specific sample I got when sampling from the expert elicitation
+
+# Also, another very different one
+nu_aero_deer_human_rural <- calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_rural, r = r_deer)
+hist(nu_aero_deer_human_rural)
+map_dbl(transPar, "v.aero.wild.human") %>% hist()
+
+
+#Human - wild deer aerosol transmission probability
+v.aero.wild.human <- pinfectAerosol(exhalationRate = aerosol_parameters['IR.human'],inhalationRate = aerosol_parameters['IR'], sputumConc = aerosol_parameters['cv'], quantaConvo = aerosol_parameters['ci'], volDroplet = aerosol_parameters['Vd'], airRefresh = aerosol_parameters['AER'], settleRate = aerosol_parameters['k'], decayRate = aerosol_parameters['λ'], airVol = aerosol_parameters['V'], contactDuration = aerosol_parameters['tcontact.wild.human'], r = aerosol_parameters['r.deer'])
+
+#Human - captive deer aerosol transmission probability
+v.aero.captive.human <- pinfectAerosol(exhalationRate = aerosol_parameters['IR.human'],inhalationRate = aerosol_parameters['IR'], sputumConc = aerosol_parameters['cv'], quantaConvo = aerosol_parameters['ci'], volDroplet = aerosol_parameters['Vd'], airRefresh = aerosol_parameters['AER'], settleRate = aerosol_parameters['k'], decayRate = aerosol_parameters['λ'], airVol = aerosol_parameters['V'], contactDuration = aerosol_parameters['tcontact.captive.human'], r = aerosol_parameters['r.deer'])
+
+##Direct contact infection probabilities
+#Deer - deer direct contact infection probability
+v.dc <- pinfectDC(volTrans = dc_parameters['Vdc'], sputumConc = dc_parameters['Cv'], pfuConvo = dc_parameters['pfu.trans'])
+#Human - deer direct contact infection probability
+v.dc.human <- pinfectDC(volTrans = dc_parameters['Vdc.human'], sputumConc = dc_parameters['Cv'], pfuConvo = dc_parameters['pfu.trans'])
+
+
+
+nu_aero_deer_human_rural <- calc_nu_aero(IR = rep(), C_nu = C_nu, t_contact = t_contact_deer_human_rural, r = r_deer)
+nu_aero_deer_human_capt <- calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_human_capt, r = r_deer)
+
+nu_dc_deer_deer <- calc_nu_dc(C_nu = C_nu)
+
+sigma_dc <- get_param_val("Direct Contact Probability")
+
+
