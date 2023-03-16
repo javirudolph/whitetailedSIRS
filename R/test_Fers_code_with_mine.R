@@ -14,7 +14,7 @@ contactRate <- function(seasonal.adj = 1, c, N, A = 100, q){
 
 pinfectAerosol <- function(exhalationRate, inhalationRate,sputumConc, quantaConvo, volDroplet, airRefresh, settleRate, decayRate, airVol, contactDuration, r)
 {
-   dose <- inhalationRate*(sputumConc*quantaConvo*exhalationRate*volDroplet)/((airRefresh+settleRate+decayRate)*airVol)*contactDuration
+   dose <- inhalationRate*((sputumConc*quantaConvo*exhalationRate*volDroplet)/((airRefresh+settleRate+decayRate)*airVol))*contactDuration
    v.aero <- 1-exp(-r*dose)
    return(as.numeric(v.aero))
 }
@@ -492,27 +492,21 @@ hist(r_deer)
 ePars$doseResponse %>% hist()
 
 # These are very different and I don't understand why
-nu_aero_deer_deer <- calc_nu_aero(AER = rep(4, nsamples),
-                                  s = rep(0.24, nsamples),
-                                  lambda = rep(0.63, nsamples),
-                                  C_nu = C_nu,
-                                  C_i = rep(0.0014, nsamples),
-                                  IR = rep(0.846, nsamples),
-                                  ER = rep(0.846, nsamples),
-                                  V_d = rep(0.009, nsamples),
-                                  V_air = rep(7.07, nsamples),
-                                  t_contact = t_contact_deer_deer,
+nu_aero_deer_deer <- calc_nu_aero(C_nu = C_nu,
+                                  t_contact = t_contact_deer_deer / 60,
                                   r = r_deer)
-calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_deer, r = r_deer) %>% hist()
 hist(nu_aero_deer_deer)
+calc_nu_aero(C_nu = parms$Cv, t_contact = parms$tcontact / 60, r = parms$r.deer,) %>% hist()
 map_dbl(transPar, "v.aero") %>% hist()
 #try Fer's function with my parameters
-nu_aero_deer_deer_2 <- pinfectAerosol(exhalationRate = rep(0.846, nsamples), inhalationRate = rep(0.846, nsamples), sputumConc = C_nu, quantaConvo = rep(0.0014, nsamples), volDroplet = rep(0.009, nsamples), airVol = rep(7.07, nsamples), airRefresh = rep(4, nsamples), settleRate = rep(0.24, nsamples), decayRate = rep(0.63, nsamples), contactDuration = t_contact_deer_deer, r = r_deer)
+nu_aero_deer_deer_2 <- pinfectAerosol(exhalationRate = rep(0.846, nsamples), inhalationRate = rep(0.846, nsamples), sputumConc = parms$Cv, quantaConvo = rep(0.0014, nsamples), volDroplet = rep(0.009, nsamples), airVol = rep(7.07, nsamples), airRefresh = rep(4, nsamples), settleRate = rep(0.24, nsamples), decayRate = rep(0.63, nsamples), contactDuration = parms$tcontact/60, r = parms$r.deer)
 hist(nu_aero_deer_deer_2)
 # I get the sample plot, so the functions work fine. This is a matter of the specific sample I got when sampling from the expert elicitation
+# got it, they are dividing the contact by 60 for some reason.
+
 
 # Also, another very different one
-nu_aero_deer_human_rural <- calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_rural, r = r_deer)
+nu_aero_deer_human_rural <- calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_rural/60, r = r_deer)
 hist(nu_aero_deer_human_rural)
 map_dbl(transPar, "v.aero.wild.human") %>% hist()
 
