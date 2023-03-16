@@ -61,7 +61,7 @@ get_param_val <- function(my_param){
 
 
 ```{r}
-alpha_immunity <- 1 /get_param_val("Temporary Immunity")
+alpha_immunity <- 1 / get_param_val("Temporary Immunity")
 
 N_w <- rpois(1, 1000)
 

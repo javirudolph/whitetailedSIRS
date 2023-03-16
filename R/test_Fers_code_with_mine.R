@@ -511,25 +511,119 @@ hist(nu_aero_deer_human_rural)
 map_dbl(transPar, "v.aero.wild.human") %>% hist()
 
 
-#Human - wild deer aerosol transmission probability
-v.aero.wild.human <- pinfectAerosol(exhalationRate = aerosol_parameters['IR.human'],inhalationRate = aerosol_parameters['IR'], sputumConc = aerosol_parameters['cv'], quantaConvo = aerosol_parameters['ci'], volDroplet = aerosol_parameters['Vd'], airRefresh = aerosol_parameters['AER'], settleRate = aerosol_parameters['k'], decayRate = aerosol_parameters['λ'], airVol = aerosol_parameters['V'], contactDuration = aerosol_parameters['tcontact.wild.human'], r = aerosol_parameters['r.deer'])
-
-#Human - captive deer aerosol transmission probability
-v.aero.captive.human <- pinfectAerosol(exhalationRate = aerosol_parameters['IR.human'],inhalationRate = aerosol_parameters['IR'], sputumConc = aerosol_parameters['cv'], quantaConvo = aerosol_parameters['ci'], volDroplet = aerosol_parameters['Vd'], airRefresh = aerosol_parameters['AER'], settleRate = aerosol_parameters['k'], decayRate = aerosol_parameters['λ'], airVol = aerosol_parameters['V'], contactDuration = aerosol_parameters['tcontact.captive.human'], r = aerosol_parameters['r.deer'])
-
-##Direct contact infection probabilities
-#Deer - deer direct contact infection probability
-v.dc <- pinfectDC(volTrans = dc_parameters['Vdc'], sputumConc = dc_parameters['Cv'], pfuConvo = dc_parameters['pfu.trans'])
-#Human - deer direct contact infection probability
-v.dc.human <- pinfectDC(volTrans = dc_parameters['Vdc.human'], sputumConc = dc_parameters['Cv'], pfuConvo = dc_parameters['pfu.trans'])
+nu_aero_deer_human_capt <- calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_human_capt/60, r = r_deer)
+hist(nu_aero_deer_human_capt)
+map_dbl(transPar, "v.aero.captive.human") %>% hist()
 
 
-
-nu_aero_deer_human_rural <- calc_nu_aero(IR = rep(), C_nu = C_nu, t_contact = t_contact_deer_human_rural, r = r_deer)
-nu_aero_deer_human_capt <- calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_human_capt, r = r_deer)
 
 nu_dc_deer_deer <- calc_nu_dc(C_nu = C_nu)
+hist(nu_dc_deer_deer)
+map_dbl(transPar, "v.dc") %>% hist()
 
-sigma_dc <- get_param_val("Direct Contact Probability")
 
+
+sigma_dc_wild <- get_param_val("Direct Contact Probability")
+hist(sigma_dc_wild)
+map_dbl(transPar, "sigma.dc.wild") %>% hist()
+
+sigma_dc_captive <- get_param_val("Direct Contact Probability")
+hist(sigma_dc_captive)
+map_dbl(transPar, "sigma.dc.captive") %>% hist()
+
+
+# map_dbl(transPar, "sigma.dc.wild.human") %>% hist()
+# map_dbl(transPar, "sigma.dc.captive.human") %>% hist()
+
+
+# I should have all the parameters now to 'match' the ones in Fer's vignette closely
+
+list_inits <- list(
+   S_wild = rep(1, nsamples),
+   I_wild = rep(0, nsamples),
+   R_wild = rep(0, nsamples),
+   S_captive = rep(1, nsamples),
+   I_captive = rep(0, nsamples),
+   R_captive = rep(0, nsamples)
+)
+
+list_params <- list(
+   alpha_immunity = alpha_immunity,
+   beta_aero_ww = c_ww * nu_aero_deer_deer,
+   beta_aero_cw = c_cw * nu_aero_deer_deer,
+   beta_aero_cc = c_cc * nu_aero_deer_deer,
+   beta_aero_hw = c_hw * nu_aero_deer_human_rural,
+   beta_aero_hc = c_hc * nu_aero_deer_human_capt,
+   beta_dc_ww = c_ww * sigma_dc_wild * nu_dc_deer_deer,
+   beta_dc_cw = c_cw * sigma_dc_wild * nu_dc_deer_deer,
+   beta_dc_cc = c_cc * sigma_dc_captive * nu_dc_deer_deer,
+   phi_cw = rep(0, nsamples),
+   phi_wc = rep(0, nsamples),
+   gamma_recov = rep(1/6, nsamples),
+   I_humans = rep(0.05, nsamples)
+)
+
+times <- seq(0, 120, by = 1)
+
+
+
+
+
+mytibble <- tibble(run_id = 1:nsamples,
+                   inits = map(run_id, ~ list_inits %>% map_dbl(., .x)),
+                   params = map(run_id, function(x) list_params %>% map_dbl(., x)))
+
+
+mytibble %>%
+   mutate(
+      ode_proj = pmap(list(y = inits, parms = params), ode, times = seq(0, 120, by = 1), func = simple_sirs)
+   ) -> my_ode
+
+library(rootSolve)
+my_ode %>%
+   mutate(equil = pmap(list(y = inits, parms = params), runsteady, func = simple_sirs)) -> sirs_results
+
+
+# plot infecteds
+
+sirs_results %>%
+   select(run_id, ode_proj) %>%
+   mutate(ode = map(ode_proj, as.data.frame)) %>%
+   pull(ode) %>%
+   list_rbind(names_to = "run_id") -> out_df
+
+out_df %>%
+   ggplot(., aes(x = time, y = I_wild, group = run_id)) +
+   geom_line()
+
+out_df %>%
+   pivot_longer(cols = -c(run_id, time), names_to = "compartment") %>%
+   ggplot(., aes(x = time, y = value, color = compartment, group = run_id)) +
+   facet_wrap(~compartment) +
+   geom_line()
+
+
+# Compare to the 50 samples from Fer's code:
+out <- NULL
+for(i in 1:nsamples) {
+   inits <- list_inits %>% map_dbl(., i)
+   times <- seq(0, 120, by = 1)
+
+   out[[i]] <- ode(y = init, time = times, parms = transPar[[i]], func = SIRS)
+}
+
+
+out %>%
+   map(., as.data.frame) %>%
+   list_rbind(names_to = "run_id") -> out_df
+
+out_df %>%
+   ggplot(., aes(x = time, y = I.wild, group = run_id)) +
+   geom_line()
+
+out_df %>%
+   pivot_longer(cols = -c(run_id, time), names_to = "compartment") %>%
+   ggplot(., aes(x = time, y = value, color = compartment, group = run_id)) +
+   facet_wrap(~compartment) +
+   geom_line()
 
