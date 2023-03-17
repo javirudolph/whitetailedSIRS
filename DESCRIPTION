@@ -16,9 +16,9 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 Depends: 
-    R (>= 2.10),
-    deSolve,
-	 rootSolve,
-	 greybox
+    R (>= 2.10)
 LazyData: true
-
+Imports: 
+    deSolve,
+    greybox,
+    rootSolve
