@@ -438,6 +438,7 @@ c_ww <- contactRate(c = rep(16.37,runs),
             q = rep(0.53,runs),
             A = rep(100,runs),
             N = rpois(runs,1000))
+calc_contact_rate(nsamples = 50) %>% hist()
 hist(c_ww)
 
 
@@ -511,7 +512,7 @@ hist(nu_aero_deer_human_rural)
 map_dbl(transPar, "v.aero.wild.human") %>% hist()
 
 
-nu_aero_deer_human_capt <- calc_nu_aero(C_nu = C_nu, t_contact = t_contact_deer_human_capt/60, r = r_deer)
+nu_aero_deer_human_capt <- calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_capt/60, r = r_deer)
 hist(nu_aero_deer_human_capt)
 map_dbl(transPar, "v.aero.captive.human") %>% hist()
 
@@ -560,7 +561,7 @@ list_params <- list(
    phi_cw = rep(0, nsamples),
    phi_wc = rep(0, nsamples),
    gamma_recov = rep(1/6, nsamples),
-   I_humans = rep(0.05, nsamples)
+   I_human = rep(0.05, nsamples)
 )
 
 times <- seq(0, 120, by = 1)
