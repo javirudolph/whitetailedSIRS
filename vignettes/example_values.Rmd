@@ -106,6 +106,9 @@ nu_aero_deer_human_capt <- calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t
 # direct contact
 nu_dc_deer_deer <- calc_nu_dc(C_nu = C_nu)
 
+# Some additional parameters:
+gamma_recov <- rep(1/6, nsamples)
+
 ```
 
 Now that we have all the parameters we need, we can set up the inputs for the `ode()` function:
@@ -132,7 +135,7 @@ list_params <- list(
    beta_dc_cc = c_cc * sigma_dc_captive * nu_dc_deer_deer,
    phi_cw = rep(0, nsamples),
    phi_wc = rep(0, nsamples),
-   gamma_recov = rep(1/6, nsamples),
+   gamma_recov = gamma_recov,
    I_human = rep(0.05, nsamples)
 )
 
@@ -206,4 +209,21 @@ steady_sir %>%
 ```
 
 
-We can also calculate some 
+We can also calculate some metrics such as R0 and force of infection (FOI): 
+
+```{r}
+r0_deer <- ((c_ww * nu_aero_deer_deer) + (c_ww * nu_dc_deer_deer * sigma_dc_wild)) * 1/gamma_recov
+r0_human <- c_hw * nu_aero_deer_human_rural * 9.5
+
+tibble(r0_deer = r0_deer, r0_human = r0_human) %>% 
+   pivot_longer(cols = everything()) %>% 
+   ggplot(., aes(y = value)) +
+   facet_wrap(~ name, scales = "free") +
+   geom_hline(yintercept = 0.0015, color = "red", linetype = "dashed") +
+   geom_boxplot() +
+   theme_bw() +
+   theme(axis.text.x = element_blank())
+
+
+```
+
