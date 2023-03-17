@@ -152,7 +152,7 @@ mytibble <- tibble(run_id = 1:nsamples,
 mytibble %>%
    mutate(ode_proj = pmap(list(y = inits, parms = params), ode, times = seq(0, 120, by = 1), func = simple_sirs)) %>% 
    # now create another column that stores the equilibrium for these:
-   mutate(equil = pmap(list(y = inits, parms = params), runsteady, func = simple_sirs)) -> sirs_results # save as new object
+   mutate(steady_state = pmap(list(y = inits, parms = params), runsteady, func = simple_sirs)) -> sirs_results # save as new object
 
 slice_head(sirs_results, n = 3)
 ```
@@ -161,47 +161,49 @@ From our results we can visualize the proportion of infected individuals over ti
 ```{r}
 # get results in proper format:
 sirs_results %>%
-   select(run_id, ode_proj) %>%
-   mutate(ode = map(ode_proj, as.data.frame)) %>%
-   pull(ode) %>%
-   list_rbind(names_to = "run_id") -> out_df
+   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+   pull(ode_df) %>%
+   list_rbind(names_to = "run_id") -> ode_df
 
-out_df %>%
+ode_df %>%
    ggplot(., aes(x = time, y = I_wild, group = run_id)) +
    geom_line() +
+   labs(x = "Time in days", y = "Proportion of I_w individuals") +
    theme_bw()
 ```
 
 We can also take a look at how all compartments change over time: 
 ```{r}
 
-out_df %>%
+ode_df %>%
    pivot_longer(cols = -c(run_id, time), names_to = "compartment") %>%
    ggplot(., aes(x = time, y = value, group = run_id)) +
    facet_wrap(~compartment) +
    geom_line() +
+   labs(x = "Time in days", y = "Proportion of population") +
    theme_bw()
 ```
 
+And check the steady state, or equilibrium, for all of these runs: 
 
-```{r warning=FALSE}
-example_eq$y %>% 
-   as_tibble_row() %>% 
-   pivot_longer(cols = everything(), names_to = "compartment", values_to = "proportion") %>% 
+```{r}
+sirs_results %>%
+   mutate(steady_sir = map(steady_state, "y"),
+          steady_sir = map(steady_sir, as_tibble_row)) %>% 
+   pull(steady_sir) %>% 
+   list_rbind(names_to = "run_id") -> steady_sir
+
+steady_sir %>% 
+   pivot_longer(cols = -run_id, names_to = "compartment", values_to = "proportion") %>% 
    separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
    mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
           pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
-   ggplot(aes(x = sir_type, 
-              alpha = pop_type,
-              y = proportion, fill = sir_type)) +
-   geom_col(position = "dodge") +
-   labs(title = "Equilibrium proportions", x = "Compartment", alpha = "Population type", fill = "SIR") +
-   scale_alpha_discrete(range = c(1, 0.4)) +
+   ggplot(aes(y = proportion, color = pop_type, x = sir_type)) +
+   geom_boxplot() +
    ylim(0, 1) +
+   labs(x = "", color = "Population Type", y = "Proportion at equilibrium") +
    theme_bw()
-   
 ```
 
 
-Do worflow for 100 sampled parameters:
-
+We can also calculate some 
