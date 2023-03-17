@@ -1,16 +1,17 @@
 #' Calculate transmission for direct contact
 #'
-#' @param V_DC
-#' @param C_nu
-#' @param pfu_conv
-#' @param k
-#' @param nsamples
-#' @param seed
+#' @param V_DC Transferred volume (ml)
+#' @param C_nu Concentration of infectious particles in sputum (gc per ml)
+#' @param pfu_conv (PFU per GC)
+#' @param k set to 410
+#' @param nsamples number of samples wanted. Default is set to 1
+#' @param seed sets a seed for random draws of parameter from default distributions.
 #'
-#' @return
+#' @return returns a number or vector of probability values for probability of infection via direct contact.
 #' @export
 #'
 #' @examples
+#' calc_nu_dc() # will run the defaults
 calc_nu_dc <- function(V_DC = NULL,
                       C_nu = NULL,
                       pfu_conv = NULL,

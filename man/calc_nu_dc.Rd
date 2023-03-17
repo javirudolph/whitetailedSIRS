@@ -14,8 +14,24 @@ calc_nu_dc(
 )
 }
 \arguments{
-\item{seed}{}
+\item{V_DC}{Transferred volume (ml)}
+
+\item{C_nu}{Concentration of infectious particles in sputum (gc per ml)}
+
+\item{pfu_conv}{(PFU per GC)}
+
+\item{k}{set to 410}
+
+\item{nsamples}{number of samples wanted. Default is set to 1}
+
+\item{seed}{sets a seed for random draws of parameter from default distributions.}
+}
+\value{
+returns a number or vector of probability values for probability of infection via direct contact.
 }
 \description{
 Calculate transmission for direct contact
+}
+\examples{
+calc_nu_dc() # will run the defaults
 }
