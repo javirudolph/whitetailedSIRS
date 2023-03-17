@@ -22,26 +22,27 @@ calc_nu_aero(
 )
 }
 \arguments{
-\item{AER}{air exchange in \eqn{hr^{-1}}}
+\item{AER}{air exchange in \eqn{hr^{-1}}. Default is set to 4.}
 
-\item{s}{settling rate; \eqn{hr^{-1}}}
+\item{s}{settling rate; \eqn{hr^{-1}} Default is set to 0.24}
 
-\item{lambda}{innactivation rates \eqn{hr^{-1}}}
+\item{lambda}{innactivation rates \eqn{hr^{-1}}. Default is set to 0.63}
 
-\item{C_nu}{viral load in sputum; RNA copies/ml}
+\item{C_nu}{viral load in sputum; RNA copies/ml. Default samples from expert
+elicited distribution of parameter 'Viral Load'}
 
-\item{C_i}{conversion factor for quanta/RNA copy}
+\item{C_i}{conversion factor for quanta/RNA copy. Default set to 0.0014}
 
-\item{IR}{inhalation rate; \eqn{m^3/hr}}
+\item{IR}{inhalation rate; \eqn{m^3/hr}.Default is set to 0.846}
 
-\item{ER}{exhalation rate; \eqn{m^3/hr}}
+\item{ER}{exhalation rate; \eqn{m^3/hr}. Default IR = ER}
 
 \item{V_d}{exhaled droplet volume concentration; ml exhaled droplets/
-\eqn{m^3}}
+\eqn{m^3}. Default to 0.009}
 
-\item{V_air}{fixed volume; \eqn{m^3}}
+\item{V_air}{fixed volume; \eqn{m^3}. Default to 7.07}
 
-\item{t_contact}{time of contact with contaminated airspace (hr)}
+\item{t_contact}{time of contact with contaminated airspace (hr).}
 
 \item{r}{species-specific probability of infection from 1 quantum. Default is
 for r_deer with expert elicited values}
@@ -63,6 +64,23 @@ provided in arguments
 defaults if no arguments are provided. Defaults are described in the
 sir_model_description document and are sourced from the literature or expert
 elicitation.
+}
+\details{
+Mathematical background for this calculation. An infected
+individual emits viral particles at a particular rate \eqn{ER_q} in
+quanta/hr as the
+product of the arguments described above: \deqn{ER_q = C_{\nu} \cdot C_i
+  \cdot ER \cdot V_d} This is used to model the instantaneous concentration
+of viral particles (C) in well-mixed air space (quanta/\eqn{m^3}) around an
+infected individual as follows: \deqn{C = \frac{ER_q}{IVRR \cdot V_{air}}}
+where the loss rate (IVRR) is given by: \deqn{AER + s + \lambda} When a
+susceptible individual enters the contaminated airspace surrounding an
+infected individual, the dose (\eqn{Q_A}) is the product of inhalation
+rate, concentration of viral particles, and time of contact: \deqn{Q_A = IR
+  \cdot C \cdot t_{contact}} The dose \eqn{Q_A} is converted into a
+probability of infection using the Wells-Riley infection model as a
+function of the dose received and a species-specific probability of
+infection from 1 quantum. \deqn{\nu^{AERO} = 1 - e^{-rQ}}
 }
 \examples{
 calc_nu_aero() # will return a single value using defaults
