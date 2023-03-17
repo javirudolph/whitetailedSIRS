@@ -17,4 +17,8 @@ Suggests:
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
+    deSolve,
+	 rootSolve,
+	 greybox
 LazyData: true
+
