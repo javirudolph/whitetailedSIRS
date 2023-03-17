@@ -1,13 +1,52 @@
 #' Simple function to generate SIRS model projections
 #'
-#' @param time vector of values for which to generate the projection (length in days)
-#' @param state initial state for compartment populations
-#' @param parameters list of parameters to generate projection
+#' `simple_sirs` is written to work alongside the `deSolve::ode()` function, and
+#' it will return an object with the proportion of individuals found in each of
+#' the SIR compartments at each of the specified time points.
 #'
-#' @return list of values at each time step
+#' @param time vector of values for which to generate the projection (length in
+#'   days).
+#' @param state initial state for compartment populations. This should be a
+#'   named vector for starting values of S_wild, I_wild, R_wild, S_captive,
+#'   I_captive, R_captive.
+#' @param parameters list of parameters to generate projection. The parameters
+#'   should include transmission parameters, immunity and recovery rates, and
+#'   proportion of infected humans.
+#'
+#' @return when used with the `deSolve::ode()` function, it will return a
+#'   dataframe with the proportion of individuals in each of the SIR
+#'   compartments at each time point.
 #' @export
 #'
 #' @examples
+#' # prepare the input parameters:
+#' example_inits <- c(S_wild = 1, I_wild = 0,
+#'                    R_wild = 0, S_captive = 1,
+#'                    I_captive = 0, R_captive = 0)
+#'
+#' # set the time to run
+#' example_times <-  seq(0, 500, by = 1)
+#' # Set parameters of transmission, immunity, recovery
+#'
+#' example_params <- c(alpha_immunity = 0.03,
+#'                     beta_aero_ww = 0.01,
+#'                     beta_aero_cw = 0.01,
+#'                     beta_aero_cc = 0.02,
+#'                     beta_aero_hw = 0.01,
+#'                     beta_aero_hc = 0.2,
+#'                     beta_dc_ww = 0.01,
+#'                     beta_dc_cw = 0.01,
+#'                     beta_dc_cc = 0.01,
+#'                     phi_cw = 0,
+#'                     phi_wc = 0,
+#'                     gamma_recov = 0.01,
+#'                     I_human = 0.05)
+#'
+#' # run the ode function:
+#'
+#' deSolve::ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs)
+#'
+#'
 simple_sirs <- function(time, state, parameters){
    with(as.list(c(state, parameters)), {
 

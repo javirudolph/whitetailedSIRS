@@ -36,25 +36,33 @@ calc_nu_aero(
 
 \item{ER}{exhalation rate; \eqn{m^3/hr}}
 
-\item{V_d}{exhaled droplet volume concentration; ml exhaled droplets/ \eqn{m^3}}
+\item{V_d}{exhaled droplet volume concentration; ml exhaled droplets/
+\eqn{m^3}}
 
 \item{V_air}{fixed volume; \eqn{m^3}}
 
 \item{t_contact}{time of contact with contaminated airspace (hr)}
 
-\item{r}{species-specific probability of infection from 1 quantum. Default is for r_deer with expert elicited values}
+\item{r}{species-specific probability of infection from 1 quantum. Default is
+for r_deer with expert elicited values}
 
-\item{nsamples}{default to 1, but if specified > 1 will draw \code{nsamples} from the default distributions of parameters}
+\item{nsamples}{default to 1, but if specified > 1 will draw \code{nsamples} from
+the default distributions of parameters}
 
-\item{print_pars}{logical. If TRUE, will return a list with all parameters used to make calculations}
+\item{print_pars}{logical. If TRUE, will return a list with all parameters
+used to make calculations}
 
 \item{seed}{if setting a seed, specify number}
 }
 \value{
-returns a numeric vector of length equal to nsamples or length of vectors provided in arguments
+a numeric vector of length equal to nsamples or length of vectors
+provided in arguments
 }
 \description{
-\code{calc_nu_aero} will calculate one value for probability of infection using defaults if no arguments are provided. Defaults are described in the sir_model_description document and are sourced from the literature or expert elicitation.
+\code{calc_nu_aero} will calculate one value for probability of infection using
+defaults if no arguments are provided. Defaults are described in the
+sir_model_description document and are sourced from the literature or expert
+elicitation.
 }
 \examples{
 calc_nu_aero() # will return a single value using defaults
