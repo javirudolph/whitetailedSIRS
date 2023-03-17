@@ -108,6 +108,7 @@ nu_dc_deer_deer <- calc_nu_dc(C_nu = C_nu)
 
 # Some additional parameters:
 gamma_recov <- rep(1/6, nsamples)
+I_human <- rep(0.05, nsamples)
 
 ```
 
@@ -136,7 +137,7 @@ list_params <- list(
    phi_cw = rep(0, nsamples),
    phi_wc = rep(0, nsamples),
    gamma_recov = gamma_recov,
-   I_human = rep(0.05, nsamples)
+   I_human = I_human
 )
 
 times <- seq(0, 120, by = 1)
@@ -223,7 +224,15 @@ tibble(r0_deer = r0_deer, r0_human = r0_human) %>%
    geom_boxplot() +
    theme_bw() +
    theme(axis.text.x = element_blank())
+```
 
+```{r}
+#FOI
+foi <- c_hw * nu_aero_deer_human_rural * I_human
 
+ggplot(data = tibble(foi = foi), aes(y = foi)) +
+   geom_boxplot() +
+   theme_bw() +
+   theme(axis.text.x = element_blank())
 ```
 
