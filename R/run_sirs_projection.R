@@ -85,6 +85,10 @@ run_sirs_projection <- function(nsamples, seed = NULL, wild_scenario = "rural", 
    gamma_recov <- rep(1/6, nsamples)
    I_human <- rep(0.05, nsamples)
 
+   # Calculate values:
+   r0_deer <- ((c_ww * nu_aero_deer_deer) + (c_ww * nu_dc_deer_deer * sigma_dc_wild)) * 1/gamma_recov
+   foi <- c_hw * nu_aero_deer_human_wild * I_human
+
    # 5. ODE parameters --------
 
    list_inits <- list(
@@ -119,7 +123,9 @@ run_sirs_projection <- function(nsamples, seed = NULL, wild_scenario = "rural", 
    # create list column to store inits and params
    mytibble <- tibble::tibble(run_id = 1:nsamples,
                       inits = purrr::map(run_id, ~ list_inits |>  purrr:::map_dbl(.x)),
-                      params = purrr::map(run_id, function(x) list_params |>  purrr::map_dbl(x)))
+                      params = purrr::map(run_id, function(x) list_params |>  purrr::map_dbl(x)),
+                      R0 = r0_deer,
+                      FOI = foi)
 
    # create a new column that stores the results from the ode() projection
 
@@ -131,3 +137,4 @@ run_sirs_projection <- function(nsamples, seed = NULL, wild_scenario = "rural", 
    return(sirs_results)
 
 }
+
