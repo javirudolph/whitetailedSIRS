@@ -7,6 +7,9 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/default_projection.html</loc>
+  </url>
+  <url>
     <loc>/articles/example_values.html</loc>
   </url>
   <url>
@@ -31,7 +34,19 @@
     <loc>/reference/calc_nu_dc.html</loc>
   </url>
   <url>
+    <loc>/reference/contact_rate_params.html</loc>
+  </url>
+  <url>
+    <loc>/reference/draw_elicitation_samples.html</loc>
+  </url>
+  <url>
+    <loc>/reference/elicitation_data.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/run_sirs_projection.html</loc>
   </url>
   <url>
     <loc>/reference/simple_sirs.html</loc>

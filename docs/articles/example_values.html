@@ -41,6 +41,7 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/default_projection.html">default_projection</a>
     <a class="dropdown-item" href="../articles/example_values.html">example_values</a>
     <a class="dropdown-item" href="../articles/sir_model_description.html">sir_model_description</a>
   </div>
@@ -93,7 +94,7 @@ parameters:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">23</span><span class="op">)</span></span>
 <span><span class="va">nsamples</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
 <span></span>
-<span><span class="va">elicitation_data</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va">elicitation_data</span></span>
+<span><span class="va">elicitation_data</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="../reference/elicitation_data.html">elicitation_data</a></span></span>
 <span><span class="co"># bind samples to the elicitation df</span></span>
 <span><span class="va">elicitation_data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>   <span class="co"># create a random sample using the parameters depending on the specified distribution</span></span>
