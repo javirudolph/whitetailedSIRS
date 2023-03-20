@@ -7,7 +7,7 @@
 #' @param A_w area inhabited by N
 #' @param nsamples number of values to be returned. Default is 1, but will return a vector if > 2
 #' @param seed if specified, sets a seed for the function
-#' @param type_contact option between "low", "med", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.
+#' @param type_contact option between "low", "medium", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.
 #'
 #' @return returns a number or numeric vector if nsamples > 1
 #' @export
@@ -23,7 +23,7 @@ calc_contact_rate <- function(sigma_season = NULL,
                               A_w = NULL,
                               nsamples = NULL,
                               seed = NULL,
-                              type_contact = c("low", "med", "high", NULL)){
+                              type_contact = c("low", "medium", "high", NULL)){
 
 
    if(is.null(nsamples)) nsamples = 1

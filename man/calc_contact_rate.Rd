@@ -12,7 +12,7 @@ calc_contact_rate(
   A_w = NULL,
   nsamples = NULL,
   seed = NULL,
-  type_contact = c("low", "med", "high", NULL)
+  type_contact = c("low", "medium", "high", NULL)
 )
 }
 \arguments{
@@ -30,7 +30,7 @@ calc_contact_rate(
 
 \item{seed}{if specified, sets a seed for the function}
 
-\item{type_contact}{option between "low", "med", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.}
+\item{type_contact}{option between "low", "medium", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.}
 }
 \value{
 returns a number or numeric vector if nsamples > 1
