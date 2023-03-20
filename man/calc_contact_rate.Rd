@@ -11,15 +11,16 @@ calc_contact_rate(
   q = NULL,
   A_w = NULL,
   nsamples = NULL,
-  type_contact = "c_ww"
+  seed = NULL,
+  type_contact = c("low", "med", "high", NULL)
 )
 }
 \arguments{
-\item{sigma_season}{value for season scaling (derived from Williams et al 2014; Appendix A)}
+\item{sigma_season}{value for season scaling (derived from Williams et al 2014; Appendix A). Default set to 1}
 
 \item{scaling_c}{value for contact scaling constant (influences slope of density-contact relationship; reported in Habib et al. 2011; Appendix A)}
 
-\item{N_w}{total population size of deer}
+\item{N_w}{total population size of deer. Poisson dist w/ean = 10}
 
 \item{q}{value for concavity scaling constant (0-1, with 0 equating to density dependence and 1 equating to frequency dependence; reported in Habib et al. 2011, Appendix A)}
 
@@ -27,7 +28,9 @@ calc_contact_rate(
 
 \item{nsamples}{number of values to be returned. Default is 1, but will return a vector if > 2}
 
-\item{type_contact}{set to "c_ww" as is the only calculation done}
+\item{seed}{if specified, sets a seed for the function}
+
+\item{type_contact}{option between "low", "med", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.}
 }
 \value{
 returns a number or numeric vector if nsamples > 1

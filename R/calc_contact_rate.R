@@ -1,12 +1,13 @@
 #' Contact rate calculation for wild deer
 #'
-#' @param sigma_season value for season scaling (derived from Williams et al 2014; Appendix A)
+#' @param sigma_season value for season scaling (derived from Williams et al 2014; Appendix A). Default set to 1
 #' @param scaling_c value for contact scaling constant (influences slope of density-contact relationship; reported in Habib et al. 2011; Appendix A)
-#' @param N_w total population size of deer
+#' @param N_w total population size of deer. Poisson dist w/ean = 10
 #' @param q value for concavity scaling constant (0-1, with 0 equating to density dependence and 1 equating to frequency dependence; reported in Habib et al. 2011, Appendix A)
 #' @param A_w area inhabited by N
 #' @param nsamples number of values to be returned. Default is 1, but will return a vector if > 2
-#' @param type_contact set to "c_ww" as is the only calculation done
+#' @param seed if specified, sets a seed for the function
+#' @param type_contact option between "low", "med", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.
 #'
 #' @return returns a number or numeric vector if nsamples > 1
 #' @export
@@ -21,20 +22,32 @@ calc_contact_rate <- function(sigma_season = NULL,
                               q = NULL,
                               A_w = NULL,
                               nsamples = NULL,
-                              type_contact = "c_ww"){
+                              seed = NULL,
+                              type_contact = c("low", "med", "high", NULL)){
 
-   if(type_contact != "c_ww") {
-      return(print("calculation is only setup for c_ww"))
-   }
 
    if(is.null(nsamples)) nsamples = 1
+   if(!is.null(seed)) set.seed(seed)
+
+   if (type_contact == "low") {
+      scaling_c = rep(16.37, nsamples)
+      q = rep(0.53, nsamples)
+   }
+
+   if (type_contact == "med") {
+      scaling_c = rep(11.35, nsamples)
+      q = rep(0.34, nsamples)
+   }
+
+   if (type_contact == "high") {
+      scaling_c = rep(15.58, nsamples)
+      q = rep(0.32, nsamples)
+   }
 
    if (is.null(sigma_season)) sigma_season = rep(1, nsamples)
-   if (is.null(scaling_c))  scaling_c = rep(16.37, nsamples)
    if (is.null(N_w)) N_w = rpois(nsamples,1000)
-   if (is.null(q)) q = rep(0.53, nsamples)
    if (is.null(A_w)) A_w = rep(100, nsamples)
 
-   c_ww <- sigma_season * scaling_c * (N_w^(1-q)/A_w)
-   return(c_ww)
+   contact_val <- sigma_season * scaling_c * (N_w^(1-q)/A_w)
+   return(contact_val)
 }
