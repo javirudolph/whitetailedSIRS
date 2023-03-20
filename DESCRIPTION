@@ -20,5 +20,13 @@ Depends:
 LazyData: true
 Imports: 
     deSolve,
+    dplyr (>= 1.0.10),
     greybox,
-    rootSolve
+    purrr (>= 1.0.1),
+    rootSolve,
+    tibble,
+    tidyr (>= 1.3.0)
+Remotes: 
+    tidyverse/purrr,
+    tidyverse/dplyr,
+    tidyverse/tidyr

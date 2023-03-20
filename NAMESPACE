@@ -3,4 +3,6 @@
 export(calc_contact_rate)
 export(calc_nu_aero)
 export(calc_nu_dc)
+export(draw_elicitation_samples)
+export(run_sirs_projection)
 export(simple_sirs)
