@@ -5,7 +5,7 @@
 \title{Random draw of parameters from expert elicitation}
 \usage{
 draw_elicitation_samples(
-  elicitation_data,
+  elicitation_data = NULL,
   nsamples,
   seed = NULL,
   return_df = FALSE
