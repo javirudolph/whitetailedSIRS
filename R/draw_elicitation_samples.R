@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @examples
-draw_elicitation_samples <- function(elicitation_data, nsamples, seed = NULL, return_df = FALSE){
+draw_elicitation_samples <- function(elicitation_data = NULL, nsamples, seed = NULL, return_df = FALSE){
 
    if(!is.null(seed)) set.seed(seed)
 
