@@ -5,10 +5,11 @@
 \title{In progress Run SIRS projection}
 \usage{
 run_sirs_projection(
-  nsamples,
-  seed = NULL,
+  nsamples = 100,
+  seed = 123,
   wild_scenario = "rural",
   ndays = 120,
+  type_contact = "low",
   ...
 )
 }

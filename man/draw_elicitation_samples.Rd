@@ -6,7 +6,7 @@
 \usage{
 draw_elicitation_samples(
   elicitation_data = NULL,
-  nsamples,
+  nsamples = NULL,
   seed = NULL,
   return_df = FALSE
 )
