@@ -21,7 +21,7 @@ You can install the development version of whitetailedSIRS from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("javirudolph/whitetailedSIRS")
+devtools::install_github("disease-decision-analysis-and-research/whitetailedSIRS")
 ```
 
 ## Example
