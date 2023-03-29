@@ -12,7 +12,7 @@ calc_contact_rate(
   A_w = NULL,
   nsamples = NULL,
   seed = NULL,
-  type_contact = c("low", "medium", "high", NULL)
+  type_contact = NULL
 )
 }
 \arguments{
