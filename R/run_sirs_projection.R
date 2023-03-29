@@ -13,7 +13,8 @@
 #' @export
 #'
 #' @examples
-run_sirs_projection <- function(nsamples, seed = NULL, wild_scenario = "rural", ndays = 120, ...){
+run_sirs_projection <- function(nsamples = 100, seed = 123, wild_scenario = "rural", ndays = 120,
+                                type_contact = "low", ...){
 
    # This is a big function to we divide it in several parts
 
@@ -33,7 +34,7 @@ run_sirs_projection <- function(nsamples, seed = NULL, wild_scenario = "rural", 
    alpha_immunity <- 1 / get_param_val('Temporary Immunity')
 
    # Calculate contact rate between wild deer using the contact_rate fx using defaults:
-   c_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples)
+   c_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = type_contact)
 
    # The rest of the contact rates were elicited and then modified
    c_cw <- 0.00072 / get_param_val("Direct Contact Probability")
@@ -63,6 +64,8 @@ run_sirs_projection <- function(nsamples, seed = NULL, wild_scenario = "rural", 
    # Direct contact probability:
    sigma_dc_wild <- get_param_val("Direct Contact Probability")
    sigma_dc_captive <- get_param_val("Direct Contact Probability")
+
+   # Wondering if we might want to keep track of all of these parameters. Seems annoying but might be a thing...
 
 
 
