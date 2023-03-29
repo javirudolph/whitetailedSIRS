@@ -8,7 +8,7 @@ Authors@R:
 	   person("Jonathan", "Cook", email = "jcook@usgs.gov", role = "ctb"),
 	   person("Graziella", "DiRenzo", email = "gdirenzo@umass.edu", role = "ctb"),
 	   person("Brittany", "Mosher", email = "brittany.mosher@uvm.edu", role = "ctb"),
-	   person("Mike", "Runge", email = "mrunge@usgs.gov", role = "ctb")
+	   person("Mike", "Runge", email = "mrunge@usgs.gov", role = "ctb"),
 	   person("Evan", "Grant", email = "ehgrant@usgs.gov", role = "ctb")
 	   )
 Description: whitetailedSIRS is a collection of functions to generate disease dynamics projections for deer populations using an SIRS framework.

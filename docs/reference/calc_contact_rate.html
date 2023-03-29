@@ -33,7 +33,7 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/javirudolph/whitetailedSIRS/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/disease-decision-analysis-and-research/whitetailedSIRS/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -46,7 +46,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Contact rate calculation for wild deer</h1>
-      <small class="dont-index">Source: <a href="https://github.com/javirudolph/whitetailedSIRS/blob/HEAD/R/calc_contact_rate.R" class="external-link"><code>R/calc_contact_rate.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/disease-decision-analysis-and-research/whitetailedSIRS/blob/HEAD/R/calc_contact_rate.R" class="external-link"><code>R/calc_contact_rate.R</code></a></small>
       <div class="d-none name"><code>calc_contact_rate.Rd</code></div>
     </div>
 
@@ -63,14 +63,15 @@
 <span>  q <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  A_w <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nsamples <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  type_contact <span class="op">=</span> <span class="st">"c_ww"</span></span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type_contact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"low"</span>, <span class="st">"medium"</span>, <span class="st">"high"</span>, <span class="cn">NULL</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>sigma_season</dt>
-<dd><p>value for season scaling (derived from Williams et al 2014; Appendix A)</p></dd>
+<dd><p>value for season scaling (derived from Williams et al 2014; Appendix A). Default set to 1</p></dd>
 
 
 <dt>scaling_c</dt>
@@ -78,7 +79,7 @@
 
 
 <dt>N_w</dt>
-<dd><p>total population size of deer</p></dd>
+<dd><p>total population size of deer. Poisson dist w/ean = 10</p></dd>
 
 
 <dt>q</dt>
@@ -93,8 +94,12 @@
 <dd><p>number of values to be returned. Default is 1, but will return a vector if &gt; 2</p></dd>
 
 
+<dt>seed</dt>
+<dd><p>if specified, sets a seed for the function</p></dd>
+
+
 <dt>type_contact</dt>
-<dd><p>set to "c_ww" as is the only calculation done</p></dd>
+<dd><p>option between "low", "medium", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -107,11 +112,11 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.245126</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (type_contact == "low") {    scaling_c = rep(16.37, nsamples)    q = rep(0.53, nsamples)}:</span> the condition has length &gt; 1</span>
 <span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span><span class="fl">1</span>, <span class="fl">16.37</span>, <span class="fl">1000</span>, <span class="fl">0.53</span>, <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.207738</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (type_contact == "low") {    scaling_c = rep(16.37, nsamples)    q = rep(0.53, nsamples)}:</span> the condition has length &gt; 1</span>
 <span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16.37</span>, <span class="fl">16.37</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1000</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.53</span>, <span class="fl">0.53</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.167973 4.351317</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (type_contact == "low") {    scaling_c = rep(16.37, nsamples)    q = rep(0.53, nsamples)}:</span> the condition has length &gt; 1</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -119,7 +124,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by First Last.</p>
+  <p></p><p>Developed by Javi Rudolph, Elias Rosenblatt, Fer Arce.</p>
 </div>
 
 <div class="pkgdown-footer-right">
