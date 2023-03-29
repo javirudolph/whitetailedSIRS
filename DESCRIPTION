@@ -2,15 +2,22 @@ Package: whitetailedSIRS
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    c(person("Javi", "Rudolph", email = "f.javierarudolph@gmail.com", role = c("aut", "cre")),
+      person("Elias", "Rosenblatt", email = "erosenbl@uvm.edu", role = c("aut", "ctb")),
+	   person("Fer", "Arce", email = "farcego@gmail.com", role = c("aut", "ctb")),
+	   person("Jonathan", "Cook", email = "jcook@usgs.gov", role = "ctb"),
+	   person("Graziella", "DiRenzo", email = "gdirenzo@umass.edu", role = "ctb"),
+	   person("Brittany", "Mosher", email = "brittany.mosher@uvm.edu", role = "ctb"),
+	   person("Mike", "Runge", email = "mrunge@usgs.gov", role = "ctb")
+	   person("Evan", "Grant", email = "ehgrant@usgs.gov", role = "ctb")
+	   )
+Description: whitetailedSIRS is a collection of functions to generate disease dynamics projections for deer populations using an SIRS framework.
 License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-URL: https://github.com/javirudolph/whitetailedSIRS
-BugReports: https://github.com/javirudolph/whitetailedSIRS/issues
+URL: https://github.com/disease-decision-analysis-and-research/whitetailedSIRS
+BugReports: https://github.com/disease-decision-analysis-and-research/whitetailedSIRS/issues
 Suggests: 
     knitr,
     rmarkdown
