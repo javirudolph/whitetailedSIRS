@@ -23,7 +23,7 @@ calc_contact_rate <- function(sigma_season = NULL,
                               A_w = NULL,
                               nsamples = NULL,
                               seed = NULL,
-                              type_contact = c("low", "medium", "high", NULL)){
+                              type_contact = NULL){
 
 
    if(is.null(nsamples)) nsamples = 1
