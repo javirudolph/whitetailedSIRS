@@ -1,5 +1,5 @@
 Package: whitetailedSIRS
-Title: What the Package Does (One Line, Title Case)
+Title: Disease dyanmics in white tailed deers using an SIRS framework
 Version: 0.0.0.9000
 Authors@R: 
     c(person("Javi", "Rudolph", email = "f.javierarudolph@gmail.com", role = c("aut", "cre")),
