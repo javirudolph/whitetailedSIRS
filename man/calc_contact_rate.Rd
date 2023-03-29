@@ -39,7 +39,7 @@ returns a number or numeric vector if nsamples > 1
 Contact rate calculation for wild deer
 }
 \examples{
-calc_contact_rate()
-calc_contact_rate(1, 16.37, 1000, 0.53, 100)
+calc_contact_rate(type_contact = "low")
+calc_contact_rate(sigma_season = 1, scaling_c = 16.37, N_w = 1000, q = 0.53, A_w = 100)
 calc_contact_rate(c(1,1), c(16.37, 16.37), rpois(2, 1000), c(0.53, 0.53), c(100, 100))
 }

@@ -13,8 +13,8 @@
 #' @export
 #'
 #' @examples
-#' calc_contact_rate()
-#' calc_contact_rate(1, 16.37, 1000, 0.53, 100)
+#' calc_contact_rate(type_contact = "low")
+#' calc_contact_rate(sigma_season = 1, scaling_c = 16.37, N_w = 1000, q = 0.53, A_w = 100)
 #' calc_contact_rate(c(1,1), c(16.37, 16.37), rpois(2, 1000), c(0.53, 0.53), c(100, 100))
 calc_contact_rate <- function(sigma_season = NULL,
                               scaling_c = NULL,
@@ -42,6 +42,11 @@ calc_contact_rate <- function(sigma_season = NULL,
    if (type_contact == "high") {
       scaling_c = rep(15.58, nsamples)
       q = rep(0.32, nsamples)
+   }
+
+   if (is.null(type_contact)) {
+      scaling_c = scaling_c
+      q = q
    }
 
    if (is.null(sigma_season)) sigma_season = rep(1, nsamples)
