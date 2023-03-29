@@ -3,8 +3,8 @@ Title: Disease dyanmics in white tailed deers using an SIRS framework
 Version: 0.0.0.9000
 Authors@R: 
     c(person("Javi", "Rudolph", email = "f.javierarudolph@gmail.com", role = c("aut", "cre")),
+      person("Fer", "Arce", email = "farcego@gmail.com", role = c("aut", "ctb")),
       person("Elias", "Rosenblatt", email = "erosenbl@uvm.edu", role = c("aut", "ctb")),
-	   person("Fer", "Arce", email = "farcego@gmail.com", role = c("aut", "ctb")),
 	   person("Jonathan", "Cook", email = "jcook@usgs.gov", role = "ctb"),
 	   person("Graziella", "DiRenzo", email = "gdirenzo@umass.edu", role = "ctb"),
 	   person("Brittany", "Mosher", email = "brittany.mosher@uvm.edu", role = "ctb"),
