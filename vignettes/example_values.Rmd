@@ -66,7 +66,7 @@ We set up all the parameters that were generated from the expert elicitation dis
 alpha_immunity <- 1 / get_param_val('Temporary Immunity')
 
 # Calculate contact rate between wild deer using the contact_rate fx using defaults:
-c_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples)
+c_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = "low")
 # The rest of the contact rates were elicited and then modified
 c_cw <- 0.00072 / get_param_val("Direct Contact Probability")
 c_cc <- get_param_val("Deer-Deer Proximity Rate, Captive (per day)")
