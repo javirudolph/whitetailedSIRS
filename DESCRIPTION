@@ -1,30 +1,25 @@
 Package: whitetailedSIRS
-Title: Disease dyanmics in white tailed deers using an SIRS framework
+Title: Generate Deer Disease Dyanmics Under an SIRS Framework
 Version: 0.0.0.9000
-Authors@R: 
-    c(person("Javi", "Rudolph", , email = "f.javierarudolph@gmail.com", role = c("aut", "cre")),
-      person("Fer", "Arce", email = "farcego@gmail.com", role = c("aut", "ctb")),
-      person("Elias", "Rosenblatt", email = "erosenbl@uvm.edu", role = c("aut", "ctb")),
-	   person("Jonathan", "Cook", email = "jcook@usgs.gov", role = "ctb"),
-	   person("Graziella", "DiRenzo", email = "gdirenzo@umass.edu", role = "ctb"),
-	   person("Brittany", "Mosher", email = "brittany.mosher@uvm.edu", role = "ctb"),
-	   person("Mike", "Runge", email = "mrunge@usgs.gov", role = "ctb"),
-	   person("Evan", "Grant", email = "ehgrant@usgs.gov", role = "ctb")
-	   )
-Description: whitetailedSIRS is a collection of functions to generate disease dynamics projections for deer populations using an SIRS framework.
+Authors@R: c(
+    person("Javi", "Rudolph", , "f.javierarudolph@gmail.com", role = c("aut", "cre")),
+    person("Fer", "Arce", , "farcego@gmail.com", role = c("aut", "ctb")),
+    person("Elias", "Rosenblatt", , "erosenbl@uvm.edu", role = c("aut", "ctb")),
+    person("Jonathan", "Cook", , "jcook@usgs.gov", role = "ctb"),
+    person("Graziella", "DiRenzo", , "gdirenzo@umass.edu", role = "ctb"),
+    person("Brittany", "Mosher", , "brittany.mosher@uvm.edu", role = "ctb"),
+    person("Mike", "Runge", , "mrunge@usgs.gov", role = "ctb"),
+    person("Evan", "Grant", , "ehgrant@usgs.gov", role = "ctb")
+  )
+Description: Collection of functions to generate disease dynamics
+    projections for deer populations using an SIRS framework.
 License: CC BY 4.0
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
-URL: https://github.com/disease-decision-analysis-and-research/whitetailedSIRS
-BugReports: https://github.com/disease-decision-analysis-and-research/whitetailedSIRS/issues
-Suggests: 
-    knitr,
-    rmarkdown
-VignetteBuilder: knitr
+URL: 
+    https://github.com/disease-decision-analysis-and-research/whitetailedSIRS
+BugReports: 
+    https://github.com/disease-decision-analysis-and-research/whitetailedSIRS/issues
 Depends: 
     R (>= 2.10)
-LazyData: true
 Imports: 
     deSolve,
     dplyr (>= 1.0.10),
@@ -33,7 +28,16 @@ Imports:
     rootSolve,
     tibble,
     tidyr (>= 1.3.0)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: 
+    knitr
 Remotes: 
-    tidyverse/purrr,
     tidyverse/dplyr,
+    tidyverse/purrr,
     tidyverse/tidyr
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

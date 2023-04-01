@@ -12,13 +12,17 @@ draw_elicitation_samples(
 )
 }
 \arguments{
-\item{elicitation_data}{defaults to the package data on expert elicitation}
+\item{elicitation_data}{defaults to the package data on expert elicitation.
+It requires a dataframe with columns for parameter name, mu, sd, and
+distribution family. This function is written around the \code{elicitation_data}
+dataset provided in this package.}
 
-\item{nsamples}{a number of samples to draw}
+\item{nsamples}{a number of samples to draw. If none set, it defaults to 1.}
 
-\item{seed}{if specified, a seed is set}
+\item{seed}{if specified, a seed is set. If left NULL no seed is set.}
 
-\item{return_df}{is TRUE the object returned is a data frame}
+\item{return_df}{if TRUE the object returned is a data frame. If FALSE it
+will return a list column}
 }
 \value{
 returns a tibble with list column for the samples drawn unless
@@ -26,4 +30,8 @@ otherwise specified in the \code{return_df} argument.
 }
 \description{
 Random draw of parameters from expert elicitation
+}
+\examples{
+draw_elicitation_samples() # this will return the default elicitation_data with an additional column for a random sample of 1 for each parameter.
+draw_elicitation_samples(return_df = TRUE) # will return the same as above but expanded as a dataframe instead of a tibble with a list column
 }
