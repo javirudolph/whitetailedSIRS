@@ -20,11 +20,11 @@ calc_contact_rate(
 
 \item{scaling_c}{value for contact scaling constant (influences slope of density-contact relationship; reported in Habib et al. 2011; Appendix A)}
 
-\item{N_w}{total population size of deer. Poisson dist w/ean = 10}
+\item{N_w}{total population size of deer. Defaults is a random draw from a Poisson dist w/mean = 1000}
 
 \item{q}{value for concavity scaling constant (0-1, with 0 equating to density dependence and 1 equating to frequency dependence; reported in Habib et al. 2011, Appendix A)}
 
-\item{A_w}{area inhabited by N}
+\item{A_w}{area inhabited by N. Default set to 100}
 
 \item{nsamples}{number of values to be returned. Default is 1, but will return a vector if > 2}
 

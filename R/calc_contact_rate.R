@@ -2,9 +2,9 @@
 #'
 #' @param sigma_season value for season scaling (derived from Williams et al 2014; Appendix A). Default set to 1
 #' @param scaling_c value for contact scaling constant (influences slope of density-contact relationship; reported in Habib et al. 2011; Appendix A)
-#' @param N_w total population size of deer. Poisson dist w/ean = 10
+#' @param N_w total population size of deer. Defaults is a random draw from a Poisson dist w/mean = 1000
 #' @param q value for concavity scaling constant (0-1, with 0 equating to density dependence and 1 equating to frequency dependence; reported in Habib et al. 2011, Appendix A)
-#' @param A_w area inhabited by N
+#' @param A_w area inhabited by N. Default set to 100
 #' @param nsamples number of values to be returned. Default is 1, but will return a vector if > 2
 #' @param seed if specified, sets a seed for the function
 #' @param type_contact option between "low", "medium", and "high" based on parameters from Habib 2011 table. If set to "manual", manual input of scaling_c and q are needed.
@@ -28,7 +28,7 @@ calc_contact_rate <- function(sigma_season = NULL,
 
    if(is.null(nsamples)) nsamples = 1
    if(!is.null(seed)) set.seed(seed)
-   if(is.null(type_contact)) return(print("Type of contact must be specified as 'low', 'med', 'high', or 'manual' and provide scaling_c and q values "))
+   if(is.null(type_contact)) return(print("Type of contact must be specified as 'low', 'med', 'high'. If set to 'manual', user must provide scaling_c and q values "))
 
    if (type_contact == "low") {
       scaling_c = rep(16.37, nsamples)
