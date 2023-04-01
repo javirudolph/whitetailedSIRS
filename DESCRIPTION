@@ -2,7 +2,7 @@ Package: whitetailedSIRS
 Title: Disease dyanmics in white tailed deers using an SIRS framework
 Version: 0.0.0.9000
 Authors@R: 
-    c(person("Javi", "Rudolph", email = "f.javierarudolph@gmail.com", role = c("aut", "cre")),
+    c(person("Javi", "Rudolph", , email = "f.javierarudolph@gmail.com", role = c("aut", "cre")),
       person("Fer", "Arce", email = "farcego@gmail.com", role = c("aut", "ctb")),
       person("Elias", "Rosenblatt", email = "erosenbl@uvm.edu", role = c("aut", "ctb")),
 	   person("Jonathan", "Cook", email = "jcook@usgs.gov", role = "ctb"),
