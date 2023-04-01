@@ -18,11 +18,9 @@
 #' @param V_air fixed volume; \eqn{m^3}. Default to 7.07
 #' @param t_contact time of contact with contaminated airspace (hr).
 #' @param r species-specific probability of infection from 1 quantum. Default is
-#'   for r_deer with expert elicited values
+#'   for r_deer with expert elicited values.
 #' @param nsamples default to 1, but if specified > 1 will draw `nsamples` from
 #'   the default distributions of parameters
-#' @param print_pars logical. If TRUE, will return a list with all parameters
-#'   used to make calculations
 #' @param seed if setting a seed, specify number
 #'
 #' @details  Mathematical background for this calculation. An infected
@@ -41,8 +39,7 @@
 #'   function of the dose received and a species-specific probability of
 #'   infection from 1 quantum. \deqn{\nu^{AERO} = 1 - e^{-rQ}}
 #'
-#' @return a numeric vector of length equal to nsamples or length of vectors
-#'   provided in arguments
+#' @return a numeric vector of length equal to nsamples for values of nu_aero
 #' @export
 #'
 #' @examples
@@ -59,7 +56,6 @@ calc_nu_aero <- function(AER = NULL,
                          t_contact = NULL,
                          r = NULL,
                          nsamples = NULL,
-                         print_pars = FALSE,
                          seed = NULL) {
 
    if(!is.null(seed)) set.seed(seed)
@@ -73,7 +69,7 @@ calc_nu_aero <- function(AER = NULL,
    if (is.null(ER)) ER = IR
    if (is.null(V_d)) V_d = rep(0.009, nsamples)
    if (is.null(V_air)) V_air = rep(7.07, nsamples)
-   if (is.null(t_contact)) t_contact = rlnorm(nsamples, 1.553, 1.272)
+   if (is.null(t_contact)) t_contact = rlnorm(nsamples, 1.553, 1.272)/60
    if (is.null(r)) r = rlnorm(nsamples, 0.2775, 0.272)
    if (is.null(AER)) AER = rep(4, nsamples)
    if (is.null(s)) s = rep(0.24, nsamples)
@@ -101,20 +97,6 @@ calc_nu_aero <- function(AER = NULL,
    # into a probability of infection via aerosol
    nu_aero <- 1 - exp(-r * Q)
 
-   if (print_pars == TRUE) {
-      list(nu_aero = nu_aero,
-           AER = AER,
-           s = s,
-           lambda = lambda,
-           C_nu = C_nu,
-           C_i = C_i,
-           IR = IR,
-           V_d = V_d,
-           V_air = V_air,
-           t_contact = t_contact,
-           r = r,
-           seed = seed)
-   } else (
-      nu_aero
-   )
+   return(nu_aero)
+
 }

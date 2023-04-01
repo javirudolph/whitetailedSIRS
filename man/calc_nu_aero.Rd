@@ -17,7 +17,6 @@ calc_nu_aero(
   t_contact = NULL,
   r = NULL,
   nsamples = NULL,
-  print_pars = FALSE,
   seed = NULL
 )
 }
@@ -45,19 +44,15 @@ elicited distribution of parameter 'Viral Load'}
 \item{t_contact}{time of contact with contaminated airspace (hr).}
 
 \item{r}{species-specific probability of infection from 1 quantum. Default is
-for r_deer with expert elicited values}
+for r_deer with expert elicited values.}
 
 \item{nsamples}{default to 1, but if specified > 1 will draw \code{nsamples} from
 the default distributions of parameters}
 
-\item{print_pars}{logical. If TRUE, will return a list with all parameters
-used to make calculations}
-
 \item{seed}{if setting a seed, specify number}
 }
 \value{
-a numeric vector of length equal to nsamples or length of vectors
-provided in arguments
+a numeric vector of length equal to nsamples for values of nu_aero
 }
 \description{
 \code{calc_nu_aero} will calculate one value for probability of infection using
