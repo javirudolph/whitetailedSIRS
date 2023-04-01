@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc_nu_dc.R
 \name{calc_nu_dc}
 \alias{calc_nu_dc}
-\title{Calculate \eqn{\nu^{DC}}}
+\title{Calculate probability of infection given physical contact \eqn{\nu^{DC}}}
 \usage{
 calc_nu_dc(
   V_DC = NULL,
@@ -32,7 +32,10 @@ distributions.}
 returns a number or vector of probability values for probability of infection via direct contact.
 }
 \description{
-Calculate infection probability given physical contact
+#' \code{calc_nu_dc} will calculate one value for probability of infection using
+defaults if no arguments are provided. Defaults are described in the
+sir_model_description document and are sourced from the literature or expert
+elicitation.
 }
 \details{
 Mathematical background to calculate this infection probability
@@ -49,4 +52,5 @@ individuals making contact.
 }
 \examples{
 calc_nu_dc() # will run the defaults
+calc_nu_dc(nsamples = 10) # use defaults with a random draw for values of C_nu from expert elicitation
 }
