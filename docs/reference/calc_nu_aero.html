@@ -78,7 +78,6 @@ elicitation.</p>
 <span>  t_contact <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  r <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nsamples <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  print_pars <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -129,17 +128,12 @@ elicited distribution of parameter 'Viral Load'</p></dd>
 
 <dt>r</dt>
 <dd><p>species-specific probability of infection from 1 quantum. Default is
-for r_deer with expert elicited values</p></dd>
+for r_deer with expert elicited values.</p></dd>
 
 
 <dt>nsamples</dt>
 <dd><p>default to 1, but if specified &gt; 1 will draw <code>nsamples</code> from
 the default distributions of parameters</p></dd>
-
-
-<dt>print_pars</dt>
-<dd><p>logical. If TRUE, will return a list with all parameters
-used to make calculations</p></dd>
 
 
 <dt>seed</dt>
@@ -150,8 +144,7 @@ used to make calculations</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>a numeric vector of length equal to nsamples or length of vectors
-provided in arguments</p>
+<p>a numeric vector of length equal to nsamples for values of nu_aero</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -175,7 +168,7 @@ infection from 1 quantum. $$\nu^{AERO} = 1 - e^{-rQ}$$</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">calc_nu_aero</span><span class="op">(</span><span class="op">)</span> <span class="co"># will return a single value using defaults</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5359741</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.01402188</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -183,7 +176,7 @@ infection from 1 quantum. $$\nu^{AERO} = 1 - e^{-rQ}$$</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Javi Rudolph, Elias Rosenblatt, Fer Arce.</p>
+  <p></p><p>Developed by Javi Rudolph, Fer Arce, Elias Rosenblatt.</p>
 </div>
 
 <div class="pkgdown-footer-right">

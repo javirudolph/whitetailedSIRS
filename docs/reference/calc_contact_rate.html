@@ -79,7 +79,7 @@
 
 
 <dt>N_w</dt>
-<dd><p>total population size of deer. Poisson dist w/ean = 10</p></dd>
+<dd><p>total population size of deer. Defaults is a random draw from a Poisson dist w/mean = 1000</p></dd>
 
 
 <dt>q</dt>
@@ -87,7 +87,7 @@
 
 
 <dt>A_w</dt>
-<dd><p>area inhabited by N</p></dd>
+<dd><p>area inhabited by N. Default set to 100</p></dd>
 
 
 <dt>nsamples</dt>
@@ -99,7 +99,7 @@
 
 
 <dt>type_contact</dt>
-<dd><p>option between "low", "medium", and "high" based on parameters from Habib 2011 table. If set to NULL, manual input of scaling_c and q are needed.</p></dd>
+<dd><p>option between "low", "medium", and "high" based on parameters from Habib 2011 table. If set to "manual", manual input of scaling_c and q are needed.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -111,12 +111,12 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (type_contact == "low") {    scaling_c = rep(16.37, nsamples)    q = rep(0.53, nsamples)}:</span> argument is of length zero</span>
-<span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span><span class="fl">1</span>, <span class="fl">16.37</span>, <span class="fl">1000</span>, <span class="fl">0.53</span>, <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (type_contact == "low") {    scaling_c = rep(16.37, nsamples)    q = rep(0.53, nsamples)}:</span> argument is of length zero</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span>type_contact <span class="op">=</span> <span class="st">"low"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.272439</span>
+<span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span>sigma_season <span class="op">=</span> <span class="fl">1</span>, scaling_c <span class="op">=</span> <span class="fl">16.37</span>, N_w <span class="op">=</span> <span class="fl">1000</span>, q <span class="op">=</span> <span class="fl">0.53</span>, A_w <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Type of contact must be specified as 'low', 'med', 'high'. If set to 'manual', user must provide scaling_c and q values "</span>
 <span class="r-in"><span><span class="fu">calc_contact_rate</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16.37</span>, <span class="fl">16.37</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1000</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.53</span>, <span class="fl">0.53</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (type_contact == "low") {    scaling_c = rep(16.37, nsamples)    q = rep(0.53, nsamples)}:</span> argument is of length zero</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Type of contact must be specified as 'low', 'med', 'high'. If set to 'manual', user must provide scaling_c and q values "</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -124,7 +124,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Javi Rudolph, Elias Rosenblatt, Fer Arce.</p>
+  <p></p><p>Developed by Javi Rudolph, Fer Arce, Elias Rosenblatt.</p>
 </div>
 
 <div class="pkgdown-footer-right">
