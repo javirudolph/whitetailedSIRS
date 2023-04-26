@@ -1,0 +1,282 @@
+---
+title: "SARS-CoV-2 outbreak characteristics across wild and captive settings"
+subtitle: "Analysis referenced in Rosenblatt et al. 2023"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SIRS_analysis_by_contexts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include = FALSE}
+library(whitetailedSIRS)
+library(tidyverse)
+library(deSolve)
+library(rootSolve)
+library(binom)
+```
+
+## Basic Simulation Parameters
+After loading packages, we set several parameters that will remain constant across simulations. We set a seed for reproducible results (set.seed). We define the number of iterations for simulations for a particular context (nsamples). We set human prevalence levels (I_human_null). We define the duration for the SIRS projection in days (times). 
+```{r base_simulations}
+set.seed(23)
+nsamples <- 200
+I_human_null <- 0.05
+times <- seq(0, 120, by = 1)
+```
+
+## Expert Elicitated Parameters
+```{r}
+elicitation_data <- draw_elicitation_samples(nsamples = nsamples)
+```
+
+## Contexts for SARS-CoV-2 introduction and spread in white-tailed deer populations
+Following Rosenblatt et al. (2023), four contexts were defined, including outdoor captive ranch, intensive captive facility, wild deer in rural conditions, and wild deer in suburban conditions. In this RMD file, these contexts will be simulated independently of each other. Below we briefly describe the context, calculate various proximity rates and infection probabilities, and derive transmission rates of SARS-CoV-2 in each of these contexts.
+
+### Outdoor captive ranch
+We modeled a population of captive deer housed in an outdoor ranching facility. We assumed proximity rates between deer in this context was the same as estimated in wild contexts, with the increase of these proximity rates due to supplemental feeding. We assume that proximity rates between humans and deer in this context are the same as those estimated for the wild, suburban context, but the duration of these proximity events are longer, reflecting those typical of a captive facility.
+
+#### Proximity Rates
+Proximity rates were derived from a rate model developed by Habib et al. (2011), as a function of habitat conditions (habitat) and density (nwild/A_W). For all uses of the Habib et al. (2011) model in this analysis, we fixed density at 10 deer per sq km and habitat at 26% wooded habitat (classified in the calc_contact_rate function as type_contact = "med"). We also used expert elicitation estimates of the probability of direct contact for fluid transmission.
+```{r Ranch Proximity}
+nWild <- rpois(nsamples,1000) #Abundance
+A_w <- 100 #Area
+habitat <- "med" #Habitat classification
+sigma_season <- 1 #Season adjustment for proximity rate
+
+sigma_dc <- get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Probability of direct contact between deer, given proximity.
+```
+
+Next, we define various proximity rates for the ranch context. Object names reflect other parameters that must be included in the SIRS ODE solver (e.g. c_ww_ranch, set to 0).
+```{r}
+c_ww_ranch <- rep(0, nsamples) #Deer-to-deer proximity rate in wild (set to 0; events per day).
+c_cw_null <- rep(0, nsamples) #Deer-to-deer proximity rate along fenceline (set to 0; events per day).
+c_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
+
+c_hw_ranch <- rep(0, nsamples) #Human-to-deer proximity rate in wild (set to 0; events per day).
+c_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 #Human-to-deer proximity rate in ranch context, mimicing suburban proximitty rates (events per day).
+```
+
+#### Infection probabilities
+We calculate infection probabilities for three transmission pathways - aerosol transmission from deer-to-deer, fluid transmission from deer-to-deer, and aerosol transmission from human-to-deer. Below, we will use various package functions to define parameters to estimate the infection probability given proximity or contact.
+
+```{r common infection parameters}
+C_nu_human <- rnorm(n = nsamples, mean = 10^5.6, sd = 10^1.2)#viral load in humans (genomic copies per ml)
+C_nu_deer <- 10^5.6 * get_EE_param_vals(data = elicitation_data, my_param = "Viral Load") #viral load in deer saliva, relative to humans (genomic copies per ml)
+
+r_deer <- get_EE_param_vals(data = elicitation_data, my_param = "Dose-Response")# Dose response coefficient for deer and SARS-CoV-2
+```
+
+
+``` {r infection probability}
+#Infection probability calculation of aerosol transmission from deer-to-deer
+t_contact_deer_deer_null <- get_EE_param_vals(data = elicitation_data, my_param = "Deer Proximity Duration (minutes)") #Estimate duration of proximity event...
+nu_aero_deer_deer_ranch <- calc_nu_aero(C_nu = C_nu_deer,
+                                        t_contact = t_contact_deer_deer_null / 60,
+                                        r = r_deer, nsamples = nsamples) #...and estimate probability of infection given that duration of proximity event.
+
+nu_aero_deer_deer_wild_null <- rep(0, nsamples) #Estimate infection probability in out in the wild as 0 (needs to be included for SIRS ODE equations)
+
+#Infection probability of 0.1 ml of saliva being transferred between deer on contact
+nu_dc_deer_deer_null <- calc_nu_dc(C_nu = C_nu_deer, nsamples = nsamples) #Calculate infection probability
+
+#Infection probability calculation of aerosol transmission from humans-to-deer
+t_contact_deer_human_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") #Estimate duration of human-deer proximity event in ranch facility context...
+nu_aero_deer_human_ranch <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                        t_contact = t_contact_deer_human_ranch / 60,
+                                        r = r_deer, nsamples = nsamples)#... and calculate infection probability given the duration of a human-deer proximity event.
+nu_aero_deer_human_wild_null <- rep(0, nsamples)#Estimate human-to-deer infection probability out in the wild as 0 (needs to be included for SIRS ODE equations)
+
+```
+
+#### Recovery and Immunity Loss Rates
+For all simulations, animals recover from their infection at a given rate (gamma_recov), and lose their immunity and become susceptible at a given rate (alpha_immunity). We use a recovery rate based on a 6 day infectious period (Palmer et al. 2021), and immunity loss rate based on expert elicited estimates. The recovery rate is repeated across all iterations of a simulation (nsamples). The immunity loss rate is derived from [nsamples] draws from an error distribution estimated by the expert elicitation process.
+```{r}
+gamma_recov <- rep(1/6, nsamples)
+alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param = 'Temporary Immunity')
+```
+
+#### Compile parameters and run SIRS ODE solver for context
+Now that all parameters have been defined for an SIRS model, we run three functions that define starting conditions, arrange the parameters defined above and calculated derived parameters, and run the ODE solver.
+```{r Ranch Compiler}
+captive.inits <- initial_compartments(S_wild_prop = 0, draws = nsamples)
+
+ranch.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_ranch, c_cw = c_cw_null,c_cc = c_cc_ranch,
+                            c_hw = c_hw_ranch, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_wild_null, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_null, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits, parameters = ranch.params, times = times, name = "Outdoor ranch")
+```
+
+If we look at the proj.ranch object, we can see the items stored in the first list item, including the iteration identifier (run_id), initial compartment sizes (inits), SIRS parameters (params), and the start and end of the projected infection in the ranch context.
+```{r explore output}
+proj.ranch$run_id[1]
+proj.ranch$inits[1]
+proj.ranch$params[1]
+head(proj.ranch$ode_proj[[1]])
+tail(proj.ranch$ode_proj[[1]])
+```
+
+We can now continue to run the ODE solver for other contexts. Only new parameters will be defined for these other context; several will be referenced from the ranch context above.
+
+### Intensive captive facility
+We considered captive deer held in a facility focused on captive breeding or exposition. Deer in this facility were predominantly indoors with high stocking densities and low indoor air exchange rates (AER; 1-hr). We estimated all proximity rates and duration of proximity using expert elicitation.
+
+```{r intensive captive}
+c_ww_intensive <- rep(0, nsamples)
+c_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)")
+c_hw_intensive <- rep(0, nsamples)
+c_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+
+nu_aero_deer_deer_intensive <- calc_nu_aero(C_nu = C_nu_deer,
+                                            t_contact = t_contact_deer_deer_null / 60,
+                                            r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
+
+t_contact_deer_human_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") 
+
+nu_aero_deer_human_intensive <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                            t_contact = t_contact_deer_human_intensive / 60,
+                                            r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
+
+intensive.params <- alternative(
+   c_ww = c_ww_intensive, c_cw = c_cw_null, c_cc = c_cc_intensive, 
+   c_hw = c_hw_intensive, c_hc = c_hc_intensive, 
+   nu_aero_deer_deer_wild = nu_aero_deer_human_wild_null, nu_aero_deer_deer_captive =  nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_null, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, nu_dc_deer_deer = nu_dc_deer_deer_null,
+   alpha_immunity = alpha_immunity_null, sigma_dc = sigma_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj.intensive <- run(iter = nsamples, initial_compartments = captive.inits, parameters = intensive.params, times = times, name = "Intensive facility")
+```
+
+
+### Wild deer in rural conditions
+In this context, wild deer are free-ranging in an area with a rural human density (3.1 humans/km2). We assumed that deer in this context were subject to regulated hunting either using still-hunting, or ground blind or treestand approaches. We also assumed that baiting and backyard feeding were illegal but may still occur. We again used Habib et al.’s (2011) proximity rate model. We estimated the duration of deer-deer proximity events, and rates and duration of human-deer proximity events using expert elicitation.
+
+```{r wild and rural}
+c_ww_rural <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, sigma_season = 1)
+c_cc_rural <- rep(0, nsamples)
+c_hw_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") /120
+c_hc_rural <- rep(0, nsamples)
+
+t_contact_deer_human_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Rural (minutes)")
+
+nu_aero_deer_deer_rural <- calc_nu_aero(C_nu = C_nu_deer,
+                                        t_contact = t_contact_deer_deer_null / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+
+nu_aero_deer_deer_captive_null <- rep(0, nsamples)
+
+nu_aero_deer_human_rural <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                        t_contact = t_contact_deer_human_rural / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+
+nu_aero_deer_human_captive_null <- rep(0, nsamples)
+
+wild.inits <- initial_compartments(S_captive_prop = 0, draws = nsamples)
+
+rural.params <- alternative(c_ww = c_ww_rural, c_cw = c_cw_null, c_cc = c_cc_rural, c_hw = c_hw_rural, c_hc = c_hc_rural, nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_captive_null, nu_aero_deer_human_wild = nu_aero_deer_human_rural,  nu_aero_deer_human_capt = nu_aero_deer_human_captive_null, nu_dc_deer_deer = nu_dc_deer_deer_null,alpha_immunity = alpha_immunity_null, sigma_dc = sigma_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj.rural <- run(iter = nsamples, initial_compartments = wild.inits, parameters = rural.params, times = times, name = "Wild, rural")
+```
+
+
+### Wild deer in suburban conditions
+Wild deer are free-ranging in an area of suburban human density (100 humans/km2). Deer-to-deer proximity rates were derived using the same parameters as used in the rural setting. The primary difference between this context and the wild, rural context are higher human-to-deer proximity rates and longer duration of proximity events as estimated by expert elicitation.
+
+```{r wild and captive}
+c_ww_suburban <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, sigma_season = 1)
+c_cc_suburban <- rep(0, nsamples)
+c_hw_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+c_hc_suburban <- rep(0, nsamples)
+
+t_contact_deer_human_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Suburban (minutes)")
+
+nu_aero_deer_deer_suburban <- calc_nu_aero(C_nu = C_nu_deer,
+                                        t_contact = t_contact_deer_deer_null / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+
+nu_aero_deer_human_suburban <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                        t_contact = t_contact_deer_human_suburban / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+
+suburban.params <- alternative(c_ww = c_ww_suburban, c_cw = c_cw_null, c_cc = c_cc_suburban, c_hw = c_hw_suburban, c_hc = c_hc_suburban, nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_captive_null, nu_aero_deer_human_wild = nu_aero_deer_human_suburban,  nu_aero_deer_human_capt = nu_aero_deer_human_captive_null, nu_dc_deer_deer = nu_dc_deer_deer_null,alpha_immunity = alpha_immunity_null, sigma_dc = sigma_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj.suburban <- run(iter = nsamples, initial_compartments = wild.inits, parameters = suburban.params, times = times, name = "Wild, suburban")
+```
+
+## Compile dataset across all contexts
+Finally, we are going to summarize four measurements for each iteration to summarize across contexts. First, we combine the projections for each context into one list object, and summarize the average prevalence (Infected) and SARS-CoV-2 persists to the end of the 120-day projection (Persists). We save this resulting summary dataframe for future use.
+
+```{r, message=FALSE}
+sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
+
+sirs_results_contexts %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[4],length(times)*nsamples))) %>% 
+  group_by(Context, run_id) %>% 
+  summarize(Wild = mean(I_wild), Captive = mean(I_captive), Infected = Wild + Captive, Persist_wild = last(I_wild) >=0.0001, Persist_captive = last(I_captive) >=0.0001, Persist = as.logical(Persist_wild + Persist_captive)) %>% 
+  mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
+   select(., -Wild, -Captive, -Persist_wild, -Persist_captive) %>% 
+  group_by(.,Context) %>% 
+  arrange(., Context, run_id) -> Prev_Persist_df
+
+head(Prev_Persist_df)
+```
+
+Next, we step through each context's parameters to estimate strength of introduction (quantified as force-of-infection) and spread (quantified as basic reproductive number R0). We then combine with the prevalence and persistence summary above to create the dataset that we will visualized in another vignette.
+```{r, message=FALSE, warning=FALSE}
+ranch.df <- list_cbind(map(ranch.params, as_data_frame))
+colnames(ranch.df) <-  names(ranch.params)
+ranch.df %>% 
+  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Outdoor ranch"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
+         FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
+         Context = "Outdoor ranch", Setting = "Captive") %>% 
+  select(., run_id, Context,  Setting, r0, FOI) -> ranch.r0.FOI
+
+intensive.df <- list_cbind(map(intensive.params, as_data_frame))
+colnames(intensive.df) <-  names(intensive.params)
+intensive.df %>% 
+  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Intensive facility"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
+         FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
+         Context = "Intensive facility", Setting = "Captive") %>% 
+  select(., run_id, Context,  Setting, r0, FOI) -> intensive.r0.FOI
+
+rural.df <- list_cbind(map(rural.params, as_data_frame))
+colnames(rural.df) <-  names(rural.params)
+rural.df %>% 
+  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Wild, rural"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
+         FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
+         Context = "Wild, rural", Setting = "Wild") %>% 
+  select(., run_id, Context, Setting,  r0, FOI) -> rural.r0.FOI
+
+suburban.df <- list_cbind(map(suburban.params, as_data_frame))
+colnames(suburban.df) <-  names(suburban.params)
+suburban.df %>% 
+  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Wild, suburban"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
+         FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
+         Context = "Wild, suburban", Setting = "Wild") %>% 
+  select(., run_id, Context, Setting, r0, FOI) -> suburban.r0.FOI
+
+r0.FOI <- rbind(ranch.r0.FOI,intensive.r0.FOI, rural.r0.FOI,suburban.r0.FOI)
+
+#Merge with average prevalence (step 1) and persistence (step 2)
+merge(r0.FOI,Prev_Persist_df[,c("run_id","Infected", "Persist")], by = "run_id", all.x = TRUE) %>% 
+  mutate(Context = factor(Context,  levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) -> df
+```
+
+We will develop plots and tables of this results data frame. Here is a simple summary to end this vignette, with median spread (R0), probability introduction from humans (FOI, log10-transformed), average prevalence for the 120-day fall projection (Prevalence), and if there are any infections at the end of the 120-day fall projection (Persistence).
+```{r}
+df %>% 
+  group_by(., Context) %>% 
+  reframe(., R0.Median = quantile(r0,probs = c(0.5)), FOI.Median = log10(quantile(FOI,probs = c(0.5))), Prevalence.Median = quantile(Infected, probs = c(0.5)), Persistence.Median = sum(Persist)/nsamples)
+```
+
