@@ -21,6 +21,7 @@ library(tidyverse)
 library(deSolve)
 library(rootSolve)
 library(binom)
+library(kableExtra)
 ```
 
 ## Basic Simulation Parameters
@@ -277,6 +278,10 @@ We will develop plots and tables of this results data frame. Here is a simple su
 ```{r}
 df %>% 
   group_by(., Context) %>% 
-  reframe(., R0.Median = quantile(r0,probs = c(0.5)), FOI.Median = log10(quantile(FOI,probs = c(0.5))), Prevalence.Median = quantile(Infected, probs = c(0.5)), Persistence.Median = sum(Persist)/nsamples)
+  reframe(., R0.Median = round(quantile(r0,probs = c(0.5)),2), FOI.Median = round(log10(quantile(FOI,probs = c(0.5))),2), Prevalence.Median = round(quantile(Infected, probs = c(0.5)),2), Persistence.Median = round(sum(Persist)/nsamples,2)) -> median.results
+
+median.results %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
 ```
 

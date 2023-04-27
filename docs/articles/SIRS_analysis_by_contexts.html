@@ -69,7 +69,7 @@
 
 
 
-
+<script src="SIRS_analysis_by_contexts_files/kePrint-0.0.1/kePrint.js"></script><link href="SIRS_analysis_by_contexts_files/lightable-0.0.1/lightable.css" rel="stylesheet">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>SARS-CoV-2 outbreak characteristics across wild and captive settings</h1>
@@ -443,14 +443,100 @@ are any infections at the end of the 120-day fall projection
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">Context</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span><span class="va">.</span>, R0.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">r0</span>,probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>, FOI.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log10</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">FOI</span>,probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, Prevalence.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Infected</span>, probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>, Persistence.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Persist</span><span class="op">)</span><span class="op">/</span><span class="va">nsamples</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
-<span><span class="co">#&gt;   Context            R0.Median FOI.Median Prevalence.Median Persistence.Median</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Outdoor ranch          1.76       -<span style="color: #BB0000;">5.11</span>        0.040<span style="text-decoration: underline;">3</span>                  0.82 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Intensive facility     6.44       -<span style="color: #BB0000;">4.70</span>        0.070<span style="text-decoration: underline;">5</span>                  0.965</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Wild, rural            0.865      -<span style="color: #BB0000;">7.04</span>        0.000<span style="text-decoration: underline;">008</span>71              0.435</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Wild, suburban         0.865      -<span style="color: #BB0000;">5.76</span>        0.000<span style="text-decoration: underline;">116</span>                0.53</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span><span class="va">.</span>, R0.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">r0</span>,probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>,<span class="fl">2</span><span class="op">)</span>, FOI.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log10</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">FOI</span>,probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,<span class="fl">2</span><span class="op">)</span>, Prevalence.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Infected</span>, probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>,<span class="fl">2</span><span class="op">)</span>, Persistence.Median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Persist</span><span class="op">)</span><span class="op">/</span><span class="va">nsamples</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">median.results</span></span>
+<span></span>
+<span><span class="va">median.results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">kbl</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">kable_paper</span><span class="op">(</span><span class="st">"hover"</span>, full_width <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<table class="table  lightable-paper lightable-hover" style='font-family: "Arial Narrow", arial, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<thead><tr>
+<th style="text-align:left;">
+Context
+</th>
+<th style="text-align:right;">
+R0.Median
+</th>
+<th style="text-align:right;">
+FOI.Median
+</th>
+<th style="text-align:right;">
+Prevalence.Median
+</th>
+<th style="text-align:right;">
+Persistence.Median
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Outdoor ranch
+</td>
+<td style="text-align:right;">
+1.76
+</td>
+<td style="text-align:right;">
+-5.11
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+0.82
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Intensive facility
+</td>
+<td style="text-align:right;">
+6.44
+</td>
+<td style="text-align:right;">
+-4.70
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+0.96
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Wild, rural
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:right;">
+-7.04
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Wild, suburban
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:right;">
+-5.76
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.53
+</td>
+</tr>
+</tbody>
+</table>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
