@@ -7,6 +7,12 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/SIRS_analysis_by_contexts.html</loc>
+  </url>
+  <url>
+    <loc>/articles/Visualize_by_context.html</loc>
+  </url>
+  <url>
     <loc>/articles/default_projection.html</loc>
   </url>
   <url>
@@ -23,6 +29,12 @@
   </url>
   <url>
     <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Epi_sirs.html</loc>
+  </url>
+  <url>
+    <loc>/reference/alternative.html</loc>
   </url>
   <url>
     <loc>/reference/calc_contact_rate.html</loc>
@@ -43,7 +55,16 @@
     <loc>/reference/elicitation_data.html</loc>
   </url>
   <url>
+    <loc>/reference/get_EE_param_vals.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/initial_compartments.html</loc>
+  </url>
+  <url>
+    <loc>/reference/run.html</loc>
   </url>
   <url>
     <loc>/reference/run_sirs_projection.html</loc>
