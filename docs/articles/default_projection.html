@@ -41,6 +41,8 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
+    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
     <a class="dropdown-item" href="../articles/default_projection.html">default_projection</a>
     <a class="dropdown-item" href="../articles/example_values.html">example_values</a>
     <a class="dropdown-item" href="../articles/sir_model_description.html">sir_model_description</a>
@@ -93,12 +95,12 @@ projection, and equilibrium:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
 <span><span class="co">#&gt;   run_id inits     params         R0          FOI ode_proj     steady_state    </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.416  0.000<span style="text-decoration: underline;">000</span>086<span style="text-decoration: underline;">5</span> &lt;deSolve[…]&gt; <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.295  0.000<span style="text-decoration: underline;">000</span>118  &lt;deSolve[…]&gt; <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.016<span style="text-decoration: underline;">6</span> 0.000<span style="text-decoration: underline;">000</span>019<span style="text-decoration: underline;">3</span> &lt;deSolve[…]&gt; <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.771  0.000<span style="text-decoration: underline;">000</span>411  &lt;deSolve[…]&gt; <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.035<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">003</span>23   &lt;deSolve[…]&gt; <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>      6 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 3.27   0.000<span style="text-decoration: underline;">004</span>43   &lt;deSolve[…]&gt; <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.416  0.000<span style="text-decoration: underline;">000</span>086<span style="text-decoration: underline;">5</span> <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.295  0.000<span style="text-decoration: underline;">000</span>118  <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.016<span style="text-decoration: underline;">6</span> 0.000<span style="text-decoration: underline;">000</span>019<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.771  0.000<span style="text-decoration: underline;">000</span>411  <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.035<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">003</span>23   <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>      6 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 3.27   0.000<span style="text-decoration: underline;">004</span>43   <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list [1]&gt;</span></span></span></code></pre></div>
 <p>To visualize:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># get results in proper format:</span></span>
@@ -151,7 +153,7 @@ To check for steady state (equilibrium):</p>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Javi Rudolph, Elias Rosenblatt, Fer Arce.</p>
+<p>Developed by Javi Rudolph, Fer Arce, Elias Rosenblatt.</p>
 </div>
 
 <div class="pkgdown-footer-right">
