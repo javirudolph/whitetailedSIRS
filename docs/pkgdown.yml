@@ -2,10 +2,13 @@ pandoc: 2.19.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  Connected_Systems: Connected_Systems.html
+  Connected_Systems_initialspill: Connected_Systems_initialspill.html
   SIRS_analysis_by_contexts: SIRS_analysis_by_contexts.html
+  SIRS_analysis_by_contexts_initialspill: SIRS_analysis_by_contexts_initialspill.html
   Visualize_by_context: Visualize_by_context.html
   default_projection: default_projection.html
   example_values: example_values.html
   sir_model_description: sir_model_description.html
-last_built: 2023-04-27T14:07Z
+last_built: 2023-04-28T19:29Z
 
