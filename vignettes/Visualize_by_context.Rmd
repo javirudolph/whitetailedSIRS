@@ -61,7 +61,8 @@ ggplot(df, aes(x = Context, y = r0)) +
   stat_summary(fun=mean, geom="point", shape="+", size=8) +
   theme_classic()+
   geom_hline(yintercept = 1)+
-  scale_y_continuous("Basic reproductive number (r0)", limits = c(0,20))+
+   coord_cartesian(ylim = c(0,20))+
+  scale_y_continuous("Basic reproductive number (r0)")+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> r0
 
 #plot FOI
@@ -69,7 +70,8 @@ ggplot(df, aes(x = Context, y = log10(FOI))) +
   geom_boxplot()+
   stat_summary(fun.y=mean, geom="point", shape="+", size=8) +
   theme_classic()+
-  scale_y_continuous("Spillover hazard from humans (FOI)", limits = c(-8,-2), breaks = c(-6,-5,-4,-3), labels = c("1:10^6","1:10^5", "1:10^4", "1:10^3"))+
+    coord_cartesian(ylim = c(-8,-2))+
+  scale_y_continuous("Spillover hazard from humans (FOI)", breaks = c(-6,-5,-4,-3), labels = c("1:10^6","1:10^5", "1:10^4", "1:10^3"))+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> FOI
 
 ggpubr::ggarrange(r0, FOI,nrow =1, ncol=2)
