@@ -42,5 +42,5 @@ run <- function(iter = NULL, initial_compartments = example_inits, parameters = 
    if(is.null(name)) {stop("User must name context for data storage")}
 
    tibble(run_id = 1:iter,inits = map(run_id, ~ initial_compartments %>% map_dbl(., .x)),params = map(run_id, function(x) parameters %>% map_dbl(., x)))%>%
-      mutate(ode_proj = pmap(list(y = inits, parms = params), ode, times = times, func = Epi_sirs)) %>%
+      mutate(ode_proj = pmap(list(y = inits, parms = params), ode, times = times, func = Epi_sirs_with_cumulative)) %>%
      mutate(Context = rep(name, nsamples))}
