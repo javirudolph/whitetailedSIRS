@@ -218,13 +218,22 @@ Finally, we are going to summarize four measurements for each iteration to summa
 ```{r, message=FALSE}
 sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
 
+bind_rows(lapply(sirs_results_contexts$params, as.data.frame.list)) %>% 
+mutate(run_id = as.numeric(row.names(.))) %>% 
+   select(., "run_id", "beta_aero_ww","beta_aero_cw","beta_aero_cc","beta_aero_hw","beta_aero_hc", "beta_dc_ww", "beta_dc_cw", "beta_dc_cc", "I_human")-> parameters
+
 sirs_results_contexts %>%
   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
   pull(ode_df) %>%
   list_rbind(names_to = "run_id") %>% 
   mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[4],length(times)*nsamples))) %>% 
   group_by(Context, run_id) %>% 
-  summarize(Wild = mean(I_wild), Captive = mean(I_captive), Infected = Wild + Captive, Persist_wild = last(I_wild) >=0.0001, Persist_captive = last(I_captive) >=0.0001, Persist = as.logical(Persist_wild + Persist_captive)) %>% 
+   left_join(parameters, by = "run_id") %>% 
+   mutate(NewInfect_wild = S_wild*((beta_aero_ww*I_wild)+(beta_dc_ww*I_wild)+(beta_aero_cw*I_captive)+(beta_dc_cw*I_captive)+(beta_aero_hw*I_human)),
+          NewInfect_captive = (S_captive * ((beta_aero_cc * I_captive) + (beta_dc_cc *I_captive) +
+                                               (beta_aero_cw * I_wild) + (beta_dc_cw * I_wild) +
+                                               (beta_aero_hc * I_human)))) %>% 
+   summarize(Wild = mean(I_wild), Captive = mean(I_captive), Infected = Wild + Captive, Persist_wild = last(I_wild) >=0.0001, Persist_captive = last(I_captive) >=0.0001, Persist = as.logical(Persist_wild + Persist_captive), Cumulative_wild_infections = sum(NewInfect_wild), Cumulative_captive_infections = sum(NewInfect_captive)) %>% 
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
    select(., -Wild, -Captive, -Persist_wild, -Persist_captive) %>% 
   group_by(.,Context) %>% 
@@ -270,7 +279,7 @@ suburban.df %>%
 r0.FOI <- rbind(ranch.r0.FOI,intensive.r0.FOI, rural.r0.FOI,suburban.r0.FOI)
 
 #Merge with average prevalence (step 1) and persistence (step 2)
-merge(r0.FOI,Prev_Persist_df[,c("run_id","Infected", "Persist")], by = "run_id", all.x = TRUE) %>% 
+merge(r0.FOI,Prev_Persist_df[,c("run_id","Infected", "Persist", "Cumulative_wild_infections", "Cumulative_captive_infections")], by = "run_id", all.x = TRUE) %>% 
   mutate(Context = factor(Context,  levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) -> df
 ```
 
@@ -278,7 +287,7 @@ We will develop plots and tables of this results data frame. Here is a simple su
 ```{r}
 df %>% 
   group_by(., Context) %>% 
-  reframe(., R0.Median = round(quantile(r0,probs = c(0.5)),2), FOI.Median = round(log10(quantile(FOI,probs = c(0.5))),2), Prevalence.Median = round(quantile(Infected, probs = c(0.5)),2), Persistence.Median = round(sum(Persist)/nsamples,2)) -> median.results
+  reframe(., R0.Median = round(quantile(r0,probs = c(0.5)),2), FOI.Median = round(log10(quantile(FOI,probs = c(0.5))),2), Prevalence.Median = round(quantile(Infected, probs = c(0.5)),2), Persistence.Median = round(sum(Persist)/nsamples,2), Cumulative_cases_wild = median(Cumulative_wild_infections), Cumulative_cases_captive = median(Cumulative_captive_infections)) -> median.results
 
 median.results %>%
   kbl() %>%
