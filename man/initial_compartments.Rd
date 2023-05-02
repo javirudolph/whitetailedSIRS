@@ -28,6 +28,10 @@ initial_compartments(
 \item{R_captive_prop}{Size of recovered compartment in captive population (proportion)}
 
 \item{draws}{$Number of iterations of simulation}
+
+\item{I_wild_cumulative}{Cumulative infected in wild segment, starting always at 0}
+
+\item{I_captive_cumulative}{Cumulative infected in captive segment, starting always at 0}
 }
 \value{
 List of six vectors, repeating starting conditions specified by user. Length of vectors are determined by draws argument.
