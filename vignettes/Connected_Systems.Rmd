@@ -424,7 +424,7 @@ sirs_results_systems %>%
    group_by(., System) %>% 
    summarise(., Wild_Prevalence_Change = paste0(round(median(Change_Prev_Wild)*100,4), " (", round(quantile(Change_Prev_Wild,probs = 0.1)*100,4), "-",round(quantile(Change_Prev_Wild,probs = 0.9)*100,4),")"), Captive_Prevalence_Change = paste0(round(median(Change_Prev_Captive)*100,4), " (", round(quantile(Change_Prev_Captive,probs = 0.1)*100,4), "-",round(quantile(Change_Prev_Captive,probs = 0.9)*100,4),")"), 
              Wild_Prevalence_Proportional_Change = paste0(round(median(Proportional_Change_Prev_Wild)*100,4), " (", round(quantile(Proportional_Change_Prev_Wild,probs = 0.1)*100,4), "-",round(quantile(Proportional_Change_Prev_Wild,probs = 0.9)*100,4),")"), Proportional_Captive_Prevalence_Change = paste0(round(median(Proportional_Change_Prev_Captive)*100,4), " (", round(quantile(Proportional_Change_Prev_Captive,probs = 0.1)*100,4), "-",round(quantile(Proportional_Change_Prev_Captive,probs = 0.9)*100,4),")"),
-             Wild_Persist_Change = sum(Change_Persist_Wild),
+             Wild_Persist_Change = paste0(round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact")$mean,2), " (", round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact", conf.level = 0.80)$lower,2), "-", round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact", conf.level = 0.80)$upper,2), ")"),
              Captive_Persist_Change = sum(Change_Persist_Captive)) ->fence_effect
 
 fence_effect %>%
