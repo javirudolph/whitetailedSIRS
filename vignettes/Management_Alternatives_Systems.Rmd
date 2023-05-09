@@ -1,0 +1,933 @@
+---
+title: "Evaluation of management alternatives across systems (still being developed)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Evaluation of management alternatives across systems}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include = FALSE}
+library(whitetailedSIRS)
+library(tidyverse)
+library(deSolve)
+library(rootSolve)
+library(binom)
+library(kableExtra)
+```
+
+##Introduction: Here, we run 200 iterations of the SIRS function to estimate the effects of various managment alternatives. These management alternatives include:
+
+```{r}
+ActionTable <- data.frame(Alternative = c("Reduce wild density by 10%", "Reduce wild density by 25%", "Eliminate baiting", "Pause Research", "PPE, Wild" , "PPE, Captive", "PPE, Both", "Vaccinate captive deer", "Vaccinate and boost captive deer", "Double-fence captive facilities", "Increase air exchange rate in intensive facilities"), Sector = c("Wildlife", "Wildlife", "Wildlife", "Wildlife", "Public Health","Public Health","Public Health", "Agriculture", "Agriculture","Agriculture", "Agriculture"), Ranch_Rural_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE), Ranch_Suburban_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE), Intensive_Facility_Rural_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE), Intensive_Facility_Suburban_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE))
+
+ActionTable %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+```
+First, we set basic simulation parameters across all simulations.
+```{r base_simulations, include = FALSE}
+set.seed(23)
+nsamples <- 200
+I_human_null <- 0.05
+times <- seq(0, 120, by = 1)
+```
+We bring in elicitation data for various parameters included in these simulations.
+```{r, include = FALSE}
+elicitation_data <- draw_elicitation_samples(nsamples = nsamples)
+```
+
+We can then define a number of parameters that will be used in every system in which we want to test alternatives.
+```{r shared parameters, include = FALSE}
+nWild <- rpois(nsamples,1000) #Abundance
+A_w <- 100 #Area
+habitat <- "med" #Habitat classification
+sigma_season <- 1 #Season adjustment for proximity rate
+
+sigma_dc <- get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Probability of direct contact between deer, given proximity.
+
+C_nu_human <- rnorm(n = nsamples, mean = 10^5.6, sd = 10^1.2)#viral load in humans (genomic copies per ml)
+C_nu_deer <- 10^5.6 * get_EE_param_vals(data = elicitation_data, my_param = "Viral Load") #viral load in deer saliva, relative to humans (genomic copies per ml)
+
+r_deer <- get_EE_param_vals(data = elicitation_data, my_param = "Dose-Response")# Dose response coefficient for deer and SARS-CoV-2
+
+t_contact_deer_deer_null <- get_EE_param_vals(data = elicitation_data, my_param = "Deer Proximity Duration (minutes)") #Estimate duration of proximity event...
+
+gamma_recov <- rep(1/6, nsamples) #Recovery rate from infection (6 days)
+alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param = 'Temporary Immunity') #Rate of temporary immunity loss
+
+#shared derived parameter
+nu_dc_deer_deer_null <- calc_nu_dc(C_nu = C_nu_deer, nsamples = nsamples) #Infection probability for fluid transmission
+```
+
+##Context parameters
+Here, we define parameter values used for the baseline projection for each system.
+
+###Outdoor ranch facilities
+
+```{r}
+#Ranch Parameters
+c_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
+c_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 #Human-to-deer proximity rate in ranch context, mimicing suburban proximitty rates (events per day).
+#Infection probability calculation of aerosol transmission from humans-to-deer
+t_contact_deer_human_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") #Estimate duration 
+#derived ranch parameters
+nu_aero_deer_deer_ranch <- calc_nu_aero(C_nu = C_nu_deer,
+                                        t_contact = t_contact_deer_deer_null / 60,
+                                        r = r_deer, nsamples = nsamples) #...and estimate probability of infection given that duration of proximity event.
+
+nu_aero_deer_human_ranch <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                        t_contact = t_contact_deer_human_ranch / 60,
+                                        r = r_deer, nsamples = nsamples)#... and calculate infection probability given the duration of a human-deer proximity event.
+```
+
+###Intensive facilities
+```{r}
+#Intensive facility parameters
+c_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)") #Deer-to-deer proximity rate in intensive context, mimicing wild proximity rates with the influence of baiting (events per day).
+c_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Captive (per 120 days)") /120 #Human-to-deer proximity rate in intensive context, mimicing suburban proximitty rates (events per day).
+#Infection probability calculation of aerosol transmission from humans-to-deer
+t_contact_deer_human_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") #Estimate duration 
+#derived intensive parameters
+nu_aero_deer_deer_intensive <- calc_nu_aero(C_nu = C_nu_deer,
+                                        t_contact = t_contact_deer_deer_null / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(1, nsamples)) #...and estimate probability of infection given that duration of proximity event.
+
+nu_aero_deer_human_intensive <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                        t_contact = t_contact_deer_human_intensive / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))#... and calculate infection probability given the duration of a human-deer proximity event.
+```
+
+###Fenceline proximity rate
+Captive and wild deer are separated by a single fence that allows proximity and direct contact through the fenceline.
+```{r}
+#Fenceline
+c_cw <- 0.00072 / get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Deer-to-deer proximity rate along fenceline (events per day).
+```
+
+###Suburban
+```{r}
+#Wild, suburban parameters
+c_ww_suburban <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, sigma_season = 1)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+c_hw_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+
+t_contact_deer_human_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Suburban (minutes)")
+
+#derived wild parameters
+nu_aero_deer_deer_suburban <- calc_nu_aero(C_nu = C_nu_deer,
+                                        t_contact = t_contact_deer_deer_null / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+
+nu_aero_deer_human_suburban <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                        t_contact = t_contact_deer_human_suburban / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+```
+
+###Rural
+```{r}
+#Wild, rural parameters
+c_ww_rural <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, sigma_season = 1)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+c_hw_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") /120
+
+t_contact_deer_human_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Rural (minutes)")
+
+#derived wild parameters
+nu_aero_deer_deer_rural <- calc_nu_aero(C_nu = C_nu_deer,
+                                        t_contact = t_contact_deer_deer_null / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+
+nu_aero_deer_human_rural <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+                                        t_contact = t_contact_deer_human_rural / 60,
+                                        r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+```
+
+## Combined system of outdoor ranch facilities and wild deer in a suburban setting
+```{r}
+ranch_suburban.inits.fall <- initial_compartments(draws = nsamples)
+ranch_suburban.inits.steady <- initial_compartments(draws = nsamples, steady = TRUE)
+
+
+ranch_suburban.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_null <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params, times = times, name = "Baseline")
+
+#Alternatives
+#1. 10% density reduction
+c_ww_alt1_density.red.10 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.9)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) 
+
+ranch_suburban.params_alt1 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt1_density.red.10, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_alt1 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt1, times = times, name = "Reduce wild density by 10%")
+
+#2. 25% density reduction
+c_ww_alt2_density.red.25 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+
+ranch_suburban.params_alt2 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt2_density.red.25, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_alt2 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt2, times = times, name = "Reduce wild density by 25%")
+
+#3. Eliminate baiting
+c_ww_alt3_no.baiting <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)
+
+ranch_suburban.params_alt3 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_alt3 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt3, times = times, name = "Eliminate baiting")
+
+#4. Pause research (assuming random 1-50% of human-wild deer interaction)
+c_hw_alt4_pause.research <- c_hw_suburban*runif(nsamples, min = 0.5, max = 0.99) #reduce human deer proximity rate in the wild up to 50%
+
+ranch_suburban.params_alt4 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_alt4_pause.research, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_alt4 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt4, times = times, name = "Pause Research")
+
+#5. Require PPE for humans in wild settings
+nu_aero_deer_human_wild_alt5_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_suburban/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+ranch_suburban.params_alt5 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_alt5 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt5, times = times, name = "PPE, Wild")
+
+#6. Require PPE for humans in captive settings
+nu_aero_deer_human_capt_alt6_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_ranch/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+ranch_suburban.params_alt6 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_alt6 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt6, times = times, name = "PPE, Captive")
+
+#7. Require PPE for humans in wild and captive settings (use derived parameters from 5 and 6)
+
+ranch_suburban.params_alt7 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_suburban_alt7 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt7, times = times, name = "PPE, Both")
+
+#8. Vaccinate captive deer (start with r_captive = 1)
+ranch_suburban.inits_alt8 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+ranch_suburban.inits_alt8.steady <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = TRUE)
+
+proj_ranch_suburban_alt8 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits_alt8, initial_compartments_steady = ranch_suburban.inits_alt8.steady,params = ranch_suburban.params, times = times, name = "Vaccinate captive deer")
+
+#9. Vaccinate and boost captive deer (start with r_captive = 1)
+ranch_suburban.inits_alt9 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+ranch_suburban.inits_alt9.steady <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = TRUE)
+
+boost_alt9 <- rep(0.9,nsamples)
+
+ranch_suburban.params_alt9 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+
+proj_ranch_suburban_alt9 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits_alt9, initial_compartments_steady = ranch_suburban.inits_alt9.steady, params = ranch_suburban.params_alt9, times = times, name = "Vaccinate and boost captive deer")
+
+#10. Double fence captive facilities
+c_cw_alt10 <- rep(0, nsamples)
+
+ranch_suburban.params_alt10 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw_alt10, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_ranch_suburban_alt10 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt10, times = times, name = "Double-fence captive facilities")
+
+#11. Restrict human interaction (using proportional reduction from suburban to rural)
+human_restrictions <- (get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") / 120)/(get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") / 120)
+
+ranch_suburban.params_alt11 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban*human_restrictions, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_ranch_suburban_alt11 <- run(iter = nsamples, initial_compartments = ranch_suburban.inits.fall, initial_compartments_steady = ranch_suburban.inits.steady, params = ranch_suburban.params_alt11, times = times, name = "Restrict human interactions")
+
+#12. Improve indoor facility air exchange (does not apply to outdoor ranch facilities)
+
+proj_ranch_suburban <- rbind(proj_ranch_suburban_null, proj_ranch_suburban_alt1, proj_ranch_suburban_alt2, proj_ranch_suburban_alt3, proj_ranch_suburban_alt4, proj_ranch_suburban_alt5, proj_ranch_suburban_alt6, proj_ranch_suburban_alt7, proj_ranch_suburban_alt8, proj_ranch_suburban_alt9, proj_ranch_suburban_alt10, proj_ranch_suburban_alt11)
+```
+
+```{r}
+persist.threshold <- 0.001
+
+proj_ranch_suburban %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_ranch_suburban_df
+
+proj_ranch_suburban %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Outdoor ranch and suburban deer",nrow(.)), Alternative = c(rep(unique(proj_ranch_suburban$Context)[1],length(times)*nsamples),rep(unique(proj_ranch_suburban$Context)[2],length(times)*nsamples), rep(unique(proj_ranch_suburban$Context)[3],length(times)*nsamples),rep(unique(proj_ranch_suburban$Context)[4],length(times)*nsamples), rep(unique(proj_ranch_suburban$Context)[5],length(times)*nsamples), rep(unique(proj_ranch_suburban$Context)[6],length(times)*nsamples), rep(unique(proj_ranch_suburban$Context)[7],length(times)*nsamples),rep(unique(proj_ranch_suburban$Context)[8],length(times)*nsamples),rep(unique(proj_ranch_suburban$Context)[9],length(times)*nsamples),rep(unique(proj_ranch_suburban$Context)[10],length(times)*nsamples),rep(unique(proj_ranch_suburban$Context)[11],length(times)*nsamples),rep(unique(proj_ranch_suburban$Context)[12],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+   merge(.,Persist_ranch_suburban_df, by = "run_id")-> alternatives_for_ranch_suburban_complex
+```
+
+## Combined system of outdoor ranch facilities and wild deer in a rural setting
+
+```{r}
+ranch_rural.inits.fall <- initial_compartments(draws = nsamples)
+ranch_rural.inits.steady <- initial_compartments(draws = nsamples, steady = TRUE)
+
+ranch_rural.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_null <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params, times = times, name = "Baseline")
+
+#Alternatives
+#1. 10% density reduction
+c_ww_alt1_density.red.10 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.9)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) 
+
+ranch_rural.params_alt1 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt1_density.red.10, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_alt1 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt1, times = times, name = "Reduce wild density by 10%")
+
+#2. 25% density reduction
+c_ww_alt2_density.red.25 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+
+ranch_rural.params_alt2 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt2_density.red.25, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_alt2 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt2, times = times, name = "Reduce wild density by 25%")
+
+#3. Eliminate baiting
+c_ww_alt3_no.baiting <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)
+
+ranch_rural.params_alt3 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_alt3 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt3, times = times, name = "Eliminate baiting")
+
+#4. Pause research (assuming random 1-50% of human-wild deer interaction)
+c_hw_alt4_pause.research <- c_hw_rural*runif(nsamples, min = 0.5, max = 0.99) #reduce human deer proximity rate in the wild up to 50%
+
+ranch_rural.params_alt4 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_alt4_pause.research, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_alt4 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt4, times = times, name = "Pause Research")
+
+#5. Require PPE for humans in wild settings
+nu_aero_deer_human_wild_alt5_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_rural/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+ranch_rural.params_alt5 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_alt5 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt5, times = times, name = "PPE, Wild")
+
+#6. Require PPE for humans in captive settings
+nu_aero_deer_human_capt_alt6_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_ranch/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+ranch_rural.params_alt6 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_alt6 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt6, times = times, name = "PPE, Captive")
+
+#7. Require PPE for humans in wild and captive settings (use derived parameters from 5 and 6)
+
+ranch_rural.params_alt7 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_ranch_rural_alt7 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt7, times = times, name = "PPE, Both")
+
+#8. Vaccinate captive deer (start with r_captive = 1)
+ranch_rural.inits_alt8 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+ranch_rural.inits_alt8_steady <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = T)
+
+proj_ranch_rural_alt8 <- run(iter = nsamples, initial_compartments = ranch_rural.inits_alt8, initial_compartments_steady = ranch_rural.inits_alt8_steady, params = ranch_rural.params, times = times, name = "Vaccinate captive deer")
+
+#9. Vaccinate and boost captive deer (start with r_captive = 1)
+ranch_rural.inits_alt9 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+ranch_rural.inits_alt9_steady <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = T)
+
+
+boost_alt9 <- rep(0.9,nsamples)
+
+ranch_rural.params_alt9 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+
+proj_ranch_rural_alt9 <- run(iter = nsamples, initial_compartments = ranch_rural.inits_alt9, initial_compartments_steady = ranch_rural.inits_alt9_steady, params = ranch_rural.params_alt9, times = times, name = "Vaccinate and boost captive deer")
+
+#10. Double fence captive facilities
+c_cw_alt10 <- rep(0, nsamples)
+
+ranch_rural.params_alt10 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw_alt10, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_ranch_rural_alt10 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt10, times = times, name = "Double-fence captive facilities")
+
+#11. Restrict human interaction (using proportional reduction from suburban to rural)
+human_restrictions <- (get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") / 120)/(get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") / 120)
+
+ranch_rural.params_alt11 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural*human_restrictions, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_ranch_rural_alt11 <- run(iter = nsamples, initial_compartments = ranch_rural.inits.fall, initial_compartments_steady = ranch_rural.inits.steady, params = ranch_rural.params_alt11, times = times, name = "Restrict human interactions")
+
+#12. Improve indoor facility air exchange (does not apply to outdoor ranch facilities)
+
+proj_ranch_rural <- rbind(proj_ranch_rural_null, proj_ranch_rural_alt1, proj_ranch_rural_alt2, proj_ranch_rural_alt3, proj_ranch_rural_alt4, proj_ranch_rural_alt5, proj_ranch_rural_alt6, proj_ranch_rural_alt7, proj_ranch_rural_alt8, proj_ranch_rural_alt9, proj_ranch_rural_alt10, proj_ranch_rural_alt11)
+```
+
+```{r}
+persist.threshold <- 0.001
+
+proj_ranch_rural %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_ranch_rural_df
+
+proj_ranch_rural %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Outdoor ranch and rural deer",nrow(.)), Alternative = c(rep(unique(proj_ranch_rural$Context)[1],length(times)*nsamples),rep(unique(proj_ranch_rural$Context)[2],length(times)*nsamples), rep(unique(proj_ranch_rural$Context)[3],length(times)*nsamples),rep(unique(proj_ranch_rural$Context)[4],length(times)*nsamples), rep(unique(proj_ranch_rural$Context)[5],length(times)*nsamples), rep(unique(proj_ranch_rural$Context)[6],length(times)*nsamples), rep(unique(proj_ranch_rural$Context)[7],length(times)*nsamples),rep(unique(proj_ranch_rural$Context)[8],length(times)*nsamples),rep(unique(proj_ranch_rural$Context)[9],length(times)*nsamples),rep(unique(proj_ranch_rural$Context)[10],length(times)*nsamples),rep(unique(proj_ranch_rural$Context)[11],length(times)*nsamples),rep(unique(proj_ranch_rural$Context)[12],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+   merge(.,Persist_ranch_rural_df, by = "run_id")-> alternatives_for_ranch_rural_complex
+```
+
+##Combined system of intensive captive facilities and wild deer in a suburban setting
+
+```{r}
+intensive_suburban.inits.fall <- initial_compartments(draws = nsamples)
+intensive_suburban.inits.steady <- initial_compartments(draws = nsamples, steady = TRUE)
+
+
+intensive_suburban.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_null <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params, times = times, name = "Baseline")
+
+#Alternatives
+#1. 10% density reduction
+c_ww_alt1_density.red.10 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.9)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) 
+
+intensive_suburban.params_alt1 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt1_density.red.10, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_alt1 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt1, times = times, name = "Reduce wild density by 10%")
+
+#2. 25% density reduction
+c_ww_alt2_density.red.25 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+
+intensive_suburban.params_alt2 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt2_density.red.25, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_alt2 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt2, times = times, name = "Reduce wild density by 25%")
+
+#3. Eliminate baiting
+c_ww_alt3_no.baiting <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)
+
+intensive_suburban.params_alt3 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_alt3 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt3, times = times, name = "Eliminate baiting")
+
+#4. Pause research (assuming random 1-50% of human-wild deer interaction)
+c_hw_alt4_pause.research <- c_hw_suburban*runif(nsamples, min = 0.5, max = 0.99) #reduce human deer proximity rate in the wild up to 50%
+
+intensive_suburban.params_alt4 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_alt4_pause.research, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_alt4 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt4, times = times, name = "Pause Research")
+
+#5. Require PPE for humans in wild settings
+nu_aero_deer_human_wild_alt5_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_suburban/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+intensive_suburban.params_alt5 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_alt5 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt5, times = times, name = "PPE, Wild")
+
+#6. Require PPE for humans in captive settings
+nu_aero_deer_human_capt_alt6_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_intensive/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+intensive_suburban.params_alt6 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_alt6 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt6, times = times, name = "PPE, Captive")
+
+#7. Require PPE for humans in wild and captive settings (use derived parameters from 5 and 6)
+
+intensive_suburban.params_alt7 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_suburban_alt7 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params =  intensive_suburban.params_alt7, times = times, name = "PPE, Both")
+
+#8. Vaccinate captive deer (start with r_captive = 1)
+intensive_suburban.inits_alt8.fall <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+intensive_suburban.inits_alt8.steady <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = TRUE)
+
+proj_intensive_suburban_alt8 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits_alt8.fall, initial_compartments_steady = intensive_suburban.inits_alt8.steady, params = intensive_suburban.params, times = times, name = "Vaccinate captive deer")
+
+#9. Vaccinate and boost captive deer (start with r_captive = 1)
+intensive_suburban.inits_alt9.fall <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+intensive_suburban.inits_alt9.steady <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = TRUE)
+
+boost_alt9 <- rep(0.9,nsamples)
+
+intensive_suburban.params_alt9 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+
+proj_intensive_suburban_alt9 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits_alt9.fall, initial_compartments_steady = intensive_suburban.inits_alt9.steady, params = intensive_suburban.params_alt9, times = times, name = "Vaccinate and boost captive deer")
+
+#10. Double fence captive facilities
+c_cw_alt10 <- rep(0, nsamples)
+
+intensive_suburban.params_alt10 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw_alt10, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_intensive_suburban_alt10 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt10, times = times, name = "Double-fence captive facilities")
+
+#11. Restrict human interaction (using proportional reduction from suburban to rural)
+human_restrictions <- (get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") / 120)/(get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") / 120)
+
+intensive_suburban.params_alt11 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban*human_restrictions, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_intensive_suburban_alt11 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt11, times = times, name = "Restrict human interactions")
+
+#12. Improve indoor facility air exchange
+nu_aero_deer_human_intensive_alt12 <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_intensive/60, r = r_deer, nsamples = nsamples)
+
+nu_aero_deer_deer_intensive_alt12 <- calc_nu_aero(C_nu = C_nu_deer, t_contact = t_contact_deer_deer_null/60, r = r_deer, nsamples = nsamples)
+
+intensive_suburban.params_alt12 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_suburban, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive_alt12, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive_alt12, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_intensive_suburban_alt12 <- run(iter = nsamples, initial_compartments = intensive_suburban.inits.fall, initial_compartments_steady = intensive_suburban.inits.steady, params = intensive_suburban.params_alt12, times = times, name = "Improve indoor facility air quality")
+
+proj_intensive_suburban <- rbind(proj_intensive_suburban_null, proj_intensive_suburban_alt1, proj_intensive_suburban_alt2, proj_intensive_suburban_alt3, proj_intensive_suburban_alt4, proj_intensive_suburban_alt5, proj_intensive_suburban_alt6, proj_intensive_suburban_alt7, proj_intensive_suburban_alt8, proj_intensive_suburban_alt9, proj_intensive_suburban_alt10, proj_intensive_suburban_alt11, proj_intensive_suburban_alt12)
+```
+
+```{r}
+persist.threshold <- 0.001
+
+proj_intensive_suburban %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_intensive_suburban_df
+
+
+proj_intensive_suburban %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Intensive facility and suburban deer",nrow(.)), Alternative = c(rep(unique(proj_intensive_suburban$Context)[1],length(times)*nsamples),rep(unique(proj_intensive_suburban$Context)[2],length(times)*nsamples), rep(unique(proj_intensive_suburban$Context)[3],length(times)*nsamples),rep(unique(proj_intensive_suburban$Context)[4],length(times)*nsamples), rep(unique(proj_intensive_suburban$Context)[5],length(times)*nsamples), rep(unique(proj_intensive_suburban$Context)[6],length(times)*nsamples), rep(unique(proj_intensive_suburban$Context)[7],length(times)*nsamples),rep(unique(proj_intensive_suburban$Context)[8],length(times)*nsamples),rep(unique(proj_intensive_suburban$Context)[9],length(times)*nsamples),rep(unique(proj_intensive_suburban$Context)[10],length(times)*nsamples),rep(unique(proj_intensive_suburban$Context)[11],length(times)*nsamples),rep(unique(proj_intensive_suburban$Context)[12],length(times)*nsamples), rep(unique(proj_intensive_suburban$Context)[13],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+  merge(.,Persist_intensive_suburban_df, by = "run_id") -> alternatives_for_intensive_suburban_complex
+```
+
+##Combined system of intensive captive facilities and wild deer in a rural setting
+```{r}
+intensive_rural.inits.fall <- initial_compartments(draws = nsamples)
+intensive_rural.inits.steady <- initial_compartments(draws = nsamples, steady = TRUE)
+
+
+intensive_rural.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_null <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params, times = times, name = "Baseline")
+
+#Alternatives
+#1. 10% density reduction
+c_ww_alt1_density.red.10 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.9)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) 
+
+intensive_rural.params_alt1 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt1_density.red.10, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_alt1 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt1, times = times, name = "Reduce wild density by 10%")
+
+#2. 25% density reduction
+c_ww_alt2_density.red.25 <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+
+intensive_rural.params_alt2 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt2_density.red.25, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_alt2 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt2, times = times, name = "Reduce wild density by 25%")
+
+#3. Eliminate baiting
+c_ww_alt3_no.baiting <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)
+
+intensive_rural.params_alt3 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_alt3 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt3, times = times, name = "Eliminate baiting")
+
+#4. Pause research (assuming random 1-50% of human-wild deer interaction)
+c_hw_alt4_pause.research <- c_hw_rural*runif(nsamples, min = 0.5, max = 0.99) #reduce human deer proximity rate in the wild up to 50%
+
+intensive_rural.params_alt4 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_alt4_pause.research, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_alt4 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt4, times = times, name = "Pause Research")
+
+#5. Require PPE for humans in wild settings
+nu_aero_deer_human_wild_alt5_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_rural/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+intensive_rural.params_alt5 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_alt5 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt5, times = times, name = "PPE, Wild")
+
+#6. Require PPE for humans in captive settings
+nu_aero_deer_human_capt_alt6_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_intensive/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+intensive_rural.params_alt6 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_alt6 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt6, times = times, name = "PPE, Captive")
+
+#7. Require PPE for humans in wild and captive settings (use derived parameters from 5 and 6)
+
+intensive_rural.params_alt7 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+proj_intensive_rural_alt7 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt7, times = times, name = "PPE, Both")
+
+#8. Vaccinate captive deer (start with r_captive = 1)
+intensive_rural.inits.fall_alt8 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+intensive_rural.inits.steady_alt8 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = TRUE)
+
+proj_intensive_rural_alt8 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall_alt8, initial_compartments_steady = intensive_rural.inits.steady_alt8, params = intensive_rural.params, times = times, name = "Vaccinate captive deer")
+
+#9. Vaccinate and boost captive deer (start with r_captive = 1)
+intensive_rural.inits.fall_alt9 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+intensive_rural.inits.steady_alt9 <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = TRUE)
+
+boost_alt9 <- rep(0.9,nsamples)
+
+intensive_rural.params_alt9 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+
+proj_intensive_rural_alt9 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall_alt9, initial_compartments_steady = intensive_rural.inits.steady_alt9, params = intensive_rural.params_alt9, times = times, name = "Vaccinate and boost captive deer")
+
+#10. Double fence captive facilities
+c_cw_alt10 <- rep(0, nsamples)
+
+intensive_rural.params_alt10 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw_alt10, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_intensive_rural_alt10 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt10, times = times, name = "Double-fence captive facilities")
+
+#11. Restrict human interaction (using proportional reduction from suburban to rural)
+human_restrictions <- (get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") / 120)/(get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") / 120)
+
+intensive_rural.params_alt11 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural*human_restrictions, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_intensive_rural_alt11 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt11, times = times, name = "Restrict human interactions")
+
+#12. Improve indoor facility air exchange
+nu_aero_deer_human_intensive_alt12 <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_intensive/60, r = r_deer, nsamples = nsamples)
+
+nu_aero_deer_deer_intensive_alt12 <- calc_nu_aero(C_nu = C_nu_deer, t_contact = t_contact_deer_deer_null/60, r = r_deer, nsamples = nsamples)
+
+intensive_rural.params_alt12 <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_rural, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive_alt12, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive_alt12, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0,nsamples))
+
+
+proj_intensive_rural_alt12 <- run(iter = nsamples, initial_compartments = intensive_rural.inits.fall, initial_compartments_steady = intensive_rural.inits.steady, params = intensive_rural.params_alt12, times = times, name = "Improve indoor facility air quality")
+
+proj_intensive_rural <- rbind(proj_intensive_rural_null, proj_intensive_rural_alt1, proj_intensive_rural_alt2, proj_intensive_rural_alt3, proj_intensive_rural_alt4, proj_intensive_rural_alt5, proj_intensive_rural_alt6, proj_intensive_rural_alt7, proj_intensive_rural_alt8, proj_intensive_rural_alt9, proj_intensive_rural_alt10, proj_intensive_rural_alt11, proj_intensive_rural_alt12)
+```
+
+```{r}
+persist.threshold <- 0.001
+
+proj_intensive_rural %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_intensive_rural_df
+
+proj_intensive_rural %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Intensive facility and rural deer",nrow(.)), Alternative = c(rep(unique(proj_intensive_rural$Context)[1],length(times)*nsamples),rep(unique(proj_intensive_rural$Context)[2],length(times)*nsamples), rep(unique(proj_intensive_rural$Context)[3],length(times)*nsamples),rep(unique(proj_intensive_rural$Context)[4],length(times)*nsamples), rep(unique(proj_intensive_rural$Context)[5],length(times)*nsamples), rep(unique(proj_intensive_rural$Context)[6],length(times)*nsamples), rep(unique(proj_intensive_rural$Context)[7],length(times)*nsamples),rep(unique(proj_intensive_rural$Context)[8],length(times)*nsamples),rep(unique(proj_intensive_rural$Context)[9],length(times)*nsamples),rep(unique(proj_intensive_rural$Context)[10],length(times)*nsamples),rep(unique(proj_intensive_rural$Context)[11],length(times)*nsamples),rep(unique(proj_intensive_rural$Context)[12],length(times)*nsamples), rep(unique(proj_intensive_rural$Context)[13],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+  merge(.,Persist_intensive_rural_df, by = "run_id") -> alternatives_for_intensive_rural_complex
+```
+
+Combine and summarize results
+```{r}
+alternatives_across_systems <- rbind(alternatives_for_ranch_suburban_complex, alternatives_for_ranch_rural_complex, alternatives_for_intensive_suburban_complex, alternatives_for_intensive_rural_complex)
+
+alternatives_across_systems %>% 
+   group_by(., Complex, Alternative) %>% 
+   summarize(., Wild_Cumulative = median(cumulativeWild), Captive_Cumulative = median(cumulativeCaptive))
+
+```
+
+##Cross-sector action!
+
+
+```{r}
+#Vaccinate..
+cross_sector.inits.fall <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1)
+cross_sector.inits.steady <- initial_compartments(draws = nsamples, S_captive_prop = 0, R_captive_prop = 1, steady = TRUE)
+
+#...and boost
+boost_alt9 <- rep(0.9,nsamples)
+
+#PPE for all interactions
+nu_aero_deer_human_capt_alt6_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_ranch/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+nu_aero_deer_human_wild_alt5_PPE <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, t_contact = t_contact_deer_human_rural/60, r = r_deer, V_d = 0.009*runif(nsamples, min = (1-0.994), max = (1-0.509)), nsamples = nsamples)
+
+#Eliminate baiting
+c_ww_alt3_no.baiting <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild*0.75)
+
+#Ranch and suburban complex
+ranch_suburban_cross_sector.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+proj_ranch_suburban_cross_sector <- run(iter = nsamples, initial_compartments = cross_sector.inits.fall, initial_compartments_steady = cross_sector.inits.steady, params =  ranch_suburban_cross_sector.params, times = times, name = "Cross-Sector Collaboration: Vaccinate and Boost, PPE for all interactions, and eliminating baiting")
+
+proj_ranch_suburban_cross_sector %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_ranch_suburban_cross_sector_df
+
+proj_ranch_suburban_cross_sector %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Ranch and suburban deer",nrow(.)), Alternative = c(rep(unique(proj_ranch_suburban_cross_sector$Context)[1],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+   merge(.,Persist_ranch_suburban_cross_sector_df, by = "run_id") -> cross_sector_for_ranch_suburban_complex
+
+#Ranch and rural complex
+ranch_rural_cross_sector.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_ranch,
+                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+proj_ranch_rural_cross_sector <- run(iter = nsamples, initial_compartments = cross_sector.inits.fall, initial_compartments_steady = cross_sector.inits.steady, params = ranch_rural_cross_sector.params, times = times, name = "Cross-Sector Collaboration: Vaccinate and Boost, PPE for all interactions, and eliminating baiting")
+
+proj_ranch_rural_cross_sector %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_ranch_rural_cross_sector_df
+
+proj_ranch_rural_cross_sector %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Ranch and rural deer",nrow(.)), Alternative = c(rep(unique(proj_ranch_rural_cross_sector$Context)[1],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+  merge(.,Persist_ranch_rural_cross_sector_df, by = "run_id")-> cross_sector_for_ranch_rural_complex
+
+#Intensive facility and suburban complex
+intensive_suburban_cross_sector.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+proj_intensive_suburban_cross_sector <- run(iter = nsamples, initial_compartments = cross_sector.inits.fall, initial_compartments_steady = cross_sector.inits.steady, params = intensive_suburban_cross_sector.params, times = times, name = "Cross-Sector Collaboration: Vaccinate and Boost, PPE for all interactions, and eliminating baiting")
+
+proj_intensive_suburban_cross_sector %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_intensive_suburban_cross_sector_df
+
+proj_intensive_suburban_cross_sector %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Intensive facility and suburban deer",nrow(.)), Alternative = c(rep(unique(proj_intensive_suburban_cross_sector$Context)[1],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+   merge(.,Persist_intensive_suburban_cross_sector_df, by = "run_id")-> cross_sector_for_intensive_suburban_complex
+
+#Intensive facility and rural complex
+intensive_rural_cross_sector.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            c_ww = c_ww_alt3_no.baiting, c_cw = c_cw, c_cc = c_cc_intensive,
+                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
+                            nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_alt5_PPE, nu_aero_deer_human_capt = nu_aero_deer_human_capt_alt6_PPE, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = boost_alt9)
+
+proj_intensive_rural_cross_sector <- run(iter = nsamples, initial_compartments = cross_sector.inits.fall, initial_compartments_steady = cross_sector.inits.steady, params = intensive_rural_cross_sector.params, times = times, name = "Cross-Sector Collaboration: Vaccinate and Boost, PPE for all interactions, and eliminating baiting")
+
+proj_intensive_rural_cross_sector %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., persistWild = I_wild > persist.threshold, persistCaptive = I_captive > persist.threshold) %>%
+  select(., run_id, persistWild, persistCaptive) %>%
+  arrange(., run_id) -> Persist_intensive_rural_cross_sector_df
+
+proj_intensive_rural_cross_sector %>%
+  mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+  pull(ode_df) %>%
+  list_rbind(names_to = "run_id") %>% 
+  mutate(., Complex = rep("Intensive facility and rural deer",nrow(.)), Alternative = c(rep(unique(proj_intensive_rural_cross_sector$Context)[1],length(times)*nsamples))) %>% 
+  group_by(Complex,Alternative, run_id) %>% 
+  summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
+            cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
+   merge(.,Persist_intensive_rural_cross_sector_df, by = "run_id")-> cross_sector_for_intensive_rural_complex
+
+
+cross_sector_results <- rbind(cross_sector_for_ranch_suburban_complex, cross_sector_for_ranch_rural_complex, cross_sector_for_intensive_suburban_complex, cross_sector_for_intensive_rural_complex)
+
+cross_sector_results %>% 
+   group_by(Complex) %>% 
+   summarize(., prevalenceWild = median(meanWild), prevalenceCaptive = median(meanCaptive), cumulativeWild = median(cumulativeWild), cumulativeCaptive = median(cumulativeCaptive), meanPersistWild = (sum(persistWild)/nsamples), meanPersistCaptive= (sum(persistCaptive)/nsamples))
+
+```

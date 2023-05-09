@@ -18,10 +18,10 @@
 #' @examples
 #' initial_compartments(S_wild_prop = 0, draws = 5) #Starting conditions for a simulation focused only on captive deer
 #' initial_compartments(draws = 5) #Starting conditions for a simulation of introduction and spread in both wild and captive deer.
-initial_compartments <- function(S_wild_prop = 1, I_wild_prop = 0, R_wild_prop = 0, S_captive_prop = 1, I_captive_prop = 0, R_captive_prop = 0, draws = NULL)
+initial_compartments <- function(S_wild_prop = 1, I_wild_prop = 0, R_wild_prop = 0, S_captive_prop = 1, I_captive_prop = 0, R_captive_prop = 0, draws = NULL, steady = FALSE)
 {
    if(is.null(draws)) {stop("Specify number of iterations (draws)")}
-   list(
+   if(steady == FALSE) {list(
    S_wild = rep(S_wild_prop, draws),
    I_wild = rep(I_wild_prop, draws),
    R_wild = rep(R_wild_prop, draws),
@@ -30,3 +30,13 @@ initial_compartments <- function(S_wild_prop = 1, I_wild_prop = 0, R_wild_prop =
    I_captive = rep(I_captive_prop, draws),
    R_captive = rep(R_captive_prop, draws),
    I_captive_cumulative = rep(0, draws))}
+
+   else {list(
+   S_wild = rep(S_wild_prop, draws),
+   I_wild = rep(I_wild_prop, draws),
+   R_wild = rep(R_wild_prop, draws),
+   S_captive = rep(S_captive_prop, draws),
+   I_captive = rep(I_captive_prop, draws),
+   R_captive = rep(R_captive_prop, draws))}
+}
+

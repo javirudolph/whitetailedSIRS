@@ -11,7 +11,8 @@ initial_compartments(
   S_captive_prop = 1,
   I_captive_prop = 0,
   R_captive_prop = 0,
-  draws = NULL
+  draws = NULL,
+  steady = FALSE
 )
 }
 \arguments{

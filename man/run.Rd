@@ -6,8 +6,9 @@
 \usage{
 run(
   iter = NULL,
-  initial_compartments = example_inits,
-  parameters = NULL,
+  initial_compartments = NULL,
+  initial_compartments_steady = NULL,
+  params = NULL,
   times = NULL,
   name = NULL
 )
@@ -17,11 +18,11 @@ run(
 
 \item{initial_compartments}{Initial compartment sizes (proportions, stored as list)}
 
-\item{parameters}{SIRS parameters, stored as a list}
-
 \item{times}{Length of projection (days)}
 
 \item{name}{Name of context being simulated}
+
+\item{parameters}{SIRS parameters, stored as a list}
 }
 \value{
 #List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment.

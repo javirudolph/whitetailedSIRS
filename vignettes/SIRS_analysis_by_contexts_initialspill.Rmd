@@ -1,5 +1,5 @@
 ---
-title: "SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover (in development)"
+title: "SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover"
 subtitle: "Analysis referenced in Rosenblatt et al. 2023"
 output: rmarkdown::html_vignette
 vignette: >
@@ -29,7 +29,7 @@ After loading packages, we set several parameters that will remain constant acro
 ```{r base_simulations}
 set.seed(23)
 nsamples <- 200
-I_human_null <- 0.00
+I_human_null <- 0
 times <- seq(0, 120, by = 1)
 ```
 
@@ -107,14 +107,15 @@ alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param =
 #### Compile parameters and run SIRS ODE solver for context
 Now that all parameters have been defined for an SIRS model, we run three functions that define starting conditions, arrange the parameters defined above and calculated derived parameters, and run the ODE solver.
 ```{r Ranch Compiler}
-captive.inits <- initial_compartments(S_wild_prop = 0, I_captive_prop = 0.0001, S_captive_prop = 0.9999, draws = nsamples)
+captive.inits.fall <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples)
+captive.inits.steady <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples, steady = TRUE)
 
 ranch.params <- alternative(alpha_immunity = alpha_immunity_null,
                             c_ww = c_ww_ranch, c_cw = c_cw_null,c_cc = c_cc_ranch,
                             c_hw = c_hw_ranch, c_hc = c_hc_ranch,
                             nu_aero_deer_deer_wild = nu_aero_deer_deer_wild_null, nu_aero_deer_deer_captive = nu_aero_deer_deer_ranch, nu_aero_deer_human_wild = nu_aero_deer_human_wild_null, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
-proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits, parameters = ranch.params, times = times, name = "Outdoor ranch")
+proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = ranch.params, times = times, name = "Outdoor ranch")
 ```
 
 If we look at the proj.ranch object, we can see the items stored in the first list item, including the iteration identifier (run_id), initial compartment sizes (inits), SIRS parameters (params), and the start and end of the projected infection in the ranch context.
@@ -124,6 +125,7 @@ proj.ranch$inits[1]
 proj.ranch$params[1]
 head(proj.ranch$ode_proj[[1]])
 tail(proj.ranch$ode_proj[[1]])
+proj.ranch$steady_state[[1]]
 ```
 
 We can now continue to run the ODE solver for other contexts. Only new parameters will be defined for these other context; several will be referenced from the ranch context above.
@@ -153,9 +155,8 @@ intensive.params <- alternative(
    nu_aero_deer_deer_wild = nu_aero_deer_human_wild_null, nu_aero_deer_deer_captive =  nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_wild_null, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, nu_dc_deer_deer = nu_dc_deer_deer_null,
    alpha_immunity = alpha_immunity_null, sigma_dc = sigma_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
-proj.intensive <- run(iter = nsamples, initial_compartments = captive.inits, parameters = intensive.params, times = times, name = "Intensive facility")
+proj.intensive <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = intensive.params, times = times, name = "Intensive facility")
 ```
-
 
 ### Wild deer in rural conditions
 In this context, wild deer are free-ranging in an area with a rural human density (3.1 humans/km2). We assumed that deer in this context were subject to regulated hunting either using still-hunting, or ground blind or treestand approaches. We also assumed that baiting and backyard feeding were illegal but may still occur. We again used Habib et al.’s (2011) proximity rate model. We estimated the duration of deer-deer proximity events, and rates and duration of human-deer proximity events using expert elicitation.
@@ -180,11 +181,12 @@ nu_aero_deer_human_rural <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human,
 
 nu_aero_deer_human_captive_null <- rep(0, nsamples)
 
-wild.inits <- initial_compartments(S_captive_prop = 0, I_wild_prop = 0.0001, S_wild_prop = 0.9999, draws = nsamples)
+wild.inits.fall <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples)
+wild.inits.steady <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples, steady = TRUE)
 
 rural.params <- alternative(c_ww = c_ww_rural, c_cw = c_cw_null, c_cc = c_cc_rural, c_hw = c_hw_rural, c_hc = c_hc_rural, nu_aero_deer_deer_wild = nu_aero_deer_deer_rural, nu_aero_deer_deer_captive = nu_aero_deer_deer_captive_null, nu_aero_deer_human_wild = nu_aero_deer_human_rural,  nu_aero_deer_human_capt = nu_aero_deer_human_captive_null, nu_dc_deer_deer = nu_dc_deer_deer_null,alpha_immunity = alpha_immunity_null, sigma_dc = sigma_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
-proj.rural <- run(iter = nsamples, initial_compartments = wild.inits, parameters = rural.params, times = times, name = "Wild, rural")
+proj.rural <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady ,params = rural.params, times = times, name = "Wild, rural")
 ```
 
 
@@ -209,11 +211,11 @@ nu_aero_deer_human_suburban <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human,
 
 suburban.params <- alternative(c_ww = c_ww_suburban, c_cw = c_cw_null, c_cc = c_cc_suburban, c_hw = c_hw_suburban, c_hc = c_hc_suburban, nu_aero_deer_deer_wild = nu_aero_deer_deer_suburban, nu_aero_deer_deer_captive = nu_aero_deer_deer_captive_null, nu_aero_deer_human_wild = nu_aero_deer_human_suburban,  nu_aero_deer_human_capt = nu_aero_deer_human_captive_null, nu_dc_deer_deer = nu_dc_deer_deer_null,alpha_immunity = alpha_immunity_null, sigma_dc = sigma_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
-proj.suburban <- run(iter = nsamples, initial_compartments = wild.inits, parameters = suburban.params, times = times, name = "Wild, suburban")
+proj.suburban <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady, params = suburban.params, times = times, name = "Wild, suburban")
 ```
 
 ## Compile dataset across all contexts
-Finally, we are going to summarize four measurements for each iteration to summarize across contexts. First, we combine the projections for each context into one list object, and summarize the average prevalence (Infected) and SARS-CoV-2 persists to the end of the 120-day projection (Persists). We save this resulting summary dataframe for future use.
+Finally, we are going to summarize four measurements for each iteration to summarize across contexts. First, we combine the projections for each context into one list object, and summarize the average prevalence (Infected) and cumulative infections (Cumulative_infections). We save this resulting summary dataframe for future use.
 
 ```{r, message=FALSE}
 sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
@@ -224,13 +226,32 @@ sirs_results_contexts %>%
   list_rbind(names_to = "run_id") %>% 
   mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[4],length(times)*nsamples))) %>% 
   group_by(Context, run_id) %>% 
-  summarize(Wild = mean(I_wild), Captive = mean(I_captive), Infected = Wild + Captive, Persist_wild = last(I_wild) >=0.0001, Persist_captive = last(I_captive) >=0.0001, Persist = as.logical(Persist_wild + Persist_captive)) %>% 
+   summarize(Wild = mean(I_wild), Captive = mean(I_captive), Prevalence = Wild + Captive, Cumulative_wild_infections = last(I_wild_cumulative), Cumulative_captive_infections = last(I_captive_cumulative), Cumulative_infections = sum(Cumulative_wild_infections,Cumulative_captive_infections)) %>% 
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
-   select(., -Wild, -Captive, -Persist_wild, -Persist_captive) %>% 
+   select(., -Wild, -Captive, -Cumulative_wild_infections, -Cumulative_captive_infections) %>% 
   group_by(.,Context) %>% 
-  arrange(., Context, run_id) -> Prev_Persist_df
+  arrange(., Context, run_id) -> Prev_cumulative_df
 
-head(Prev_Persist_df)
+head(Prev_cumulative_df)
+```
+Next, we will join information from the steady-state equilibrium, using a threshold value of 0.1% prevalence at equilibrium for persistence.
+```{r}
+
+persist.threshold <- 0.001
+
+sirs_results_contexts %>%
+  mutate(steady_sir = map(steady_state, "y"),
+         steady_sir = map(steady_sir, as_tibble_row)) %>%
+  pull(steady_sir) %>%
+  list_rbind(names_to = "run_id") %>%
+  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],nsamples),rep(unique(sirs_results_contexts$Context)[2],nsamples), rep(unique(sirs_results_contexts$Context)[3],nsamples),rep(unique(sirs_results_contexts$Context)[4],nsamples))) %>%
+  mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
+  mutate(., Persist.I_wild = I_wild > persist.threshold, Persist.I_captive = I_captive > persist.threshold, Persist = as.logical(Persist.I_wild + Persist.I_captive)) %>%
+  select(., run_id,Context, Persist) %>%
+  arrange(., Context, run_id) %>% 
+   merge(Prev_cumulative_df,.) -> Prev_cumulative_persist_df
+
+
 ```
 
 Next, we step through each context's parameters to estimate strength of introduction (quantified as force-of-infection) and spread (quantified as basic reproductive number R0). We then combine with the prevalence and persistence summary above to create the dataset that we will visualized in another vignette.
@@ -238,50 +259,42 @@ Next, we step through each context's parameters to estimate strength of introduc
 ranch.df <- list_cbind(map(ranch.params, as_data_frame))
 colnames(ranch.df) <-  names(ranch.params)
 ranch.df %>% 
-  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Outdoor ranch"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
-         FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
+  mutate(., run_id = min(Prev_cumulative_df[which(Prev_cumulative_df$Context=="Outdoor ranch"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
          Context = "Outdoor ranch", Setting = "Captive") %>% 
-  select(., run_id, Context,  Setting, r0, FOI) -> ranch.r0.FOI
+  select(., run_id, Context,  Setting, r0) -> ranch.r0
 
 intensive.df <- list_cbind(map(intensive.params, as_data_frame))
 colnames(intensive.df) <-  names(intensive.params)
 intensive.df %>% 
-  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Intensive facility"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
+  mutate(., run_id = min(Prev_cumulative_df[which(Prev_cumulative_df$Context=="Intensive facility"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
          FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
          Context = "Intensive facility", Setting = "Captive") %>% 
-  select(., run_id, Context,  Setting, r0, FOI) -> intensive.r0.FOI
+  select(., run_id, Context,  Setting, r0) -> intensive.r0
 
 rural.df <- list_cbind(map(rural.params, as_data_frame))
 colnames(rural.df) <-  names(rural.params)
 rural.df %>% 
-  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Wild, rural"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
+  mutate(., run_id = min(Prev_cumulative_df[which(Prev_cumulative_df$Context=="Wild, rural"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
          FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
          Context = "Wild, rural", Setting = "Wild") %>% 
-  select(., run_id, Context, Setting,  r0, FOI) -> rural.r0.FOI
+  select(., run_id, Context, Setting,  r0) -> rural.r0
 
 suburban.df <- list_cbind(map(suburban.params, as_data_frame))
 colnames(suburban.df) <-  names(suburban.params)
 suburban.df %>% 
-  mutate(., run_id = min(Prev_Persist_df[which(Prev_Persist_df$Context=="Wild, suburban"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
+  mutate(., run_id = min(Prev_cumulative_df[which(Prev_cumulative_df$Context=="Wild, suburban"),"run_id"])+0:(nsamples-1),r0 = unlist((beta_aero_ww+beta_aero_cc+beta_dc_ww+beta_dc_cc)/gamma_recov),
          FOI = unlist((beta_aero_hw+beta_aero_hc)*I_human),
          Context = "Wild, suburban", Setting = "Wild") %>% 
-  select(., run_id, Context, Setting, r0, FOI) -> suburban.r0.FOI
+  select(., run_id, Context, Setting, r0) -> suburban.r0
 
-r0.FOI <- rbind(ranch.r0.FOI,intensive.r0.FOI, rural.r0.FOI,suburban.r0.FOI)
+r0 <- rbind(ranch.r0,intensive.r0, rural.r0,suburban.r0)
 
 #Merge with average prevalence (step 1) and persistence (step 2)
-merge(r0.FOI,Prev_Persist_df[,c("run_id","Infected", "Persist")], by = "run_id", all.x = TRUE) %>% 
-  mutate(Context = factor(Context,  levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) -> df
+merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumulative_infections")], by = "run_id", all.x = TRUE) %>% 
+  mutate(Context = factor(Context,  levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) -> df_initial_infections_1_in_1000
 ```
 
-We will develop plots and tables of this results data frame. Here is a simple summary to end this vignette, with median spread (R0), probability introduction from humans (FOI, log10-transformed), average prevalence for the 120-day fall projection (Prevalence), and if there are any infections at the end of the 120-day fall projection (Persistence).
 ```{r}
-df %>% 
-  group_by(., Context) %>% 
-  reframe(., R0.Median = round(quantile(r0,probs = c(0.5)),2), FOI.Median = round(log10(quantile(FOI,probs = c(0.5))),2), Prevalence.Median = round(quantile(Infected, probs = c(0.5)),2), Persistence.Median = round(sum(Persist)/nsamples,2)) -> median.results
-
-median.results %>%
-  kbl() %>%
-  kable_paper("hover", full_width = F)
+initial_infection_results_1_in_1000 <- df_initial_infections_1_in_1000
 ```
 

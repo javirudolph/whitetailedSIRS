@@ -25,10 +25,9 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
-    <a class="dropdown-item" href="../articles/Connected_Systems_initialspill.html">SARS-CoV-2 introduction and spread in connected systems, with an initial spill (in development)</a>
-    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
+    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems (still being developed)</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover (in development)</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
     <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
     <a class="dropdown-item" href="../articles/default_projection.html">default_projection</a>
     <a class="dropdown-item" href="../articles/example_values.html">example_values</a>
@@ -125,21 +124,21 @@ otherwise specified in the <code>return_df</code> argument.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 15 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    parameter                                           mu    sd family my_sample</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Temporary Immunity                              4.72   0.626 log-n…  135.    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Wastewater Infections                          -<span style="color: #BB0000;">1.35</span>   1.49  log-n…    0.022<span style="text-decoration: underline;">1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Fomite Infections                              -<span style="color: #BB0000;">0.041</span><span style="color: #BB0000; text-decoration: underline;">4</span> 1.03  log-n…    0.687 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Viral Load                                      0.216  0.344 log-n…    1.62  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Dose-Response                                   0.277  0.272 log-n…    0.953 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Deer Proximity Duration (minutes)               1.55   1.27  log-n…    2.99  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Direct Contact Probability                     -<span style="color: #BB0000;">1.46</span>   0.708 logit…    0.210 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Proximity rate with baiting (17 events withou…  3.47   0.226 log-n…   30.1   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Deer-Human Proximity Rate, Rural (per 120 day… -<span style="color: #BB0000;">1.59</span>   1.70  log-n…    0.893 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Deer-Human Proximity Duration, Rural (minutes) -<span style="color: #BB0000;">0.355</span>  0.979 log-n…    3.13  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> Deer-Human Proximity Rate, Suburban (per 120 …  0.573  0.951 log-n…    3.79  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> Deer-Human Proximity Duration, Suburban (minu…  0.432  0.929 log-n…    1.90  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> Deer-Human Proximity Rate, Captive (per 120 d…  2.52   1.13  log-n…   53.0   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> Deer-Human Proximity Duration, Captive (minut…  1.79   1.15  log-n…   20.4   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> Deer-Deer Proximity Rate, Captive (per day)     3.47   0.913 log-n…    7.94  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Temporary Immunity                              4.72   0.626 log-n…   37.2   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Wastewater Infections                          -<span style="color: #BB0000;">1.35</span>   1.49  log-n…    0.083<span style="text-decoration: underline;">0</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Fomite Infections                              -<span style="color: #BB0000;">0.041</span><span style="color: #BB0000; text-decoration: underline;">4</span> 1.03  log-n…    4.84  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Viral Load                                      0.216  0.344 log-n…    1.49  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Dose-Response                                   0.277  0.272 log-n…    1.06  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Deer Proximity Duration (minutes)               1.55   1.27  log-n…   25.5   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Direct Contact Probability                     -<span style="color: #BB0000;">1.46</span>   0.708 logit…    0.116 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Proximity rate with baiting (17 events withou…  3.47   0.226 log-n…   38.0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Deer-Human Proximity Rate, Rural (per 120 day… -<span style="color: #BB0000;">1.59</span>   1.70  log-n…    0.141 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Deer-Human Proximity Duration, Rural (minutes) -<span style="color: #BB0000;">0.355</span>  0.979 log-n…    1.51  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> Deer-Human Proximity Rate, Suburban (per 120 …  0.573  0.951 log-n…    2.65  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> Deer-Human Proximity Duration, Suburban (minu…  0.432  0.929 log-n…    2.58  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> Deer-Human Proximity Rate, Captive (per 120 d…  2.52   1.13  log-n…    1.89  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> Deer-Human Proximity Duration, Captive (minut…  1.79   1.15  log-n…    5.68  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> Deer-Deer Proximity Rate, Captive (per day)     3.47   0.913 log-n…   24.0   </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

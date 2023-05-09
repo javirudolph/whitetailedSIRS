@@ -25,10 +25,9 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
-    <a class="dropdown-item" href="../articles/Connected_Systems_initialspill.html">SARS-CoV-2 introduction and spread in connected systems, with an initial spill (in development)</a>
-    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
+    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems (still being developed)</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover (in development)</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
     <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
     <a class="dropdown-item" href="../articles/default_projection.html">default_projection</a>
     <a class="dropdown-item" href="../articles/example_values.html">example_values</a>
@@ -64,8 +63,9 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run</span><span class="op">(</span></span>
 <span>  iter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  initial_compartments <span class="op">=</span> <span class="va">example_inits</span>,</span>
-<span>  parameters <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  initial_compartments <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  initial_compartments_steady <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  params <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  times <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  name <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -81,16 +81,16 @@
 <dd><p>Initial compartment sizes (proportions, stored as list)</p></dd>
 
 
-<dt>parameters</dt>
-<dd><p>SIRS parameters, stored as a list</p></dd>
-
-
 <dt>times</dt>
 <dd><p>Length of projection (days)</p></dd>
 
 
 <dt>name</dt>
 <dd><p>Name of context being simulated</p></dd>
+
+
+<dt>parameters</dt>
+<dd><p>SIRS parameters, stored as a list</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -126,7 +126,7 @@
 <span class="r-in"><span>                    boost <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">run</span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">example_inits</span>, parameters <span class="op">=</span> <span class="va">example_params</span>, times <span class="op">=</span> <span class="va">example_times</span>, name <span class="op">=</span> <span class="va">Test</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in run(iter = nsamples, initial_compartments = example_inits, parameters = example_params,     times = example_times, name = Test):</span> object 'Test' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in run(iter = nsamples, initial_compartments = example_inits, parameters = example_params,     times = example_times, name = Test):</span> unused argument (parameters = example_params)</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

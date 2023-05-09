@@ -34,13 +34,14 @@
 #'                     boost = 0)
 #'
 #' run(iter = nsamples, initial_compartments = example_inits, parameters = example_params, times = example_times, name = Test)
-run <- function(iter = NULL, initial_compartments = example_inits, parameters = NULL, times = NULL, name = NULL)
+run <- function(iter = NULL, initial_compartments = NULL, initial_compartments_steady = NULL,params = NULL, times = NULL, name = NULL)
 
 {  if(is.null(iter)) {stop("User must specify number of iterations - often stored as nsamples object")}
    if(is.null(initial_compartments)) {stop("User must specify initial compartment sizes, either by hand or with initial_compartments function")}
-   if(is.null(parameters)) {stop("User must specify all parameters for ODE equation, either by hand or with alternative function")}
+   if(is.null(params)) {stop("User must specify all parameters for ODE equation, either by hand or with alternative function")}
    if(is.null(name)) {stop("User must name context for data storage")}
 
-   tibble(run_id = 1:iter,inits = map(run_id, ~ initial_compartments %>% map_dbl(., .x)),params = map(run_id, function(x) parameters %>% map_dbl(., x)))%>%
-      mutate(ode_proj = pmap(list(y = inits, parms = params), ode, times = times, func = Epi_sirs_with_cumulative)) %>%
-     mutate(Context = rep(name, nsamples))}
+   tibble(run_id = 1:iter, inits.fall = map(run_id, ~ initial_compartments %>% map_dbl(., .x)), inits.steady = map(run_id, ~ initial_compartments_steady %>% map_dbl(., .x)), params = map(run_id, function(x) params %>% map_dbl(., x)))%>%
+      mutate(ode_proj = pmap(list(y = inits.fall, parms = params), ode, times = times, func = Epi_sirs_with_cumulative)) %>%
+      mutate(steady_state = pmap(list(y = inits.steady, parms = params), runsteady, func = Epi_sirs, mf = 10)) %>%
+      mutate(Context = rep(name, nsamples))}
