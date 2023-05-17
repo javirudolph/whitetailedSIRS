@@ -25,7 +25,7 @@ run(
 \item{parameters}{SIRS parameters, stored as a list}
 }
 \value{
-#List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment.
+#List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.
 }
 \description{
 Run ODE Solver for SIRS model
@@ -54,5 +54,5 @@ example_params <- c(alpha_immunity = 0.03,
                     I_human = 0.05,
                     boost = 0)
 
-run(iter = nsamples, initial_compartments = example_inits, parameters = example_params, times = example_times, name = Test)
+run(iter = nsamples, initial_compartments = example_inits, params = example_params, times = example_times, name = Test)
 }

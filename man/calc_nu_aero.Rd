@@ -21,25 +21,25 @@ calc_nu_aero(
 )
 }
 \arguments{
-\item{AER}{air exchange in \eqn{hr^{-1}}. Default is set to 4.}
+\item{AER}{air exchange rate \eqn{hr^{-1}}. Default is set to \eqn{4 hr^{-1}}}
 
-\item{s}{settling rate; \eqn{hr^{-1}} Default is set to 0.24}
+\item{s}{settling rate; \eqn{hr^{-1}} Default is set to \eqn{0.24 hr^{-1}}}
 
-\item{lambda}{innactivation rates \eqn{hr^{-1}}. Default is set to 0.63}
+\item{lambda}{inactivation rates \eqn{hr^{-1}}. Default is set to \eqn{0.63 hr^{-1}}}
 
 \item{C_nu}{viral load in sputum; RNA copies/ml. Default samples from expert
 elicited distribution of parameter 'Viral Load'}
 
 \item{C_i}{conversion factor for quanta/RNA copy. Default set to 0.0014}
 
-\item{IR}{inhalation rate; \eqn{m^3/hr}.Default is set to 0.846}
+\item{IR}{inhalation rate; \eqn{m^3/hr}.Default is set to 0.846 for deer}
 
 \item{ER}{exhalation rate; \eqn{m^3/hr}. Default IR = ER}
 
 \item{V_d}{exhaled droplet volume concentration; ml exhaled droplets/
 \eqn{m^3}. Default to 0.009}
 
-\item{V_air}{fixed volume; \eqn{m^3}. Default to 7.07}
+\item{V_air}{fixed volume; \eqn{m^3}. Default to \eqn{7.07m^3}, corresponding to a half-sphere with a 1.5m radius}
 
 \item{t_contact}{time of contact with contaminated airspace (hr).}
 
@@ -79,4 +79,5 @@ infection from 1 quantum. \deqn{\nu^{AERO} = 1 - e^{-rQ}}
 }
 \examples{
 calc_nu_aero() # will return a single value using defaults
+calc_nu_aero(nsamples = 10)
 }

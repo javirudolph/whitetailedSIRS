@@ -97,7 +97,7 @@
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>#List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment.</p>
+<p>#List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.</p>
     </div>
 
     <div class="section level2">
@@ -125,8 +125,8 @@
 <span class="r-in"><span>                    I_human <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
 <span class="r-in"><span>                    boost <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">run</span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">example_inits</span>, parameters <span class="op">=</span> <span class="va">example_params</span>, times <span class="op">=</span> <span class="va">example_times</span>, name <span class="op">=</span> <span class="va">Test</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in run(iter = nsamples, initial_compartments = example_inits, parameters = example_params,     times = example_times, name = Test):</span> unused argument (parameters = example_params)</span>
+<span class="r-in"><span><span class="fu">run</span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">example_inits</span>, params <span class="op">=</span> <span class="va">example_params</span>, times <span class="op">=</span> <span class="va">example_times</span>, name <span class="op">=</span> <span class="va">Test</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in run(iter = nsamples, initial_compartments = example_inits, params = example_params,     times = example_times, name = Test):</span> object 'Test' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

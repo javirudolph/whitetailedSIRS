@@ -16,7 +16,9 @@ I_captive, R_captive.}
 
 \item{parameters}{list of parameters to generate projection. The parameters
 should include transmission parameters, immunity and recovery rates, and
-proportion of infected humans.}
+proportion of infected humans.
+
+@details \code{simple_sirs}does not allow individuals to move from Susceptible to Recovered compartment by means of boosting, and contains parameters not included in the primary analysis. Use \code{Epi_sirs} and \code{Epi_sirs_with_cumulative} instead.}
 }
 \value{
 when used with the \code{deSolve::ode()} function, it will return a
@@ -26,7 +28,7 @@ compartments at each time point.
 \description{
 \code{simple_sirs} is written to work alongside the \code{deSolve::ode()} function, and
 it will return an object with the proportion of individuals found in each of
-the SIR compartments at each of the specified time points.
+the SIR compartments at each of the specified time points. No longer relevant for epidemiological model or alternative testing.
 }
 \examples{
 # prepare the input parameters:

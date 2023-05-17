@@ -57,3 +57,70 @@
 #' @source https://doi.org/10.1016/j.ecolmodel.2011.05.007
 #'
 "contact_rate_params"
+
+#' example_results
+#'
+#' A dataframe containing results used to compare degrees of introduction, spread, prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations. 200 iterations (run_id) were run for each scenario (Context). Scenarios included captive deer in outdoor ranch facilities, captive deer in intensive facilities, wild deer in rural areas, and wild deer in suburban areas. Setting indicates whether deer were captive or wild. r0, or basic reproductive number, indicates the number of secondary infections caused by a single infectious deer over the course of it's infection. FOI, or Force-Of-Infection, is a hazard rate of a deer becoming infected from infectious humans, per day. Prevalence is the percent of a population infected, averaged over a simulated 120-day projection. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and `run_steady()` from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium. Cumulative infections reports the total proportion of the population infected over the course of the 120-fall projection, and can exceed 1, indicating that all individuals were infected at least once during the fall season.
+#'
+#' @format `example_results`
+#'
+#'
+#' @source Derived using `SIRS_analysis_by_contexts.Rmd`
+#'
+"example_results"
+
+#' alternatives_across_systems
+#'
+#' A dataframe containing results used to compare influences of potential management alternatives on the prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations. 200 iterations (run_id) were run for captive and wild populations of white-tailed deer, seperated by a single fenceline that allows proximity and direct contact between captive and wild deer (Complex), under each alternative implemented (Alternative). Complexes include captive deer in outdoor ranch facilities and wild deer in rural areas (Outdoor ranch and rural deer), captive deer in outdoor ranch facilities and wild deer in suburban areas (Outdoor ranch and suburban deer), captive deer in intensive facilities and wild deer in rural areas (Intensive facility and rural deer), and captive deer in intensive facilities and wild deer in suburban areas (Intensive facility and suburban deer). Management alternatives (Alternative) include 1) no action (baseline), 2) improve separation between captive and wild deer by improving fencing (double-fence captive facilities), 3) reduce and eliminate baiting practices through legislation, enforcement, and education (Eliminate baiting), 4) increase air flow in indoor facilities to match air exchange rate in outdoor settings (Improve indoor facility air quality; only applies for complexes with intensive facilities), 5) Cease research activities that would bring research and management staff in close proximity with wild deer (Pause Research), 6) Require personal protective equipment for humans during interactions with deer in both captive and wild settings (PPE, Both), 7) Require PPE in captive settings only (PPE, Captive), 8) Require PPE in wild settings only (PPE, Wild), 9) Reduce wild deer densities by 10% to reduce deer-deer contact rate and spread of SARS-CoV-2 (Reduce wild density by 10%), 10) Reduce wild deer densities by 25% to reduce deer-deer contact rate and spread of SARS-CoV-2 (Reduce wild density by 25%), 11) restrict human activities in areas posing elevated probability of human-deer interactions, such as suburban neighborhoods, parks, trail heads, etc. (Restrict human interactions), 12) Vaccinate and repeatedly boost captive deer (Vaccinate and boost captive deer), and 13) provide initial vaccination to captive deer with no secondary boosting (Vaccinate captive deer). Wild and captive prevalence (meanWild and meanCaptive, respectively) are reported as the percent of a population infected, averaged over a simulated 120-day projection (run_id), for a particular alternative applied to a particular context. Cumulative infections reports the total proportion of the wild and captive populations infected over the course of the 120-fall projection (cumulativeWild and cumulativeCaptive, respectively), and can exceed 1, indicating that all individuals were infected at least once during the fall season, for a particular alternative applied to a particular context. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and `run_steady()` from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium for wild and captive deer (persistWild and persistCaptive, respectively), for a particular alternative applied to a particular context.
+#'
+#' @format `alternatives_across_systems`
+#'
+#'
+#' @source Derived from `Management_Alternatives_Systems.Rmd`
+#'
+"alternatives_across_systems"
+
+#' cross_sector_results
+#'
+#' A dataframe containing results used to compare cumulative influences of the top performing alternative action for each OneHealth sectors (public health, agriculture, and wildlife sectors) on the prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations. 200 iterations (run_id) were run for captive and wild populations of white-tailed deer, separated by a single fenceline that allows proximity and direct contact between captive and wild deer (Complex), under the alternative identified for public health, agriculture, and wildlife (Alternative) that have the greatest reduction in prevalence, persistence, and cumulative infections. Complexes include captive deer in outdoor ranch facilities and wild deer in rural areas (Outdoor ranch and rural deer), captive deer in outdoor ranch facilities and wild deer in suburban areas (Outdoor ranch and suburban deer), captive deer in intensive facilities and wild deer in rural areas (Intensive facility and rural deer), and captive deer in intensive facilities and wild deer in suburban areas (Intensive facility and suburban deer). Cross-sector collaboration would vaccinate and boost captive deer (agriculture sector), require personal protective equipment for humans interacting with deer in wild and captive settings (public health sector), and eliminate baiting practices through legislation, enforcement, and education (wildlife sector).
+#' Wild and captive prevalence (meanWild and meanCaptive, respectively) are reported as the percent of a population infected, averaged over a simulated 120-day projection (run_id), for a particular alternative applied to a particular context. Cumulative infections reports the total proportion of the wild and captive populations infected over the course of the 120-fall projection (cumulativeWild and cumulativeCaptive, respectively), and can exceed 1, indicating that all individuals were infected at least once during the fall season, for a particular alternative applied to a particular context. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and `run_steady()` from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium for wild and captive deer (persistWild and persistCaptive, respectively), for a particular alternative applied to a particular context.
+#'
+#' @format `cross_sector_results`
+#'
+#'
+#' @source Derived from `Management_Alternatives_Systems.Rmd`, and compared to single alternative impacts stored in `alternatives_across_systems.rda`
+#'
+"cross_sector_results"
+
+#' initial_infection_results_1_in_1000
+#'
+#' A dataframe containing results used to compare degrees of introduction, spread, prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations with an initial infection of 1 in 1000 deer on day 0. These results do not include continuous human introduction during the 120-day fall simulation, and thus represent the risk of single introductions to spawn persisting infections in white-tailed deer. 200 iterations (run_id) were run for each scenario (Context). Scenarios included captive deer in outdoor ranch facilities, captive deer in intensive facilities, wild deer in rural areas, and wild deer in suburban areas. Setting indicates whether deer were captive or wild. r0, or basic reproductive number, indicates the number of secondary infections caused by a single infectious deer over the course of it's infection. Prevalence is the percent of a population infected, averaged over a simulated 120-day projection. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and `run_steady()` from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium. Cumulative infections reports the total proportion of the population infected over the course of the 120-fall projection, and can exceed 1, indicating that all individuals were infected at least once during the fall season.
+#'
+#' @format `initial_infection_results_1_in_1000`
+#'
+#'
+#' @source Derived from `SIRS_analysis_by_contexts_initialspill.Rmd`, to be compared with continual introduction results from `SIRS_analysis_by_contexts.Rmd`
+#'
+"initial_infection_results_1_in_1000"
+
+#' initial_infection_results_1_in_1mil
+#'
+#' A dataframe containing results used to compare degrees of introduction, spread, prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations with an initial infection of 1 in 1 million deer on day 0. These results do not include continuous human introduction during the 120-day fall simulation, and thus represent the risk of single introductions to spawn persisting infections in white-tailed deer. 200 iterations (run_id) were run for each scenario (Context). Scenarios included captive deer in outdoor ranch facilities, captive deer in intensive facilities, wild deer in rural areas, and wild deer in suburban areas. Setting indicates whether deer were captive or wild. r0, or basic reproductive number, indicates the number of secondary infections caused by a single infectious deer over the course of it's infection. Prevalence is the percent of a population infected, averaged over a simulated 120-day projection. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and `run_steady()` from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium. Cumulative infections reports the total proportion of the population infected over the course of the 120-fall projection, and can exceed 1, indicating that all individuals were infected at least once during the fall season.
+#'
+#' @format `initial_infection_results_1_in_1mil`
+#'
+#'
+#' @source Derived from `SIRS_analysis_by_contexts_initialspill.Rmd`, to be compared with continual introduction results from `SIRS_analysis_by_contexts.Rmd`
+#'
+"initial_infection_results_1_in_1mil"
+
+#' initial_infection_results_1_in_1bil
+#'
+#' A dataframe containing results used to compare degrees of introduction, spread, prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations with an initial infection of 1 in 1 billion deer on day 0. These results do not include continuous human introduction during the 120-day fall simulation, and thus represent the risk of single introductions to spawn persisting infections in white-tailed deer. 200 iterations (run_id) were run for each scenario (Context). Scenarios included captive deer in outdoor ranch facilities, captive deer in intensive facilities, wild deer in rural areas, and wild deer in suburban areas. Setting indicates whether deer were captive or wild. r0, or basic reproductive number, indicates the number of secondary infections caused by a single infectious deer over the course of it's infection. Prevalence is the percent of a population infected, averaged over a simulated 120-day projection. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and `run_steady()` from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium. Cumulative infections reports the total proportion of the population infected over the course of the 120-fall projection, and can exceed 1, indicating that all individuals were infected at least once during the fall season.
+#'
+#' @format `initial_infection_results_1_in_1bil`
+#'
+#'
+#' @source Derived from `SIRS_analysis_by_contexts_initialspill.Rmd`, to be compared with continual introduction results from `SIRS_analysis_by_contexts.Rmd`
+#'
+"initial_infection_results_1_in_1bil"

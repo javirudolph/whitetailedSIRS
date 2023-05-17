@@ -2,7 +2,7 @@
 #'
 #' `simple_sirs` is written to work alongside the `deSolve::ode()` function, and
 #' it will return an object with the proportion of individuals found in each of
-#' the SIR compartments at each of the specified time points.
+#' the SIR compartments at each of the specified time points. No longer relevant for epidemiological model or alternative testing.
 #'
 #' @param time vector of values for which to generate the projection (length in
 #'   days).
@@ -12,6 +12,8 @@
 #' @param parameters list of parameters to generate projection. The parameters
 #'   should include transmission parameters, immunity and recovery rates, and
 #'   proportion of infected humans.
+#'
+#'   @details `simple_sirs`does not allow individuals to move from Susceptible to Recovered compartment by means of boosting, and contains parameters not included in the primary analysis. Use `Epi_sirs` and `Epi_sirs_with_cumulative` instead.
 #'
 #' @return when used with the `deSolve::ode()` function, it will return a
 #'   dataframe with the proportion of individuals in each of the SIR

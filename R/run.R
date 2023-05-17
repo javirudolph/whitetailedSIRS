@@ -6,7 +6,7 @@
 #' @param times Length of projection (days)
 #' @param name Name of context being simulated
 #'
-#' @return #List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment.
+#' @return #List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.
 #' @export
 #'
 #' @examples
@@ -33,7 +33,7 @@
 #'                     I_human = 0.05,
 #'                     boost = 0)
 #'
-#' run(iter = nsamples, initial_compartments = example_inits, parameters = example_params, times = example_times, name = Test)
+#' run(iter = nsamples, initial_compartments = example_inits, params = example_params, times = example_times, name = Test)
 run <- function(iter = NULL, initial_compartments = NULL, initial_compartments_steady = NULL,params = NULL, times = NULL, name = NULL)
 
 {  if(is.null(iter)) {stop("User must specify number of iterations - often stored as nsamples object")}

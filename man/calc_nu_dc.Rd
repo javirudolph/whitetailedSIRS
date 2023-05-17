@@ -32,7 +32,7 @@ distributions.}
 returns a number or vector of probability values for probability of infection via direct contact.
 }
 \description{
-#' \code{calc_nu_dc} will calculate one value for probability of infection using
+\code{calc_nu_dc} will calculate one value for probability of infection using
 defaults if no arguments are provided. Defaults are described in the
 sir_model_description document and are sourced from the literature or expert
 elicitation.

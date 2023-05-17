@@ -1,6 +1,6 @@
-#' Calculate probability of infection given physical contact \eqn{\nu^{DC}}
+#'@title Calculate probability of infection given physical contact \eqn{\nu^{DC}}
 #'
-#'#' `calc_nu_dc` will calculate one value for probability of infection using
+#'@description `calc_nu_dc` will calculate one value for probability of infection using
 #' defaults if no arguments are provided. Defaults are described in the
 #' sir_model_description document and are sourced from the literature or expert
 #' elicitation.

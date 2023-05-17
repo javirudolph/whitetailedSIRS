@@ -1,5 +1,6 @@
-#' Define parameters for solving white-tailed deer SIRS ODE equations under different management alternatives
+#' @title Define parameters for solving white-tailed deer SIRS ODE equations under different management alternatives
 #'
+#' @description `alternative()` helps to prepare parameters used to solve SIRS ODE equations for both wild and captive deer, to be fed into the params argument of the `run()` function.
 #'
 #' @param alpha_immunity Inverse of duration of temporary immunity after entering recovered compartment (per day, 0-1).
 #' @param c_ww Deer-deer proximity rate in a wild setting (proximity events per day).
@@ -26,7 +27,7 @@
 #' @return Returns a list of vectors for each parameter
 #' @export
 #'
-#' @seealso calc_contact_rate, calc_nu_aero, calc_nu_dc, draw_elicitation_samples
+#' @seealso `run()`, `calc_contact_rate()`, `calc_nu_aero()`, `calc_nu_dc()`, `draw_elicitation_samples()`
 #'
 #' @examples
 #' alternative(alpha_immunity = c((1/30),(1/60),(1/90),(1/120),(1/150)), c_ww = rep(10,5), c_cw = rep(1,5), c_cc = rep(20,5), c_hw = rep(0.01,5), c_hc = rep(0.25,5), nu_aero_deer_deer_wild = rep(0.01,5), nu_aero_deer_deer_captive = rep(0.1,5), nu_aero_deer_human_wild = rep(0.001,5), nu_aero_deer_human_capt = rep(0.05,5), sigma_dc = rep(0.2,5), nu_dc_deer_deer = rep(0.02,5), gamma_recov = rep(1/6,5), I_human = rep(0.05,5), boost = rep(0,5))

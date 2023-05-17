@@ -28,11 +28,14 @@ compartments at each time point, as well as a cumulative case count (proportion)
 it will return an object with the proportion of individuals found in each of
 the SIR compartments at each of the specified time points.
 }
+\details{
+\code{Epi_sirs_with_cumulative()} cannot be run with \code{run_steady()} to estimate probability of persistence. Instead, use \code{Epi_sirs()}, which does not return cumulative proportion of population infected.
+}
 \examples{
 # prepare the input parameters:
 example_inits <- c(S_wild = 1, I_wild = 0,
-                   R_wild = 0, S_captive = 1,
-                   I_captive = 0, R_captive = 0)
+                   R_wild = 0, I_wild_cumulative = 0,S_captive = 1,
+                   I_captive = 0, R_captive = 0, I_captive_cumulative = 0)
 
 # set the time to run
 example_times <-  seq(0, 500, by = 1)

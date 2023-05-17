@@ -13,6 +13,8 @@
 #'   should include transmission parameters, immunity and recovery rates, and
 #'   proportion of infected humans.
 #'
+#' @details `Epi_sirs_with_cumulative()` cannot be run with `run_steady()` to estimate probability of persistence. Instead, use `Epi_sirs()`, which does not return cumulative proportion of population infected.
+#'
 #' @return when used with the `deSolve::ode()` function, it will return a
 #'   dataframe with the proportion of individuals in each of the SIR
 #'   compartments at each time point, as well as a cumulative case count (proportion)
@@ -21,8 +23,8 @@
 #' @examples
 #' # prepare the input parameters:
 #' example_inits <- c(S_wild = 1, I_wild = 0,
-#'                    R_wild = 0, S_captive = 1,
-#'                    I_captive = 0, R_captive = 0)
+#'                    R_wild = 0, I_wild_cumulative = 0,S_captive = 1,
+#'                    I_captive = 0, R_captive = 0, I_captive_cumulative = 0)
 #'
 #' # set the time to run
 #' example_times <-  seq(0, 500, by = 1)

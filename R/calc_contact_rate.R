@@ -1,23 +1,23 @@
 #' @title Contact rate calculation for wild deer
 #'
-#' TEST TEST TEST
+#' @description `calc_contact_rate()` uses proximity rate model developed by Habib et al. (2011) to estimate proximity rates for deer in wild settings, conditional on density and habitat availability. This function can also be used for captive settings with conditions that result in identical deer-deer proximity rates.
 #'
-#' @param sigma_season value for season scaling (derived from Williams et al 2014; Appendix A). Default set to 1
-#' @param scaling_c value for contact scaling constant (influences slope of density-contact relationship; reported in Habib et al. 2011; Appendix A)
-#' @param N_w total population size of deer. Defaults is a random draw from a Poisson dist w/mean = 1000
-#' @param q value for concavity scaling constant (0-1, with 0 equating to density dependence and 1 equating to frequency dependence; reported in Habib et al. 2011, Appendix A)
-#' @param A_w area inhabited by N. Default set to 100
+#' @param sigma_season value for season scaling (optional). Default set to 1
+#' @param scaling_c value for contact scaling constant (influences slope of density-contact relationship; reported in Habib et al. 2011)
+#' @param N_w total population size of deer. Defaults is a random draw from a Poisson distribution with mean = 1000.
+#' @param q value for concavity scaling constant (0-1, with 0 equating to density dependence and 1 equating to frequency dependence; reported in Habib et al. 2011)
+#' @param A_w area inhabited by N, in square kilometers. Default set to 100 square kilometers to match Habib et al.'s (2011) approach.
 #' @param nsamples number of values to be returned. Default is 1, but will return a vector if > 2
 #' @param seed if specified, sets a seed for the function
-#' @param type_contact option between "low", "medium", and "high" based on parameters from Habib 2011 table. If set to "manual", manual input of scaling_c and q are needed.
+#' @param type_contact option between "low", "medium", and "high" based on parameters from Habib et al. 2011 for particular values of wooded habitat available to the deer population in question. "low" contact fixes scaling_c to 16.37 and q to 0.53, mimicking proximity rates in areas with 53% wooded habitat. "med" contact fixes scaling_c to 11.35 and q to 0.34, mimicking proximity rates in areas with 26% wooded habitat. "high" contact fixes scaling_c to 15.58 and q to 0.32, mimicking proximity rates in areas with 12% wooded habitat. If set to "manual", manual input of scaling_c and q are needed. All values from Habib et al. (2011) are available in the `contact_rate_params` dataset.
 #'
 #' @return returns a number or numeric vector if nsamples > 1
 #' @export
 #'
 #' @examples
 #' calc_contact_rate(type_contact = "low")
-#' calc_contact_rate(sigma_season = 1, scaling_c = 16.37, N_w = 1000, q = 0.53, A_w = 100)
-#' calc_contact_rate(c(1,1), c(16.37, 16.37), rpois(2, 1000), c(0.53, 0.53), c(100, 100))
+#' calc_contact_rate(sigma_season = 1, scaling_c = 16.37, N_w = 1000, q = 0.53, A_w = 100, type_contact = "manual")
+#' calc_contact_rate(c(1,1), c(16.37, 16.37), rpois(2, 1000), c(0.53, 0.53), c(100, 100), type_contact = "manual")
 calc_contact_rate <- function(sigma_season = NULL,
                               scaling_c = NULL,
                               N_w = NULL,

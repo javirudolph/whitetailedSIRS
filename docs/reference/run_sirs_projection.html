@@ -100,6 +100,15 @@
 <p>returns a list column tibble with parameters and sirs projection.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">run_sirs_projection</span><span class="op">(</span>nsamples <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">63</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   run_id inits     params         R0           FOI ode_proj     steady_state    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      1 <span style="color: #949494;">&lt;dbl [6]&gt;</span> <span style="color: #949494;">&lt;dbl [13]&gt;</span> 0.056<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">000</span>005<span style="text-decoration: underline;">85</span> <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list [1]&gt;</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

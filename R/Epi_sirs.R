@@ -2,7 +2,7 @@
 #'
 #' `Epi_sirs` is written to work alongside the `deSolve::ode()` function, and
 #' it will return an object with the proportion of individuals found in each of
-#' the SIR compartments at each of the specified time points.
+#' the SIR compartments at each of the specified time points. `Epi_sirs` is also written to work with `rootSolve::run_steady()` to estimate stable, equilibrium sizes for the SIR compartments.
 #'
 #' @param time vector of values for which to generate the projection (length in
 #'   days).
@@ -12,6 +12,8 @@
 #' @param parameters list of parameters to generate projection. The parameters
 #'   should include transmission parameters, immunity and recovery rates, and
 #'   proportion of infected humans.
+#'
+#'   @details Use `Epi_sirs` to calculate persistence (via `rootSolve::run_steady()`), along with how compartment sizes change through a projection. If cumulative infections are desired, use `Epi_sir_with_cumulative` instead.
 #'
 #' @return when used with the `deSolve::ode()` function, it will return a
 #'   dataframe with the proportion of individuals in each of the SIR

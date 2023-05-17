@@ -16,7 +16,9 @@ I_captive, R_captive.}
 
 \item{parameters}{list of parameters to generate projection. The parameters
 should include transmission parameters, immunity and recovery rates, and
-proportion of infected humans.}
+proportion of infected humans.
+
+@details Use \code{Epi_sirs} to calculate persistence (via \code{rootSolve::run_steady()}), along with how compartment sizes change through a projection. If cumulative infections are desired, use \code{Epi_sir_with_cumulative} instead.}
 }
 \value{
 when used with the \code{deSolve::ode()} function, it will return a
@@ -26,7 +28,7 @@ compartments at each time point.
 \description{
 \code{Epi_sirs} is written to work alongside the \code{deSolve::ode()} function, and
 it will return an object with the proportion of individuals found in each of
-the SIR compartments at each of the specified time points.
+the SIR compartments at each of the specified time points. \code{Epi_sirs} is also written to work with \code{rootSolve::run_steady()} to estimate stable, equilibrium sizes for the SIR compartments.
 }
 \examples{
 # prepare the input parameters:

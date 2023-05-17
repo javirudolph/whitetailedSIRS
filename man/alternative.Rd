@@ -57,7 +57,7 @@ alternative(
 Returns a list of vectors for each parameter
 }
 \description{
-Define parameters for solving white-tailed deer SIRS ODE equations under different management alternatives
+\code{alternative()} helps to prepare parameters used to solve SIRS ODE equations for both wild and captive deer, to be fed into the params argument of the \code{run()} function.
 }
 \details{
 alternative() creates a list of parameter values that will be fed into a SIRS ODE solver. The length of each item in the output is determined by the length of all arguments, which must be equal. If argument(s) is not filled with outputs from another function in this package (e.g. calc_contact_rate, calc_nu_aero, calc_nu_dc, draw_elicitation_samples), the user must fill argument with vector of values of the same length as the other arguments.
@@ -70,5 +70,5 @@ Proximity, by default with the calc_nu_aero() function, is defined as two indivi
 alternative(alpha_immunity = c((1/30),(1/60),(1/90),(1/120),(1/150)), c_ww = rep(10,5), c_cw = rep(1,5), c_cc = rep(20,5), c_hw = rep(0.01,5), c_hc = rep(0.25,5), nu_aero_deer_deer_wild = rep(0.01,5), nu_aero_deer_deer_captive = rep(0.1,5), nu_aero_deer_human_wild = rep(0.001,5), nu_aero_deer_human_capt = rep(0.05,5), sigma_dc = rep(0.2,5), nu_dc_deer_deer = rep(0.02,5), gamma_recov = rep(1/6,5), I_human = rep(0.05,5), boost = rep(0,5))
 }
 \seealso{
-calc_contact_rate, calc_nu_aero, calc_nu_dc, draw_elicitation_samples
+\code{run()}, \code{calc_contact_rate()}, \code{calc_nu_aero()}, \code{calc_nu_dc()}, \code{draw_elicitation_samples()}
 }

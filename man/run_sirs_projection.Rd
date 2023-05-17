@@ -30,3 +30,6 @@ returns a list column tibble with parameters and sirs projection.
 \description{
 This function is still in development but it is a wrapper for other functions in the package and will generate a projection for SIRS model using defaults for a specified number of samples
 }
+\examples{
+run_sirs_projection(nsamples = 1, seed = 63)
+}

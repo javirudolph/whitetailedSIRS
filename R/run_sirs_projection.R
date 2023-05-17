@@ -13,6 +13,7 @@
 #' @export
 #'
 #' @examples
+#' run_sirs_projection(nsamples = 1, seed = 63)
 run_sirs_projection <- function(nsamples = 100, seed = 123, wild_scenario = "rural", ndays = 120,
                                 type_contact = "low", ...){
 
