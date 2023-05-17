@@ -1,4 +1,6 @@
-#' Contact rate calculation for wild deer
+#' @title Contact rate calculation for wild deer
+#'
+#' TEST TEST TEST
 #'
 #' @param sigma_season value for season scaling (derived from Williams et al 2014; Appendix A). Default set to 1
 #' @param scaling_c value for contact scaling constant (influences slope of density-contact relationship; reported in Habib et al. 2011; Appendix A)

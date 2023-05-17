@@ -2,7 +2,9 @@
 % Please edit documentation in R/calc_contact_rate.R
 \name{calc_contact_rate}
 \alias{calc_contact_rate}
-\title{Contact rate calculation for wild deer}
+\title{Contact rate calculation for wild deer
+
+TEST TEST TEST}
 \usage{
 calc_contact_rate(
   sigma_season = NULL,
@@ -37,6 +39,8 @@ returns a number or numeric vector if nsamples > 1
 }
 \description{
 Contact rate calculation for wild deer
+
+TEST TEST TEST
 }
 \examples{
 calc_contact_rate(type_contact = "low")

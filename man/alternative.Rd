@@ -2,7 +2,7 @@
 % Please edit documentation in R/alternatives.R
 \name{alternative}
 \alias{alternative}
-\title{alternative: a function to define parameters for solving white-tailed deer SIRS ODE equations}
+\title{Define parameters for solving white-tailed deer SIRS ODE equations under different management alternatives}
 \usage{
 alternative(
   alpha_immunity = NULL,
@@ -23,45 +23,52 @@ alternative(
 )
 }
 \arguments{
-\item{alpha_immunity}{Inverse of duration of temporary immunity after entering recovered compartment (per day, 0-1)}
+\item{alpha_immunity}{Inverse of duration of temporary immunity after entering recovered compartment (per day, 0-1).}
 
-\item{c_ww}{Proximity rate (<=1.5m) between wild deer (proximity events per day)}
+\item{c_ww}{Deer-deer proximity rate in a wild setting (proximity events per day).}
 
-\item{c_cw}{Proximity rate (<=1.5m) between captive and wild deer along fencelines(proximity events per day)}
+\item{c_cw}{Captive and wild deer proximity rate along fence lines demarking captive and wild populations (proximity events per day).}
 
-\item{c_cc}{Proximity rate (<=1.5m) between captive deer (proximity events per day)}
+\item{c_cc}{Deer-deer proximity rate in a captive setting (proximity events per day).}
 
-\item{c_hw}{Proximity rate (<=1.5m) between humans and wild deer (proximity events per day)}
+\item{c_hw}{Human-deer proximity rate in a wild setting (proximity events per day).}
 
-\item{c_hc}{Proximity rate (<=1.5m) between humans and captive deer (proximity events per day)}
+\item{c_hc}{Human-deer proximity rate in a captive setting(proximity events per day).}
 
-\item{nu_aero_deer_deer_wild}{Probability of infection via aerosol transmission in wild deer}
+\item{nu_aero_deer_deer_wild}{Probability of infection via aerosol transmission between wild deer. Derived using the calc_nu_aero() function.}
 
-\item{nu_aero_deer_deer_captive}{Probability of infection via aerosol transmission in captive deer}
+\item{nu_aero_deer_deer_captive}{Probability of infection via aerosol transmission in captive deer. Derived using the calc_nu_aero() function.}
 
-\item{nu_aero_deer_human_wild}{Probability of infection via aerosol transmission from humans to wild deer}
+\item{nu_aero_deer_human_wild}{Probability of infection via aerosol transmission from humans to wild deer. Derived using the calc_nu_aero() function.}
 
-\item{nu_aero_deer_human_capt}{Probability of infection via aerosol transmission from humans to captive deer}
+\item{nu_aero_deer_human_capt}{Probability of infection via aerosol transmission from humans to captive deer. Derived using the calc_nu_aero() function.}
 
-\item{sigma_dc}{Probability of direct contact between deer, given proximity}
+\item{sigma_dc}{Probability of direct contact between deer, given proximity.}
 
-\item{nu_dc_deer_deer}{Probability of infection via fluid transmission between deer}
+\item{nu_dc_deer_deer}{Probability of infection via fluid transmission between deer. Derived using the calc_nu_dc() function.}
 
-\item{gamma_recov}{Duration of recovery from infection (days)}
+\item{gamma_recov}{Inverse of duration for recovery from infection (per day, 0-1).}
 
-\item{I_human}{Prevalence in human population (Proportion)}
+\item{I_human}{Prevalence in human population (proportion).}
 
-\item{boost}{Boosting rate in captive deer (Proportion)}
+\item{boost}{Proportion of susceptible deer in captivity receiving vaccine boosters, per day.}
 }
 \value{
 Returns a list of vectors for each parameter
 }
 \description{
-alternative: a function to define parameters for solving white-tailed deer SIRS ODE equations
+Define parameters for solving white-tailed deer SIRS ODE equations under different management alternatives
 }
 \details{
 alternative() creates a list of parameter values that will be fed into a SIRS ODE solver. The length of each item in the output is determined by the length of all arguments, which must be equal. If argument(s) is not filled with outputs from another function in this package (e.g. calc_contact_rate, calc_nu_aero, calc_nu_dc, draw_elicitation_samples), the user must fill argument with vector of values of the same length as the other arguments.
+
+Parameter values defined with this function remained fixed during SIRS ODE solves. While these parameter values can be derived through random processes, projections are deterministic.
+
+Proximity, by default with the calc_nu_aero() function, is defined as two individuals entering within 1.5m of each other. This proximity limit can be modified in V_air argument in the calc_nu_aero() function, which defines a half-sphere volume into which aerosolized virus is exhaled from an infectious individual.
 }
 \examples{
 alternative(alpha_immunity = c((1/30),(1/60),(1/90),(1/120),(1/150)), c_ww = rep(10,5), c_cw = rep(1,5), c_cc = rep(20,5), c_hw = rep(0.01,5), c_hc = rep(0.25,5), nu_aero_deer_deer_wild = rep(0.01,5), nu_aero_deer_deer_captive = rep(0.1,5), nu_aero_deer_human_wild = rep(0.001,5), nu_aero_deer_human_capt = rep(0.05,5), sigma_dc = rep(0.2,5), nu_dc_deer_deer = rep(0.02,5), gamma_recov = rep(1/6,5), I_human = rep(0.05,5), boost = rep(0,5))
+}
+\seealso{
+calc_contact_rate, calc_nu_aero, calc_nu_dc, draw_elicitation_samples
 }
