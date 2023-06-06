@@ -17,8 +17,7 @@ I_captive, R_captive.}
 \item{parameters}{list of parameters to generate projection. The parameters
 should include transmission parameters, immunity and recovery rates, and
 proportion of infected humans.
-
-@details \code{simple_sirs}does not allow individuals to move from Susceptible to Recovered compartment by means of boosting, and contains parameters not included in the primary analysis. Use \code{Epi_sirs} and \code{Epi_sirs_with_cumulative} instead.}
+@details Use \code{simple_sirs} to calculate persistence (via \code{rootSolve::run_steady()}), along with how compartment sizes change through a projection. If cumulative infections are desired, use \code{simple_sir_with_cumulative} instead.}
 }
 \value{
 when used with the \code{deSolve::ode()} function, it will return a
@@ -49,8 +48,6 @@ example_params <- c(alpha_immunity = 0.03,
                     beta_dc_ww = 0.01,
                     beta_dc_cw = 0.01,
                     beta_dc_cc = 0.01,
-                    phi_cw = 0,
-                    phi_wc = 0,
                     gamma_recov = 0.01,
                     I_human = 0.05)
 

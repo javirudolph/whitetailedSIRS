@@ -1,8 +1,8 @@
 #' Simple function to generate SIRS model projections
 #'
-#' `Epi_sirs` is written to work alongside the `deSolve::ode()` function, and
+#' `simple_sirs_with_cumulative` is written to work alongside the `deSolve::ode()` function, and
 #' it will return an object with the proportion of individuals found in each of
-#' the SIR compartments at each of the specified time points. `Epi_sirs` is also written to work with `rootSolve::run_steady()` to estimate stable, equilibrium sizes for the SIR compartments.
+#' the SIR compartments at each of the specified time points.
 #'
 #' @param time vector of values for which to generate the projection (length in
 #'   days).
@@ -13,18 +13,18 @@
 #'   should include transmission parameters, immunity and recovery rates, and
 #'   proportion of infected humans.
 #'
-#'   @details Use `Epi_sirs` to calculate persistence (via `rootSolve::run_steady()`), along with how compartment sizes change through a projection. If cumulative infections are desired, use `Epi_sir_with_cumulative` instead.
+#' @details `simple_sirs_with_cumulative()` cannot be run with `run_steady()` to estimate probability of persistence. Instead, use `simple_sirs()`, which does not return cumulative proportion of population infected.
 #'
 #' @return when used with the `deSolve::ode()` function, it will return a
 #'   dataframe with the proportion of individuals in each of the SIR
-#'   compartments at each time point.
+#'   compartments at each time point, as well as a cumulative case count (proportion)
 #' @export
 #'
 #' @examples
 #' # prepare the input parameters:
 #' example_inits <- c(S_wild = 1, I_wild = 0,
-#'                    R_wild = 0, S_captive = 1,
-#'                    I_captive = 0, R_captive = 0)
+#'                    R_wild = 0, I_wild_cumulative = 0,S_captive = 1,
+#'                    I_captive = 0, R_captive = 0, I_captive_cumulative = 0)
 #'
 #' # set the time to run
 #' example_times <-  seq(0, 500, by = 1)
@@ -45,10 +45,10 @@
 #'
 #' # run the ode function:
 #'
-#' deSolve::ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::Epi_sirs)
+#' deSolve::ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs_with_cumulative)
 #'
 #'
-Epi_sirs <- function(time, state, parameters){
+simple_sirs_with_cumulative <- function(time, state, parameters){
    with(as.list(c(state, parameters)), {
 
       # wild deer functions
@@ -66,6 +66,9 @@ Epi_sirs <- function(time, state, parameters){
       dR_wild <- (gamma_recov * I_wild) -
          (alpha_immunity * R_wild)
 
+      cumulative_I_wild <- (S_wild * ((beta_aero_ww * I_wild) + (beta_dc_ww * I_wild) +
+                                         (beta_aero_cw * I_captive) + (beta_dc_cw * I_captive) +
+                                         (beta_aero_hw * I_human)))
 
       # captive deer functions
 
@@ -82,6 +85,10 @@ Epi_sirs <- function(time, state, parameters){
       dR_captive <- (gamma_recov * I_captive) -
          (alpha_immunity * R_captive) + (S_captive*boost)
 
-      return(list(c(dS_wild, dI_wild, dR_wild, dS_captive, dI_captive, dR_captive)))
+      cumulative_I_captive <- (S_captive * ((beta_aero_cc * I_captive) + (beta_dc_cc *I_captive) +
+                                               (beta_aero_cw*I_wild) + (beta_dc_cw * I_wild) +
+                                               (beta_aero_hc * I_human)))
+
+      return(list(c(dS_wild, dI_wild, dR_wild, cumulative_I_wild, dS_captive, dI_captive, dR_captive, cumulative_I_captive)))
    })
 }

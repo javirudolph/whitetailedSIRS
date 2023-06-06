@@ -121,7 +121,8 @@ proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits.fall, in
 If we look at the proj.ranch object, we can see the items stored in the first list item, including the iteration identifier (run_id), initial compartment sizes (inits), SIRS parameters (params), and the start and end of the projected infection in the ranch context.
 ```{r explore output}
 proj.ranch$run_id[1]
-proj.ranch$inits[1]
+proj.ranch$inits.fall[1]
+proj.ranch$inits.steady[1]
 proj.ranch$params[1]
 head(proj.ranch$ode_proj[[1]])
 tail(proj.ranch$ode_proj[[1]])

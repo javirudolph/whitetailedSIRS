@@ -1,5 +1,6 @@
 ---
-title: "example_values"
+title: "Introduction to a simple projection using whitetailedSIRS"
+author: "F. Javiera Rudolph, Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{example_values}
@@ -17,7 +18,6 @@ knitr::opts_chunk$set(
 ```{r setup, message=FALSE}
 library(whitetailedSIRS)
 library(tidyverse)
-
 library(deSolve)
 library(rootSolve)
 ```
@@ -25,22 +25,15 @@ library(rootSolve)
 
 As a first example, we will use the defaults for all the values, and run one projection of the SIRS model. These defaults are produced as random draws from the expert elicitation data.
 
-
-First, load the data, and generate a random sample for each of the parameters: 
-
+First, load the data, and generate a random sample for each of the parameters using the `draw_elicitation_samples.R` function from the whitetailedSIRS package: 
 ```{r}
 set.seed(23)
 nsamples <- 50
 
-elicitation_data <- whitetailedSIRS::elicitation_data
+EE_data <- whitetailedSIRS::elicitation_data
 # bind samples to the elicitation df
-elicitation_data %>%
-   # create a random sample using the parameters depending on the specified distribution
-   mutate(my_sample = if_else(family == "log-normal",
-                              pmap(list(mu, sd), function(mu, sd) rlnorm(nsamples, mu, sd)),
-                              pmap(list(mu, sd),
-                                   function(mu, sd) greybox::rlogitnorm(nsamples, mu, sd)))) -> elicitation_data
 
+draw_elicitation_samples(elicitation_data = EE_data, nsamples = nsamples,seed = 23) -> elicitation_data
 ```
 
 With the previous code we generated a sample of `r nsamples` values for each of the parameters elicited, using the appropriate distribution. We will use some of those parameters now to calculate our transmission terms and other parameters that go into the SIRS model. The `elicitation_data` object is a tibble, and the sample of values for each parameter is a vector of values within each cell of the tibble for the `my_sample` column:
@@ -48,10 +41,10 @@ With the previous code we generated a sample of `r nsamples` values for each of 
 slice_head(elicitation_data, n = 5)
 ```
 
-We write a short helper function to help us extract each of the vectors in the `my_sample` column, so these can be assigned to the different parameters: 
+We write a short helper function to help us extract each of the vectors in the `my_sample` column, so these can be assigned to the different parameters. This function `get_EE_param_vals.R` is available for use from the whitetailedSIRS package.
 
 ```{r}
-get_param_val <- function(my_param){
+get_EE_param_vals <- function(my_param){
    elicitation_data %>%
       filter(parameter == my_param) %>%
       unnest(cols = c(my_sample)) %>%
@@ -63,31 +56,30 @@ We set up all the parameters that were generated from the expert elicitation dis
 
 ```{r}
 # The immunity parameter that goes into the SIR is the reciprocal to what was elicited
-alpha_immunity <- 1 / get_param_val('Temporary Immunity')
+alpha_immunity <- 1 / get_EE_param_vals('Temporary Immunity')
 
 # Calculate contact rate between wild deer using the contact_rate fx using defaults:
 c_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = "low")
 # The rest of the contact rates were elicited and then modified
-c_cw <- 0.00072 / get_param_val("Direct Contact Probability")
-c_cc <- get_param_val("Deer-Deer Proximity Rate, Captive (per day)")
-c_hw <- get_param_val("Deer-Human Proximity Rate, Rural (per 120 days)") / 120
-c_hc <- get_param_val("Deer-Human Proximity Rate, Captive (per 120 days)") /120
+c_cw <- 0.00072 / get_EE_param_vals("Direct Contact Probability")
+c_cc <- get_EE_param_vals("Deer-Deer Proximity Rate, Captive (per day)")
+c_hw <- get_EE_param_vals("Deer-Human Proximity Rate, Rural (per 120 days)") / 120
+c_hc <- get_EE_param_vals("Deer-Human Proximity Rate, Captive (per 120 days)") /120
 
 # time or duration of these contacts was also expert elicited:
-t_contact_deer_deer <- get_param_val("Deer Proximity Duration (minutes)")
-t_contact_deer_human_rural <- get_param_val("Deer-Human Proximity Duration, Rural (minutes)")
-t_contact_deer_human_capt <- get_param_val("Deer-Human Proximity Duration, Captive (minutes)")
-
+t_contact_deer_deer <- get_EE_param_vals("Deer Proximity Duration (minutes)")
+t_contact_deer_human_rural <- get_EE_param_vals("Deer-Human Proximity Duration, Rural (minutes)")
+t_contact_deer_human_capt <- get_EE_param_vals("Deer-Human Proximity Duration, Captive (minutes)")
 
 # Viral load proportional to human value:
-C_nu <- 10^5.6 * get_param_val("Viral Load")
+C_nu <- 10^5.6 * get_EE_param_vals("Viral Load")
 
 # Dose response
-r_deer <- get_param_val("Dose-Response")
+r_deer <- get_EE_param_vals("Dose-Response")
 
 # Direct contact probability:
-sigma_dc_wild <- get_param_val("Direct Contact Probability")
-sigma_dc_captive <- get_param_val("Direct Contact Probability")
+sigma_dc_wild <- get_EE_param_vals("Direct Contact Probability")
+sigma_dc_captive <- get_EE_param_vals("Direct Contact Probability")
 ```
 
 
@@ -109,6 +101,7 @@ nu_dc_deer_deer <- calc_nu_dc(C_nu = C_nu)
 # Some additional parameters:
 gamma_recov <- rep(1/6, nsamples)
 I_human <- rep(0.05, nsamples)
+boost <- rep(0, nsamples)
 
 ```
 
@@ -124,6 +117,17 @@ list_inits <- list(
    R_captive = rep(0, nsamples)
 )
 
+list_inits_cumulative <- list(
+   S_wild = rep(1, nsamples),
+   I_wild = rep(0, nsamples),
+   R_wild = rep(0, nsamples),
+   I_wild_cumulative = rep(0, nsamples),
+   S_captive = rep(1, nsamples),
+   I_captive = rep(0, nsamples),
+   R_captive = rep(0, nsamples),
+   I_captive_cumulative = rep(0,nsamples)
+)
+
 list_params <- list(
    alpha_immunity = alpha_immunity,
    beta_aero_ww = c_ww * nu_aero_deer_deer,
@@ -134,10 +138,9 @@ list_params <- list(
    beta_dc_ww = c_ww * sigma_dc_wild * nu_dc_deer_deer,
    beta_dc_cw = c_cw * sigma_dc_wild * nu_dc_deer_deer,
    beta_dc_cc = c_cc * sigma_dc_captive * nu_dc_deer_deer,
-   phi_cw = rep(0, nsamples),
-   phi_wc = rep(0, nsamples),
    gamma_recov = gamma_recov,
-   I_human = I_human
+   I_human = I_human,
+   boost = boost
 )
 
 times <- seq(0, 120, by = 1)
@@ -148,15 +151,15 @@ We continue to work with list columns here so we can keep track of the sets of p
 ```{r}
 # create list column to store inits and params
 mytibble <- tibble(run_id = 1:nsamples,
-                   inits = map(run_id, ~ list_inits %>% map_dbl(., .x)),
+                   inits.outbreak = map(run_id, ~ list_inits_cumulative %>% map_dbl(., .x)),
+                   inits.steady = map(run_id, ~ list_inits %>% map_dbl(., .x)),
                    params = map(run_id, function(x) list_params %>% map_dbl(., x)))
 
 # create a new column that stores the results from the ode() projection
-
 mytibble %>%
-   mutate(ode_proj = pmap(list(y = inits, parms = params), ode, times = seq(0, 120, by = 1), func = simple_sirs)) %>% 
+   mutate(ode_proj = pmap(list(y = inits.outbreak, parms = params), ode, times = seq(0, 120, by = 1), func = simple_sirs_with_cumulative)) %>% 
    # now create another column that stores the equilibrium for these:
-   mutate(steady_state = pmap(list(y = inits, parms = params), runsteady, func = simple_sirs)) -> sirs_results # save as new object
+   mutate(steady_state = pmap(list(y = inits.steady, parms = params), runsteady, func = simple_sirs)) -> sirs_results # save as new object
 
 slice_head(sirs_results, n = 3)
 ```
@@ -172,6 +175,21 @@ sirs_results %>%
 ode_df %>%
    ggplot(., aes(x = time, y = I_wild, group = run_id)) +
    geom_line() +
+   labs(x = "Time in days", y = "Proportion of infected, wild individuals") +
+   theme_bw()
+```
+
+We can calculate the cumulative proportion of the population that is infected over the course of the projection:
+```{r}
+# get results in proper format:
+sirs_results %>%
+   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+   pull(ode_df) %>%
+   list_rbind(names_to = "run_id") -> ode_df
+
+ode_df %>%
+   ggplot(., aes(x = time, y = I_wild_cumulative, group = run_id)) +
+   geom_line() +
    labs(x = "Time in days", y = "Proportion of I_w individuals") +
    theme_bw()
 ```
@@ -180,6 +198,7 @@ We can also take a look at how all compartments change over time:
 ```{r}
 
 ode_df %>%
+   select(., -I_wild_cumulative, -I_captive_cumulative) %>% 
    pivot_longer(cols = -c(run_id, time), names_to = "compartment") %>%
    ggplot(., aes(x = time, y = value, group = run_id)) +
    facet_wrap(~compartment) +
@@ -187,6 +206,7 @@ ode_df %>%
    labs(x = "Time in days", y = "Proportion of population") +
    theme_bw()
 ```
+
 
 And check the steady state, or equilibrium, for all of these runs: 
 
