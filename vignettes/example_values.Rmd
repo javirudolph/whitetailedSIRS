@@ -33,7 +33,7 @@ nsamples <- 50
 EE_data <- whitetailedSIRS::elicitation_data
 # bind samples to the elicitation df
 
-draw_elicitation_samples(elicitation_data = EE_data, nsamples = nsamples,seed = 23) -> elicitation_data
+whitetailedSIRS::draw_elicitation_samples(elicitation_data = EE_data, nsamples = nsamples,seed = 23) -> elicitation_data
 ```
 
 With the previous code we generated a sample of `r nsamples` values for each of the parameters elicited, using the appropriate distribution. We will use some of those parameters now to calculate our transmission terms and other parameters that go into the SIRS model. The `elicitation_data` object is a tibble, and the sample of values for each parameter is a vector of values within each cell of the tibble for the `my_sample` column:
@@ -58,7 +58,7 @@ We set up all the parameters that were generated from the expert elicitation dis
 # The immunity parameter that goes into the SIR is the reciprocal to what was elicited
 alpha_immunity <- 1 / get_EE_param_vals('Temporary Immunity')
 
-# Calculate contact rate between wild deer using the contact_rate fx using defaults:
+# Calculate contact rate between wild deer using the contact_rate fx using defaults (see ?calc_contact_rate for details):
 c_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = "low")
 # The rest of the contact rates were elicited and then modified
 c_cw <- 0.00072 / get_EE_param_vals("Direct Contact Probability")
@@ -77,47 +77,38 @@ C_nu <- 10^5.6 * get_EE_param_vals("Viral Load")
 # Dose response
 r_deer <- get_EE_param_vals("Dose-Response")
 
-# Direct contact probability:
-sigma_dc_wild <- get_EE_param_vals("Direct Contact Probability")
-sigma_dc_captive <- get_EE_param_vals("Direct Contact Probability")
+# Direct contact probability (same for all deer):
+sigma_dc <- get_EE_param_vals("Direct Contact Probability")
 ```
 
 
-Using the sets of parameters from expert elicitation we calculate probability of infection via aerosol and direct contact. These calculations are also informed by parameters from the literature, and details on this can be found in the `sir_model_description` document/article.
+Using the sets of parameters from expert elicitation we calculate probability of infection via aerosol and direct contact. These calculations are also informed by parameters from the literature, and details on this can be found in the `sir_model_description` document/article. The calc_nu_aero and calc_nu_dc functions listed below are included in the `whitetailedSIRS` package.
 
 
 ```{r}
-# aerosol
-nu_aero_deer_deer <- calc_nu_aero(C_nu = C_nu,
+# aerosol transmission between deer, using deer exhalation/inhalation rates (default)
+nu_aero_deer_deer <- whitetailedSIRS::calc_nu_aero(C_nu = C_nu,
                                   t_contact = t_contact_deer_deer / 60,
                                   r = r_deer)
 
-nu_aero_deer_human_rural <- calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_rural/60, r = r_deer)
-nu_aero_deer_human_capt <- calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_capt/60, r = r_deer)
+# aerosol transmission from humans to deer, modifying exhalation rates to that of a human
+nu_aero_deer_human_rural <- whitetailedSIRS::calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_rural/60, r = r_deer)
+nu_aero_deer_human_capt <- whitetailedSIRS::calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_capt/60, r = r_deer)
 
-# direct contact
-nu_dc_deer_deer <- calc_nu_dc(C_nu = C_nu)
+# direct contact fluid transmission between deer
+nu_dc_deer_deer <- whitetailedSIRS::calc_nu_dc(C_nu = C_nu)
 
 # Some additional parameters:
-gamma_recov <- rep(1/6, nsamples)
-I_human <- rep(0.05, nsamples)
-boost <- rep(0, nsamples)
-
+gamma_recov <- rep(1/6, nsamples) #Inverse of 6 day recovery period from infection
+I_human <- rep(0.05, nsamples) #Fixed human prevalence level (5%)
+boost <- rep(0, nsamples) #No vaccine boosters administered to captive populations
 ```
 
-Now that we have all the parameters we need, we can set up the inputs for the `ode()` function:
+Now that we have all the parameters we need, we can set up the inputs for the `ode()` function. First, we list the initial compartment sizes to calculate how these compartments change through an outbreak, and calculate the steady state equilibrium size of the infected compartments:
 
 ```{r}
+#Compartment sizes formatted to calculate daily prevalence and cumulative infections:
 list_inits <- list(
-   S_wild = rep(1, nsamples),
-   I_wild = rep(0, nsamples),
-   R_wild = rep(0, nsamples),
-   S_captive = rep(1, nsamples),
-   I_captive = rep(0, nsamples),
-   R_captive = rep(0, nsamples)
-)
-
-list_inits_cumulative <- list(
    S_wild = rep(1, nsamples),
    I_wild = rep(0, nsamples),
    R_wild = rep(0, nsamples),
@@ -128,6 +119,17 @@ list_inits_cumulative <- list(
    I_captive_cumulative = rep(0,nsamples)
 )
 
+#Compartment sizes formatted to calculate steady state equilibrium dynamics:
+list_inits_steady <- list(
+   S_wild = rep(1, nsamples),
+   I_wild = rep(0, nsamples),
+   R_wild = rep(0, nsamples),
+   S_captive = rep(1, nsamples),
+   I_captive = rep(0, nsamples),
+   R_captive = rep(0, nsamples)
+)
+
+#Calculate the derived parameters necessary for use with simple_sirs.R and simple_sirs_with_cumulative.R. This can be done either as a list by hand...:
 list_params <- list(
    alpha_immunity = alpha_immunity,
    beta_aero_ww = c_ww * nu_aero_deer_deer,
@@ -135,14 +137,19 @@ list_params <- list(
    beta_aero_cc = c_cc * nu_aero_deer_deer,
    beta_aero_hw = c_hw * nu_aero_deer_human_rural,
    beta_aero_hc = c_hc * nu_aero_deer_human_capt,
-   beta_dc_ww = c_ww * sigma_dc_wild * nu_dc_deer_deer,
-   beta_dc_cw = c_cw * sigma_dc_wild * nu_dc_deer_deer,
-   beta_dc_cc = c_cc * sigma_dc_captive * nu_dc_deer_deer,
+   beta_dc_ww = c_ww * sigma_dc * nu_dc_deer_deer,
+   beta_dc_cw = c_cw * sigma_dc * nu_dc_deer_deer,
+   beta_dc_cc = c_cc * sigma_dc * nu_dc_deer_deer,
    gamma_recov = gamma_recov,
    I_human = I_human,
    boost = boost
 )
 
+#... or using the alternative.R function from the whitetailedSIRS package:
+list_params <- alternative(alpha_immunity = alpha_immunity, c_ww = c_ww, c_cw = c_cw, c_cc = c_cc, c_hw = c_hw, c_hc = c_hc, nu_aero_deer_deer_wild = nu_aero_deer_deer, nu_aero_deer_deer_captive = nu_aero_deer_deer, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_capt, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer, gamma_recov = gamma_recov, I_human = I_human, boost = boost)
+
+
+#Set a sequence of days to model outbreaks
 times <- seq(0, 120, by = 1)
 ```
 
@@ -151,15 +158,18 @@ We continue to work with list columns here so we can keep track of the sets of p
 ```{r}
 # create list column to store inits and params
 mytibble <- tibble(run_id = 1:nsamples,
-                   inits.outbreak = map(run_id, ~ list_inits_cumulative %>% map_dbl(., .x)),
-                   inits.steady = map(run_id, ~ list_inits %>% map_dbl(., .x)),
+                   inits.outbreak = map(run_id, ~ list_inits %>% map_dbl(., .x)),
+                   inits.steady = map(run_id, ~ list_inits_steady %>% map_dbl(., .x)),
                    params = map(run_id, function(x) list_params %>% map_dbl(., x)))
 
-# create a new column that stores the results from the ode() projection
+# create a new column that stores the results from the ode() projection using the simple_sirs_with_cumulative SIRS ODE equations to calculate daily compartment sizes and cumulative infections,...
 mytibble %>%
    mutate(ode_proj = pmap(list(y = inits.outbreak, parms = params), ode, times = seq(0, 120, by = 1), func = simple_sirs_with_cumulative)) %>% 
-   # now create another column that stores the equilibrium for these:
+   # ..., and create another column that stores the equilibrium for these:
    mutate(steady_state = pmap(list(y = inits.steady, parms = params), runsteady, func = simple_sirs)) -> sirs_results # save as new object
+
+#This can also be done using the run() function from the whitetailedSIRS package:
+sirs_results <- run(iter = nsamples, initial_compartments = list_inits, initial_compartments_steady = list_inits_steady, params = list_params, times = times, name = "Example Values")
 
 slice_head(sirs_results, n = 3)
 ```
@@ -194,7 +204,7 @@ ode_df %>%
    theme_bw()
 ```
 
-We can also take a look at how all compartments change over time: 
+We can also take a look at how all compartments change over time (excluding the cumulative infection calculations): 
 ```{r}
 
 ode_df %>%
@@ -233,14 +243,15 @@ steady_sir %>%
 We can also calculate some metrics such as R0 and force of infection (FOI): 
 
 ```{r}
-r0_deer <- ((c_ww * nu_aero_deer_deer) + (c_ww * nu_dc_deer_deer * sigma_dc_wild)) * 1/gamma_recov
-r0_human <- c_hw * nu_aero_deer_human_rural * 9.5
+r0_deer_wild <- ((c_ww * nu_aero_deer_deer) + (c_ww * nu_dc_deer_deer * sigma_dc)) * 1/gamma_recov
+r0_deer_captive <- ((c_cc * nu_aero_deer_deer) + (c_cc * nu_dc_deer_deer * sigma_dc)) * 1/gamma_recov
 
-tibble(r0_deer = r0_deer, r0_human = r0_human) %>% 
+
+tibble(r0_deer_wild = r0_deer_wild, r0_deer_captive = r0_deer_captive) %>% 
    pivot_longer(cols = everything()) %>% 
    ggplot(., aes(y = value)) +
    facet_wrap(~ name, scales = "free") +
-   geom_hline(yintercept = 0.0015, color = "red", linetype = "dashed") +
+   geom_hline(yintercept = 1, color = "red", linetype = "dashed") +
    geom_boxplot() +
    theme_bw() +
    theme(axis.text.x = element_blank())
@@ -248,9 +259,14 @@ tibble(r0_deer = r0_deer, r0_human = r0_human) %>%
 
 ```{r}
 #FOI
-foi <- c_hw * nu_aero_deer_human_rural * I_human
+foi_wild <- c_hw * nu_aero_deer_human_rural * I_human
+foi_captive <- c_hc * nu_aero_deer_human_capt * I_human
 
-ggplot(data = tibble(foi = foi), aes(y = foi)) +
+tibble(foi_wild = foi_wild,foi_captive = foi_captive) %>% 
+   pivot_longer(cols = everything()) %>% 
+ggplot(data = ., aes(y = value)) +
+   geom_boxplot() +
+   facet_wrap(~ name, scales = "free") +
    geom_boxplot() +
    theme_bw() +
    theme(axis.text.x = element_blank())
