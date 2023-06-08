@@ -59,7 +59,7 @@ Next, we define various proximity rates for the ranch context. Object names refl
 ```{r}
 c_ww_ranch <- rep(0, nsamples) #Deer-to-deer proximity rate in wild (set to 0; events per day).
 c_cw_null <- rep(0, nsamples) #Deer-to-deer proximity rate along fenceline (set to 0; events per day).
-c_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
+c_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, rho_attractant = get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
 
 c_hw_ranch <- rep(0, nsamples) #Human-to-deer proximity rate in wild (set to 0; events per day).
 c_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 #Human-to-deer proximity rate in ranch context, mimicing suburban proximitty rates (events per day).
@@ -121,7 +121,8 @@ proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits.fall, in
 If we look at the proj.ranch object, we can see the items stored in the first list item, including the iteration identifier (run_id), initial compartment sizes (inits), SIRS parameters (params), and the start and end of the projected infection in the ranch context.
 ```{r explore output}
 proj.ranch$run_id[1]
-proj.ranch$inits[1]
+proj.ranch$inits.fall[1]
+proj.ranch$inits.steady[1]
 proj.ranch$params[1]
 head(proj.ranch$ode_proj[[1]])
 tail(proj.ranch$ode_proj[[1]])
@@ -162,7 +163,7 @@ proj.intensive <- run(iter = nsamples, initial_compartments = captive.inits.fall
 In this context, wild deer are free-ranging in an area with a rural human density (3.1 humans/km2). We assumed that deer in this context were subject to regulated hunting either using still-hunting, or ground blind or treestand approaches. We also assumed that baiting and backyard feeding were illegal but may still occur. We again used Habib et al.’s (2011) proximity rate model. We estimated the duration of deer-deer proximity events, and rates and duration of human-deer proximity events using expert elicitation.
 
 ```{r wild and rural}
-c_ww_rural <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, sigma_season = 1)
+c_ww_rural <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)
 c_cc_rural <- rep(0, nsamples)
 c_hw_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") /120
 c_hc_rural <- rep(0, nsamples)
@@ -194,7 +195,7 @@ proj.rural <- run(iter = nsamples, initial_compartments = wild.inits.fall, initi
 Wild deer are free-ranging in an area of suburban human density (100 humans/km2). Deer-to-deer proximity rates were derived using the same parameters as used in the rural setting. The primary difference between this context and the wild, rural context are higher human-to-deer proximity rates and longer duration of proximity events as estimated by expert elicitation.
 
 ```{r wild and captive}
-c_ww_suburban <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, sigma_season = 1)
+c_ww_suburban <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)
 c_cc_suburban <- rep(0, nsamples)
 c_hw_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
 c_hc_suburban <- rep(0, nsamples)
@@ -296,5 +297,6 @@ merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumula
 
 ```{r}
 initial_infection_results_1_in_1000 <- df_initial_infections_1_in_1000
+#save(initial_infection_results_1_in_1000, file = _________) code to save plot for comparison with other intial or continuous spillover scenarios.
 ```
 

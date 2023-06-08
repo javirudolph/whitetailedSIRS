@@ -210,3 +210,61 @@ ggpubr::ggarrange(Prevalence.plot, Persistence.plot, Cumulative.plot,nrow =3, nc
    annotate("label", x = 0.1, y = .25, label = "C", fill = "white", size = 6)
 ```
 
+##Compare outbreak characteristics for initial and continuous spillover
+```{r}
+whitetailedSIRS::example_results %>% 
+   mutate(., intro = "Continuous\nintroduction") %>% 
+   select(., -r0, -FOI) -> continuous
+
+whitetailedSIRS::initial_infection_results_1_in_1000 %>% 
+   mutate(., intro = "Initial introduction\n1 in 1,000") %>% 
+   select(., -r0) -> initial_high
+
+whitetailedSIRS::initial_infection_results_1_in_1mil %>% 
+   mutate(., intro = "Initial introduction\n1 in 1 million") %>% 
+   select(., -r0) -> initial_med
+
+whitetailedSIRS::initial_infection_results_1_in_1bil %>% 
+   mutate(., intro = "Initial introduction\n1 in 1 billion") %>% 
+   select(., -r0) -> initial_low
+
+rbind(continuous, initial_high, initial_med, initial_low) %>% 
+   mutate(intro = factor(intro, levels = c("Continuous\nintroduction","Initial introduction\n1 in 1,000", "Initial introduction\n1 in 1 million", "Initial introduction\n1 in 1 billion")),
+          Cumulative_infections = Cumulative_infections*100)-> spillover.df
+
+spillover.df %>% 
+   ggplot(., aes(x = intro, y = Prevalence))+
+   geom_boxplot()+
+   facet_grid(Context ~.)+
+   scale_y_continuous(name = "Average prevalence (%)")+
+   theme_classic()+
+   theme(axis.title.x = element_blank(),
+         strip.background = element_blank(),
+         strip.text.y = element_blank())-> spillover_prev_plot
+
+spillover.df %>% 
+   group_by(Context, intro) %>% 
+   summarize(., LCL = binom.confint(x = sum(Persist),n = 200, methods = "exact", conf.level = 0.95)$lower,
+             mean = binom.confint(x = sum(Persist),n = 200, methods = "exact", conf.level = 0.95)$mean,
+             UCL = binom.confint(x = sum(Persist),n = 200, methods = "exact", conf.level = 0.95)$upper) %>% 
+   ggplot(., aes(x = intro, y = mean))+
+   geom_point()+
+   geom_errorbar(aes(ymin = LCL, ymax = UCL))+
+   facet_grid(Context ~.)+
+   scale_y_continuous(name = "Probability of persistence")+
+   theme_classic()+
+   theme(axis.title.x = element_blank(),
+         strip.background = element_blank(),
+         strip.text.y = element_blank()) -> spillover_presist_plot
+
+spillover.df %>% 
+   ggplot(., aes(x = intro, y = Cumulative_infections))+
+   geom_boxplot()+
+   facet_grid(Context ~.)+
+   scale_y_continuous(name = "Cumulative infections (%)")+
+   theme_classic()+
+   theme(axis.title.x = element_blank()) -> spillover_cumulative_plot
+
+ggpubr::ggarrange(spillover_prev_plot, spillover_presist_plot, spillover_cumulative_plot, ncol = 3)
+```
+
