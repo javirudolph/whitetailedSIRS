@@ -6,17 +6,17 @@
 \usage{
 alternative(
   alpha_immunity = NULL,
-  c_ww = NULL,
-  c_cw = NULL,
-  c_cc = NULL,
-  c_hw = NULL,
-  c_hc = NULL,
-  nu_aero_deer_deer_wild = NULL,
-  nu_aero_deer_deer_captive = NULL,
-  nu_aero_deer_human_wild = NULL,
-  nu_aero_deer_human_capt = NULL,
-  sigma_dc = NULL,
-  nu_dc_deer_deer = NULL,
+  omega_ww = NULL,
+  omega_cw = NULL,
+  omega_cc = NULL,
+  omega_hw = NULL,
+  omega_hc = NULL,
+  sigma_aero_deer_deer_wild = NULL,
+  sigma_aero_deer_deer_captive = NULL,
+  sigma_aero_deer_human_wild = NULL,
+  sigma_aero_deer_human_capt = NULL,
+  epsilon_dc = NULL,
+  sigma_dc_deer_deer = NULL,
   gamma_recov = NULL,
   I_human = NULL,
   boost = NULL
@@ -25,27 +25,27 @@ alternative(
 \arguments{
 \item{alpha_immunity}{Inverse of duration of temporary immunity after entering recovered compartment (per day, 0-1).}
 
-\item{c_ww}{Deer-deer proximity rate in a wild setting (proximity events per day).}
+\item{omega_ww}{Deer-deer proximity rate in a wild setting (proximity events per day).}
 
-\item{c_cw}{Captive and wild deer proximity rate along fence lines demarking captive and wild populations (proximity events per day).}
+\item{omega_cw}{Captive and wild deer proximity rate along fence lines demarking captive and wild populations (proximity events per day).}
 
-\item{c_cc}{Deer-deer proximity rate in a captive setting (proximity events per day).}
+\item{omega_cc}{Deer-deer proximity rate in a captive setting (proximity events per day).}
 
-\item{c_hw}{Human-deer proximity rate in a wild setting (proximity events per day).}
+\item{omega_hw}{Human-deer proximity rate in a wild setting (proximity events per day).}
 
-\item{c_hc}{Human-deer proximity rate in a captive setting(proximity events per day).}
+\item{omega_hc}{Human-deer proximity rate in a captive setting(proximity events per day).}
 
-\item{nu_aero_deer_deer_wild}{Probability of infection via aerosol transmission between wild deer. Derived using the calc_nu_aero() function.}
+\item{sigma_aero_deer_deer_wild}{Probability of infection via aerosol transmission between wild deer. Derived using the calc_sigma_aero() function.}
 
-\item{nu_aero_deer_deer_captive}{Probability of infection via aerosol transmission in captive deer. Derived using the calc_nu_aero() function.}
+\item{sigma_aero_deer_deer_captive}{Probability of infection via aerosol transmission in captive deer. Derived using the calc_sigma_aero() function.}
 
-\item{nu_aero_deer_human_wild}{Probability of infection via aerosol transmission from humans to wild deer. Derived using the calc_nu_aero() function.}
+\item{sigma_aero_deer_human_wild}{Probability of infection via aerosol transmission from humans to wild deer. Derived using the calc_sigma_aero() function.}
 
-\item{nu_aero_deer_human_capt}{Probability of infection via aerosol transmission from humans to captive deer. Derived using the calc_nu_aero() function.}
+\item{sigma_aero_deer_human_capt}{Probability of infection via aerosol transmission from humans to captive deer. Derived using the calc_sigma_aero() function.}
 
-\item{sigma_dc}{Probability of direct contact between deer, given proximity.}
+\item{epsilon_dc}{Probability of direct contact between deer, given proximity.}
 
-\item{nu_dc_deer_deer}{Probability of infection via fluid transmission between deer. Derived using the calc_nu_dc() function.}
+\item{sigma_dc_deer_deer}{Probability of infection via fluid transmission between deer. Derived using the calc_sigma_dc() function.}
 
 \item{gamma_recov}{Inverse of duration for recovery from infection (per day, 0-1).}
 
@@ -60,15 +60,15 @@ Returns a list of vectors for each parameter
 \code{alternative()} helps to prepare parameters used to solve SIRS ODE equations for both wild and captive deer, to be fed into the params argument of the \code{run()} function.
 }
 \details{
-alternative() creates a list of parameter values that will be fed into a SIRS ODE solver. The length of each item in the output is determined by the length of all arguments, which must be equal. If argument(s) is not filled with outputs from another function in this package (e.g. calc_contact_rate, calc_nu_aero, calc_nu_dc, draw_elicitation_samples), the user must fill argument with vector of values of the same length as the other arguments.
+alternative() creates a list of parameter values that will be fed into a SIRS ODE solver. The length of each item in the output is determined by the length of all arguments, which must be equal. If argument(s) is not filled with outputs from another function in this package (e.g. calc_contact_rate, calc_sigma_aero, calc_sigma_dc, draw_elicitation_samples), the user must fill argument with vector of values of the same length as the other arguments.
 
 Parameter values defined with this function remained fixed during SIRS ODE solves. While these parameter values can be derived through random processes, projections are deterministic.
 
-Proximity, by default with the calc_nu_aero() function, is defined as two individuals entering within 1.5m of each other. This proximity limit can be modified in V_air argument in the calc_nu_aero() function, which defines a half-sphere volume into which aerosolized virus is exhaled from an infectious individual.
+Proximity, by default with the calc_sigma_aero() function, is defined as two individuals entering within 1.5m of each other. This proximity limit can be modified in V_air argument in the calc_sigma_aero() function, which defines a half-sphere volume into which aerosolized virus is exhaled from an infectious individual.
 }
 \examples{
-alternative(alpha_immunity = c((1/30),(1/60),(1/90),(1/120),(1/150)), c_ww = rep(10,5), c_cw = rep(1,5), c_cc = rep(20,5), c_hw = rep(0.01,5), c_hc = rep(0.25,5), nu_aero_deer_deer_wild = rep(0.01,5), nu_aero_deer_deer_captive = rep(0.1,5), nu_aero_deer_human_wild = rep(0.001,5), nu_aero_deer_human_capt = rep(0.05,5), sigma_dc = rep(0.2,5), nu_dc_deer_deer = rep(0.02,5), gamma_recov = rep(1/6,5), I_human = rep(0.05,5), boost = rep(0,5))
+alternative(alpha_immunity = c((1/30),(1/60),(1/90),(1/120),(1/150)), omega_ww = rep(10,5), omega_cw = rep(1,5), omega_cc = rep(20,5), omega_hw = rep(0.01,5), omega_hc = rep(0.25,5), sigma_aero_deer_deer_wild = rep(0.01,5), sigma_aero_deer_deer_captive = rep(0.1,5), sigma_aero_deer_human_wild = rep(0.001,5), sigma_aero_deer_human_capt = rep(0.05,5), epsilon_dc = rep(0.2,5), sigma_dc_deer_deer = rep(0.02,5), gamma_recov = rep(1/6,5), I_human = rep(0.05,5), boost = rep(0,5))
 }
 \seealso{
-\code{run()}, \code{calc_contact_rate()}, \code{calc_nu_aero()}, \code{calc_nu_dc()}, \code{draw_elicitation_samples()}
+\code{run()}, \code{calc_contact_rate()}, \code{calc_sigma_aero()}, \code{calc_sigma_dc()}, \code{draw_elicitation_samples()}
 }
