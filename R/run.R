@@ -1,18 +1,24 @@
 #' Run ODE Solver for SIRS model
 #'
 #' @param iter Number of iterations, often referred to as 'nsamples' in package examples
-#' @param initial_compartments Initial compartment sizes (proportions, stored as list)
+#' @param initial_compartments Initial compartment sizes, including  (proportions, stored as list)
+#' @param initial_compartments_steady Initial compartment sizes for steady state calculation (proportions, stored as list)
 #' @param parameters SIRS parameters, stored as a list
 #' @param times Length of projection (days)
 #' @param name Name of context being simulated
 #'
-#' @return #List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.
+#' @return #List containing iteration details, including initial compartment sizes for ODE solver and steady state calculation, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.
 #' @export
 #'
 #' @examples
 #' nsamples = 10
 #'
 #' example_inits <- c(S_wild = 1, I_wild = 0,
+#'                    R_wild = 0, I_wild_cumulative = 0,
+#'                    S_captive = 1, I_captive = 0,
+#'                    R_captive = 0, I_captive_cumulative = 0)
+#'
+#' example_inits_steady <- c(S_wild = 1, I_wild = 0,
 #'                    R_wild = 0, S_captive = 1,
 #'                    I_captive = 0, R_captive = 0)
 #'
@@ -33,7 +39,7 @@
 #'                     I_human = 0.05,
 #'                     boost = 0)
 #'
-#' run(iter = nsamples, initial_compartments = example_inits, params = example_params, times = example_times, name = Test)
+#' run(iter = nsamples, initial_compartments = example_inits, initial_compartments_steady = example_inits_steady, params = example_params, times = example_times, name = Test)
 run <- function(iter = NULL, initial_compartments = NULL, initial_compartments_steady = NULL,params = NULL, times = NULL, name = NULL)
 
 {  if(is.null(iter)) {stop("User must specify number of iterations - often stored as nsamples object")}

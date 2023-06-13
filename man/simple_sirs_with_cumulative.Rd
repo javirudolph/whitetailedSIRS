@@ -11,8 +11,8 @@ simple_sirs_with_cumulative(time, state, parameters)
 days).}
 
 \item{state}{initial state for compartment populations. This should be a
-named vector for starting values of S_wild, I_wild, R_wild, S_captive,
-I_captive, R_captive.}
+named vector for starting values of S_wild, I_wild, R_wild, I_wild_cumulative, S_captive,
+I_captive, R_captive, I_captive_cumulative.}
 
 \item{parameters}{list of parameters to generate projection. The parameters
 should include transmission parameters, immunity and recovery rates, and
