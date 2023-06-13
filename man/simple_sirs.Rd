@@ -17,7 +17,7 @@ I_captive, R_captive.}
 \item{parameters}{list of parameters to generate projection. The parameters
 should include transmission parameters, immunity and recovery rates, and
 proportion of infected humans.
-@details Use \code{simple_sirs} to calculate persistence (via \code{rootSolve::run_steady()}), along with how compartment sizes change through a projection. If cumulative infections are desired, use \code{simple_sir_with_cumulative} instead.}
+@details Use \code{simple_sirs} to calculate persistence (via \code{rootSolve::run_steady()}), along with how compartment sizes change through a projection. If cumulative infections are desired, use \code{simple_sir_with_cumulative} instead. The parameter \code{boost} is included in the ODE equations for captive deer to allow implementation of applying vaccine boosters to captive deer herds as a potential management alternative to influence outbreak dynamics. See the vignette \code{Management_Alternative_Systems.Rmd} to see an example of its use. In all other cases where boosters would not be applied, boost should be set to 0.}
 }
 \value{
 when used with the \code{deSolve::ode()} function, it will return a

@@ -29,7 +29,7 @@ it will return an object with the proportion of individuals found in each of
 the SIR compartments at each of the specified time points.
 }
 \details{
-\code{simple_sirs_with_cumulative()} cannot be run with \code{run_steady()} to estimate probability of persistence. Instead, use \code{simple_sirs()}, which does not return cumulative proportion of population infected.
+\code{simple_sirs_with_cumulative()} cannot be run with \code{run_steady()} to estimate probability of persistence. Instead, use \code{simple_sirs()}, which does not return cumulative proportion of population infected. The parameter \code{boost} is included in the ODE equations for captive deer to allow implementation of applying vaccine boosters to captive deer herds as a potential management alternative to influence outbreak dynamics. See the vignette \code{Management_Alternative_Systems.Rmd} to see an example of its use. In all other cases where boosters would not be applied, boost should be set to 0.
 }
 \examples{
 # prepare the input parameters:
