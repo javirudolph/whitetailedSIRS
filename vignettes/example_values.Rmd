@@ -59,12 +59,12 @@ We set up all the parameters that were generated from the expert elicitation dis
 alpha_immunity <- 1 / get_EE_param_vals('Temporary Immunity')
 
 # Calculate contact rate between wild deer using the contact_rate fx using defaults (see ?calc_contact_rate for details):
-c_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = "low")
+omega_ww <- whitetailedSIRS::calc_contact_rate(nsamples = nsamples, type_contact = "low")
 # The rest of the contact rates were elicited and then modified
-c_cw <- 0.00072 / get_EE_param_vals("Direct Contact Probability")
-c_cc <- get_EE_param_vals("Deer-Deer Proximity Rate, Captive (per day)")
-c_hw <- get_EE_param_vals("Deer-Human Proximity Rate, Rural (per 120 days)") / 120
-c_hc <- get_EE_param_vals("Deer-Human Proximity Rate, Captive (per 120 days)") /120
+omega_cw <- 0.00072 / get_EE_param_vals("Direct Contact Probability")
+omega_cc <- get_EE_param_vals("Deer-Deer Proximity Rate, Captive (per day)")
+omega_hw <- get_EE_param_vals("Deer-Human Proximity Rate, Rural (per 120 days)") / 120
+omega_hc <- get_EE_param_vals("Deer-Human Proximity Rate, Captive (per 120 days)") /120
 
 # time or duration of these contacts was also expert elicited:
 t_contact_deer_deer <- get_EE_param_vals("Deer Proximity Duration (minutes)")
@@ -78,25 +78,25 @@ C_nu <- 10^5.6 * get_EE_param_vals("Viral Load")
 r_deer <- get_EE_param_vals("Dose-Response")
 
 # Direct contact probability (same for all deer):
-sigma_dc <- get_EE_param_vals("Direct Contact Probability")
+epsilon_dc <- get_EE_param_vals("Direct Contact Probability")
 ```
 
 
-Using the sets of parameters from expert elicitation we calculate probability of infection via aerosol and direct contact. These calculations are also informed by parameters from the literature, and details on this can be found in the `sir_model_description` document/article. The calc_nu_aero and calc_nu_dc functions listed below are included in the `whitetailedSIRS` package.
+Using the sets of parameters from expert elicitation we calculate probability of infection via aerosol and direct contact. These calculations are also informed by parameters from the literature, and details on this can be found in the `sir_model_description` document/article. The calc_sigma_aero and calc_sigma_dc functions listed below are included in the `whitetailedSIRS` package.
 
 
 ```{r}
 # aerosol transmission between deer, using deer exhalation/inhalation rates (default)
-nu_aero_deer_deer <- whitetailedSIRS::calc_nu_aero(C_nu = C_nu,
+sigma_aero_deer_deer <- whitetailedSIRS::calc_sigma_aero(C_nu = C_nu,
                                   t_contact = t_contact_deer_deer / 60,
                                   r = r_deer)
 
 # aerosol transmission from humans to deer, modifying exhalation rates to that of a human
-nu_aero_deer_human_rural <- whitetailedSIRS::calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_rural/60, r = r_deer)
-nu_aero_deer_human_capt <- whitetailedSIRS::calc_nu_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_capt/60, r = r_deer)
+sigma_aero_deer_human_rural <- whitetailedSIRS::calc_sigma_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_rural/60, r = r_deer)
+sigma_aero_deer_human_capt <- whitetailedSIRS::calc_sigma_aero(ER = rep(0.53, nsamples), C_nu = C_nu, t_contact = t_contact_deer_human_capt/60, r = r_deer)
 
 # direct contact fluid transmission between deer
-nu_dc_deer_deer <- whitetailedSIRS::calc_nu_dc(C_nu = C_nu)
+sigma_dc_deer_deer <- whitetailedSIRS::calc_sigma_dc(C_nu = C_nu)
 
 # Some additional parameters:
 gamma_recov <- rep(1/6, nsamples) #Inverse of 6 day recovery period from infection
@@ -132,21 +132,21 @@ list_inits_steady <- list(
 #Calculate the derived parameters necessary for use with simple_sirs.R and simple_sirs_with_cumulative.R. This can be done either as a list by hand...:
 list_params <- list(
    alpha_immunity = alpha_immunity,
-   beta_aero_ww = c_ww * nu_aero_deer_deer,
-   beta_aero_cw = c_cw * nu_aero_deer_deer,
-   beta_aero_cc = c_cc * nu_aero_deer_deer,
-   beta_aero_hw = c_hw * nu_aero_deer_human_rural,
-   beta_aero_hc = c_hc * nu_aero_deer_human_capt,
-   beta_dc_ww = c_ww * sigma_dc * nu_dc_deer_deer,
-   beta_dc_cw = c_cw * sigma_dc * nu_dc_deer_deer,
-   beta_dc_cc = c_cc * sigma_dc * nu_dc_deer_deer,
+   beta_aero_ww = omega_ww * sigma_aero_deer_deer,
+   beta_aero_cw = omega_cw * sigma_aero_deer_deer,
+   beta_aero_cc = omega_cc * sigma_aero_deer_deer,
+   beta_aero_hw = omega_hw * sigma_aero_deer_human_rural,
+   beta_aero_hc = omega_hc * sigma_aero_deer_human_capt,
+   beta_dc_ww = omega_ww * epsilon_dc * sigma_dc_deer_deer,
+   beta_dc_cw = omega_cw * epsilon_dc * sigma_dc_deer_deer,
+   beta_dc_cc = omega_cc * epsilon_dc * sigma_dc_deer_deer,
    gamma_recov = gamma_recov,
    I_human = I_human,
    boost = boost
 )
 
 #... or using the alternative.R function from the whitetailedSIRS package:
-list_params <- alternative(alpha_immunity = alpha_immunity, c_ww = c_ww, c_cw = c_cw, c_cc = c_cc, c_hw = c_hw, c_hc = c_hc, nu_aero_deer_deer_wild = nu_aero_deer_deer, nu_aero_deer_deer_captive = nu_aero_deer_deer, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_capt, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer, gamma_recov = gamma_recov, I_human = I_human, boost = boost)
+list_params <- alternative(alpha_immunity = alpha_immunity, omega_ww = omega_ww, omega_cw = omega_cw, omega_cc = omega_cc, omega_hw = omega_hw, omega_hc = omega_hc, sigma_aero_deer_deer_wild = sigma_aero_deer_deer, sigma_aero_deer_deer_captive = sigma_aero_deer_deer, sigma_aero_deer_human_wild = sigma_aero_deer_human_rural, sigma_aero_deer_human_capt = sigma_aero_deer_human_capt, epsilon_dc = epsilon_dc, sigma_dc_deer_deer = sigma_dc_deer_deer, gamma_recov = gamma_recov, I_human = I_human, boost = boost)
 
 
 #Set a sequence of days to model outbreaks
@@ -243,8 +243,8 @@ steady_sir %>%
 We can also calculate some metrics such as R0 and force of infection (FOI): 
 
 ```{r}
-r0_deer_wild <- ((c_ww * nu_aero_deer_deer) + (c_ww * nu_dc_deer_deer * sigma_dc)) * 1/gamma_recov
-r0_deer_captive <- ((c_cc * nu_aero_deer_deer) + (c_cc * nu_dc_deer_deer * sigma_dc)) * 1/gamma_recov
+r0_deer_wild <- ((omega_ww * sigma_aero_deer_deer) + (omega_ww * sigma_dc_deer_deer * epsilon_dc)) * 1/gamma_recov
+r0_deer_captive <- ((omega_cc * sigma_aero_deer_deer) + (omega_cc * sigma_dc_deer_deer * epsilon_dc)) * 1/gamma_recov
 
 
 tibble(r0_deer_wild = r0_deer_wild, r0_deer_captive = r0_deer_captive) %>% 
@@ -259,8 +259,8 @@ tibble(r0_deer_wild = r0_deer_wild, r0_deer_captive = r0_deer_captive) %>%
 
 ```{r}
 #FOI
-foi_wild <- c_hw * nu_aero_deer_human_rural * I_human
-foi_captive <- c_hc * nu_aero_deer_human_capt * I_human
+foi_wild <- omega_hw * sigma_aero_deer_human_rural * I_human
+foi_captive <- omega_hc * sigma_aero_deer_human_capt * I_human
 
 tibble(foi_wild = foi_wild,foi_captive = foi_captive) %>% 
    pivot_longer(cols = everything()) %>% 
