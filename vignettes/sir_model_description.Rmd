@@ -1,5 +1,5 @@
 ---
-title: "sir_model_description"
+title: "Epidemiological model overview for SARS-CoV-2 in white-tailed deer"
 author: F. Javiera Rudolph, Elias Rosenblatt
 output: rmarkdown::html_vignette
 vignette: >
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 library(whitetailedSIRS)
 ```
 
-## 1 SIRS ODE Equations
+## 1. SIRS ODE Equations
 The main function in the package is `whitetailedSIRS::simple_sirs()` and it is derived from equations 5-10 below.
 
 We explore two direct exposure pathways in a Susceptible-Infected-Recovered-Susceptible model (SIRS) that simulates infection dynamics through time. See Rosenblatt et al. In Prep for a full description and parameter values used in projecting outbreaks of SARS-CoV-2.
@@ -157,6 +157,7 @@ dR_captive <- (gamma_recov * I_captive) -
 
 ``` 
 
+One parameter present in `whitetailedSIRS::simple_sirs()` that is not listed here is a parameter called `boost`. `boost` mimics vaccine boosting in captive deer herds, transitioning captive deer from the Susceptible compartment to the Recovered compartment without infection. If vaccine boosting is not being evaluated, this parameter should be set to 0. See `whitetailedSIRS::Management_Alternatives_Systems` vignette for more details.
 
 ## 2 $\beta$ Definitions
 
@@ -291,78 +292,73 @@ calc_nu_aero <- function(AER,
 
 #### 2.1.4 Aerosol transmission rates ($\beta^{Aero}$) 
 
-Below are the various aerosol transmission rates used in the SIRS model. Parameter values are listed in Table 1.
+Below are the various aerosol transmission rates used in the SIRS model. Parameter values are listed in Table 1 of Rosenblatt et al. In Prep.
 
 Aerosol transmission between wild deer:  
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{WW}^{Aero} = \sigma_{season} \cdot c \bigg(\frac{N_W^{(1-q)}}{A_W} \bigg) \cdot \nu^{Aero}
+\beta_{WW}^{Aero} = \kappa \bigg( \frac{N_{W}^{1-q}}{A_{W}} \bigg) \cdot \rho_{attractant} \cdot \sigma^{Aero}
 \end{align}
 ::: 
 
-- $\sigma_{season}$ = seasonal adjustment to density-contact relationship (Section 2.3.1.1)
-- $c$ = scaling constant
-- $q$ = concavity scaling constant
-- $N_W$ = Total wild population size
-- $A_W$ = Area inhabited by wild population
-- $\nu^{Aero}$ = Probability of infection from aerosols (Section 2.3.1.3) 
+- $\kappa$ = scaling constant (Section 2.1.1)
+- $q$ = concavity scaling constant (Section 2.1.1)
+- $N_W$ = Total wild population size (Section 2.1.1)
+- $A_W$ = Area inhabited by wild population (Section 2.1.1)
+- $\rho_{attractant}$ = proportional adjustment for attractants on the landscape (Section 2.1.1)
+- $\sigma^{Aero}$ = Probability of infection from aerosols (Section 2.1.3)
 
 
 Aerosol transmission between captive deer:  
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{CC}^{Aero} = c_{CC} \cdot \nu^{Aero}
+\beta_{CC}^{Aero} = \omega_{CC} \cdot \sigma^{Aero}
 \end{align}
 :::
 
-- $c_{CC}$ = Captivity proximity rate (Section 2.3.1.1)
-- $\nu^{Aero}$ = Probability of infection from aerosols (Section 2.3.1.3)
+- $\omega_{CC}$ = Captivity proximity rate  (Section 2.1.1)
+- $\sigma^{Aero}$ = Probability of infection from aerosols (Section 2.1.3)
 
 Aerosol transmission between wild and captive deer across fence:  
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{CW}^{Aero} = c_{WC} \cdot \nu^{Aero}
+\beta_{CW}^{Aero} = \omega_{WC} \cdot \sigma^{Aero}
 \end{align}
 :::
 
-- $c_{WC}$ = Fence line proximity rate between wild and captive deer (Section 2.3.1.1)
-- $\nu^{Aero}$ = Probability of infection from aerosols (Section 2.3.1.3) 
+- $\omega_{WC}$ = Fence line proximity rate between wild and captive deer (Section 2.1.1)
+- $\sigma^{Aero}$ = Probability of infection from aerosols (Section 2.1.3)
 
 
 Aerosol transmission between humans and wild deer:  
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{HW}^{Aero} = c_{HW} \cdot \nu^{Aero}
+\beta_{HW}^{Aero} = \omega_{HW} \cdot \sigma^{Aero}
 \end{align}
 :::
 
-- $c_{HW}$ = Proximity rate between humans and wild deer (Section 2.3.1.2)
-- $\nu^{Aero}$ = Probability of infection from aerosols (Section 2.3.1.3)
+- $\omega_{HW}$ = Proximity rate between humans and wild deer (Section 2.1.2)
+- $\sigma^{Aero}$ = Probability of infection from aerosols (Section 2.1.3)
 
 Aerosol transmission between humans and captive deer:  
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{HC}^{Aero} = c_{HC} \cdot \nu^{Aero}
+\beta_{HC}^{Aero} = \omega_{HC} \cdot \sigma^{Aero}
 \end{align}
 :::
 
-- $c_{HC}$ = Proximity rate between humans and captive deer (Section 2.3.1.2)
-- $\nu^{Aero}$ = Probability of infection from aerosols (Section 2.3.1.3)
+- $\omega_{HC}$ = Proximity rate between humans and captive deer (Section 2.1.2)
+- $\sigma^{Aero}$ = Probability of infection from aerosols (Section 2.1.3)
 
 
 ### 2.2 Fluid Transmission 
 
-The transmission rate of SARS-CoV-2 via fluid transfer on direct contact ($\beta^{DC}$) is the product of the rate that a susceptible individual enters shared airspace with an infected individual (within 1.5m), the probability of the two individuals making physical contact, and the probability of infection given contact. We simply take the deer-deer proximity rates detailed above (Section 2.3.1.1) and multiply them by expert-elicited estimates of physical contact probability ($\sigma^{DC}$) to determine the rate of physical contact. Below we detail the infection probability given physical contact (Section 2.3.2.1). We then build transmission rates ($\beta^{Aero}$) between deer (Section 2.3.2.2). We consider this transmission pathway between deer, but not between human and deer.
-
-:::{.callout-note}
-In the paragraph above, towards the end, we have transmission rates as $\beta^{Aero}$, but I think it has to be $\beta^{DC}$.
-:::  
-
+The transmission rate of SARS-CoV-2 via fluid transfer on direct contact ($\beta^{DC}$) is the product of the rate that a susceptible individual enters shared airspace with an infected individual (within 1.5m), the probability of the two individuals making physical contact, and the probability of infection given contact. We simply take the deer-deer proximity rates detailed above ($\omega_{ij}$) and multiply them by expert-elicited estimates of physical contact probability ($\epsilon^{DC}$) to determine the rate of physical contact, and by the probability of infection given transfer of 0.1 ml of contaminated fluid during physical contact ($\sigma^{DC}$). Below we detail the infection probability given physical contact (Section 2.2.1). We then build transmission rates ($\beta^{DC}$) between deer (Section 2.2.2). We consider this transmission pathway between deer, but not between human and deer.
 
 #### 2.2.1 Infection probability given physical contact 
 
@@ -370,25 +366,17 @@ We use a Wells-Riley dose response model that estimates infection probability as
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\nu^{DC} = 1 - e^{-(d^{DC}/k)}
+\sigma^{DC} = 1 - e^{-((C_{v} \cdot V_{sputum} )/k)}
 \end{align}
 :::  
 
-where  
-
-::: {style="font-size: 85%;"}
-\begin{align}
-d^{DC} = V^{DC} \cdot C_{\nu} \cdot pfuConv
-\end{align}
-:::  
-
-
+In the `whitetailedSIRS package`, the function `calc_nu_dc` will automate the calculation of infection probability from the transmission of fluid.
 ```{r}
 # function for nu_direct_contact
 
 calc_nu_DC<- function(V_DC, C_nu, pfu_conv, k){
    
-   # calculate dose received as function of volume of sputum and viral particles concentration
+   # calculate dose received as function of volume of sputum and viral particles concentration. There is an added parameter pfu_conv to convert RNA copies to plaque forming units, which is likely necessary given available parameter estimates.
    d_DC <- V_DC * C_nu * pfu_conv
    
    # calculate infection probability 
@@ -402,37 +390,36 @@ calc_nu_DC<- function(V_DC, C_nu, pfu_conv, k){
 
 #### 2.2.2 Fluid Transmission ($\beta^{DC}$)  
 
-Below are the various direct contact transmission rates used in the SIRS model. Parameter values are listed in Table 1.
+Below are the various direct contact transmission rates used in the SIRS model. Parameter values are listed in Table 1 of Rosenblatt et al. In Prep.
 
 *Direct contact transmission between wild deer:* 
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{WW}^{DC} = \sigma_{season} \cdot c \cdot \bigg( \frac{N_W^{(1-q)}}{A_W} \bigg) \cdot \sigma^{DC} \cdot \nu^{DC}
+\beta_{WW}^{DC} = kappa \cdot \bigg( \frac{N_W^{(1-q)}}{A_W} \bigg) \cdot \epsilon^{DC} \cdot \sigma^{DC}
 \end{align}
 :::  
 
 
-- $\sigma_{season}$ = seasonal adjustment to density-contact relationship (Section 2.3.1.1) 
-- $c$ = scaling constant
-- $q$ = concavity scaling constant
-- $N_W$ = Total wild population size
-- $A_W$ = Area inhabited by wild population
-- $\sigma^{DC}$ = Probability of deer making direct contact (Section 2.3.2.1)
-- $\nu^{DC}$ = Probability of infection from direct contact (Section 2.3.2.2). 
+- $\kappa$ = scaling constant (Section 2.1.1)
+- $q$ = concavity scaling constant (Section 2.1.1)
+- $N_W$ = Total wild population size (Section 2.1.1)
+- $A_W$ = Area inhabited by wild population (Section 2.1.1)
+- $\epsilon^{DC}$ = Probability of deer making direct contact (Section 2.2)
+- $\sigma^{DC}$ = Probability of infection from direct contact (Section 2.2.1)
 
 
 Direct contact transmission between captive deer: 
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{CC}^{DC} = c_{CC} \cdot \sigma^{DC} \cdot \nu^{DC} 
+\beta_{CC}^{DC} = \omega_{CC} \cdot \epsilon^{DC} \cdot \sigma^{DC} 
 \end{align}
 :::  
 
-- $c_{CC}$ = Captivity proximity rate (Section 2.3.1.1) 
-- $\sigma^{DC}$ = Probability of physical contact (Section 2.3.2)
-- $\nu^{DC}$ = Probability of infection from physical contact (Section 2.3.2.1) 
+- $\omega_{CC}$ = Captivity proximity rate (Section 2.1.1)
+- $\epsilon^{DC}$ = Probability of physical contact (Section 2.2)
+- $\sigma^{DC}$ = Probability of infection from physical contact (Section 2.2.1)
 
 
 Direct contact transmission between wild and captive deer along fence line (assuming possible):  
@@ -444,6 +431,59 @@ Direct contact transmission between wild and captive deer along fence line (assu
 ::: 
 
 
-- $c_{WC}$ = Fenceline contact rate between wild and captive deer (Section 2.3.1.1)
-- $\sigma^{DC}$ = Probability of physical contact (Section 2.3.2)
-- $\nu^{DC}$ = Probability of infection from physical contact (Section 2.3.2.1)
+- $\omega_{WC}$ = Fenceline contact rate between wild and captive deer (Section 2.1.1)
+- $\epsilon^{DC}$ = Probability of physical contact (Section 2.2)
+- $\epsilon^{DC}$ = Probability of infection from physical contact (Section 2.2.1)
+
+### 2.3 Function to calculate and organize betas and other SIR parameters
+
+The function `whitetailedSIRS::alternatives()` is available to do all of these calculations for the user. 
+
+```{r}
+alternative <- function(alpha_immunity = NULL, c_ww = NULL, c_cw = NULL, c_cc = NULL, c_hw = NULL, c_hc = NULL, nu_aero_deer_deer_wild = NULL, nu_aero_deer_deer_captive = NULL, nu_aero_deer_human_wild = NULL, nu_aero_deer_human_capt = NULL, sigma_dc = NULL, nu_dc_deer_deer = NULL, gamma_recov = NULL, I_human = NULL, boost = NULL)
+
+
+   {list(
+      alpha_immunity, #Duration of immunity (Section 1)
+      beta_aero_ww = c_ww * nu_aero_deer_deer_wild, #Transmission risk, aerosols between wild deer (Section 2.1.4)
+      beta_aero_cw = c_cw * nu_aero_deer_deer_wild, #Transmission risk, aerosols across fencelines (Section 2.1.4)
+      beta_aero_cc = c_cc * nu_aero_deer_deer_captive, #Transmission risk, aerosols between captive deer  (Section 2.1.4)
+      beta_aero_hw = c_hw * nu_aero_deer_human_wild, #Transmission risk, aerosols between humans and wild deer  (Section 2.1.4)
+      beta_aero_hc = c_hc * nu_aero_deer_human_capt, #Transmission risk, aerosols between humans and captive deer  (Section 2.1.4)
+      beta_dc_ww = c_ww * sigma_dc * nu_dc_deer_deer, #Transmission risk, fluid between wild deer (Section 2.2.2)
+      beta_dc_cw = c_cw * sigma_dc * nu_dc_deer_deer, #Transmission risk, fluid across fencelines (Section 2.2.2)
+      beta_dc_cc = c_cc * sigma_dc * nu_dc_deer_deer, #Transmission risk, fluid between captive deer (Section 2.2.2)
+      gamma_recov = gamma_recov, #Recovery rate (Section 1)
+      I_human = I_human, #Human prevalence (Section 1)
+      boost = boost)} #Boost (See `whitetailedSIRS::Management_Alternatives_Systems` vignette for more details.)
+```
+
+## 3. Tracking cumulative infections
+
+There is an option to track the cumulative infections in population over the course of a projection. The modified `whitetailedSIRS::simple_sirs_with_cumulative()` has added ODE equations to calculate this sum. While the majority of the function is identical to `whitetailedSIRS::simple_sirs()`, there are two added lines:
+
+```{r}
+#| eval: false
+cumulative_I_wild <- (S_wild * ((beta_aero_ww * I_wild) + (beta_dc_ww * I_wild) +
+                                         (beta_aero_cw * I_captive) + (beta_dc_cw * I_captive) +
+                                         (beta_aero_hw * I_human)))
+
+cumulative_I_captive <- (S_captive * ((beta_aero_cc * I_captive) + (beta_dc_cc *I_captive) +
+                                               (beta_aero_cw*I_wild) + (beta_dc_cw * I_wild) +
+                                               (beta_aero_hc * I_human)))
+```
+
+These added lines equate to the following calculations:
+
+::: {style="font-size: 85%;"}
+\begin{align}
+Cumulativeinfections_{W} =  \sum^{120}_{t=1} s_{t-1}(\beta^{Aero}_{WW} i_{W,t-1} + \beta^{DC}_{WW} i_{W,t-1} + \beta^{Aero}_{CW} i_{C,t-1} + \beta^{DC}_{CW} i_{C,t-1} + \beta^{Aero}_{HW} i_{H})
+\end{align}
+:::
+
+::: {style="font-size: 85%;"}
+\begin{align}
+
+Cumulativeinfections_{C} = \sum^{120}_{t=1} s_{t-1}(\beta^{Aero}_{CC} i_{C,t-1} + \beta^{DC}_{CC} i_{C,t-1} + \beta^{Aero}_{CW} i_{W,t-1} + \beta^{DC}_{CW} i_{W,t-1} + \beta^{Aero}_{HC} i_{H})
+\end{align}
+:::
