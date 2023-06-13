@@ -254,9 +254,9 @@ The amount of SARS-CoV-2 inhaled by the susceptible deer ($Q_A$) is converted in
 
 The dose received and probability of infection are calculated for deer-deer and human-deer proximity events based on species-specific exhalation/inhalation rate, viral loads, dose response relationships, and various durations of proximity events for particular contexts. 
 
-In the whitetailedSIRS package, the function `calc_nu_aero` will automate the calculation of infection probability.
+In the whitetailedSIRS package, the function `calc_sigma_aero` will automate the calculation of infection probability.
 ```{r}
-calc_nu_aero <- function(AER,
+calc_sigma_aero <- function(AER,
                          s,
                          lambda,
                          C_nu,
@@ -284,9 +284,9 @@ calc_nu_aero <- function(AER,
    
    # Use Wells-Riley model to transform amount of virus inhaled
    # into a probability of infection via aerosol
-   nu_aero <- 1 - exp(-r * Q)
+   sigma_aero <- 1 - exp(-r * Q)
    
-   return(nu_aero)
+   return(sigma_aero)
 }
 ```
 
@@ -370,19 +370,19 @@ We use a Wells-Riley dose response model that estimates infection probability as
 \end{align}
 :::  
 
-In the `whitetailedSIRS package`, the function `calc_nu_dc` will automate the calculation of infection probability from the transmission of fluid.
+In the `whitetailedSIRS package`, the function `calc_sigma_dc` will automate the calculation of infection probability from the transmission of fluid.
 ```{r}
-# function for nu_direct_contact
+# function for sigma_direct_contact
 
-calc_nu_DC<- function(V_DC, C_nu, pfu_conv, k){
+calc_sigma_DC<- function(V_DC, C_nu, pfu_conv, k){
    
    # calculate dose received as function of volume of sputum and viral particles concentration. There is an added parameter pfu_conv to convert RNA copies to plaque forming units, which is likely necessary given available parameter estimates.
    d_DC <- V_DC * C_nu * pfu_conv
    
    # calculate infection probability 
-   nu_DC <- 1 - exp(-d_DC/k)
+   sigma_DC <- 1 - exp(-d_DC/k)
    
-   return(nu_DC)
+   return(sigma_DC)
 }
 ```
 
@@ -426,7 +426,7 @@ Direct contact transmission between wild and captive deer along fence line (assu
 
 ::: {style="font-size: 85%;"}
 \begin{align}
-\beta_{CW}^{DC} = c_{WC} \cdot \sigma^{DC} \cdot \nu^{DC}
+\beta_{CW}^{DC} = omega_{WC} \cdot \sigma^{DC} \cdot \nu^{DC}
 \end{align}
 ::: 
 
@@ -440,19 +440,19 @@ Direct contact transmission between wild and captive deer along fence line (assu
 The function `whitetailedSIRS::alternatives()` is available to do all of these calculations for the user. 
 
 ```{r}
-alternative <- function(alpha_immunity = NULL, c_ww = NULL, c_cw = NULL, c_cc = NULL, c_hw = NULL, c_hc = NULL, nu_aero_deer_deer_wild = NULL, nu_aero_deer_deer_captive = NULL, nu_aero_deer_human_wild = NULL, nu_aero_deer_human_capt = NULL, sigma_dc = NULL, nu_dc_deer_deer = NULL, gamma_recov = NULL, I_human = NULL, boost = NULL)
+alternative <- function(alpha_immunity = NULL, omega_ww = NULL, omega_cw = NULL, omega_cc = NULL, omega_hw = NULL, omega_hc = NULL, sigma_aero_deer_deer_wild = NULL, sigma_aero_deer_deer_captive = NULL, sigma_aero_deer_human_wild = NULL, sigma_aero_deer_human_capt = NULL, sigma_dc = NULL, sigma_dc_deer_deer = NULL, gamma_recov = NULL, I_human = NULL, boost = NULL)
 
 
    {list(
       alpha_immunity, #Duration of immunity (Section 1)
-      beta_aero_ww = c_ww * nu_aero_deer_deer_wild, #Transmission risk, aerosols between wild deer (Section 2.1.4)
-      beta_aero_cw = c_cw * nu_aero_deer_deer_wild, #Transmission risk, aerosols across fencelines (Section 2.1.4)
-      beta_aero_cc = c_cc * nu_aero_deer_deer_captive, #Transmission risk, aerosols between captive deer  (Section 2.1.4)
-      beta_aero_hw = c_hw * nu_aero_deer_human_wild, #Transmission risk, aerosols between humans and wild deer  (Section 2.1.4)
-      beta_aero_hc = c_hc * nu_aero_deer_human_capt, #Transmission risk, aerosols between humans and captive deer  (Section 2.1.4)
-      beta_dc_ww = c_ww * sigma_dc * nu_dc_deer_deer, #Transmission risk, fluid between wild deer (Section 2.2.2)
-      beta_dc_cw = c_cw * sigma_dc * nu_dc_deer_deer, #Transmission risk, fluid across fencelines (Section 2.2.2)
-      beta_dc_cc = c_cc * sigma_dc * nu_dc_deer_deer, #Transmission risk, fluid between captive deer (Section 2.2.2)
+      beta_aero_ww = omega_ww * sigma_aero_deer_deer_wild, #Transmission risk, aerosols between wild deer (Section 2.1.4)
+      beta_aero_cw = omega_cw * sigma_aero_deer_deer_wild, #Transmission risk, aerosols across fencelines (Section 2.1.4)
+      beta_aero_cc = omega_cc * sigma_aero_deer_deer_captive, #Transmission risk, aerosols between captive deer  (Section 2.1.4)
+      beta_aero_hw = omega_hw * sigma_aero_deer_human_wild, #Transmission risk, aerosols between humans and wild deer  (Section 2.1.4)
+      beta_aero_hc = omega_hc * sigma_aero_deer_human_capt, #Transmission risk, aerosols between humans and captive deer  (Section 2.1.4)
+      beta_dc_ww = omega_ww * sigma_dc * sigma_dc_deer_deer, #Transmission risk, fluid between wild deer (Section 2.2.2)
+      beta_dc_cw = omega_cw * sigma_dc * sigma_dc_deer_deer, #Transmission risk, fluid across fencelines (Section 2.2.2)
+      beta_dc_cc = omega_cc * sigma_dc * sigma_dc_deer_deer, #Transmission risk, fluid between captive deer (Section 2.2.2)
       gamma_recov = gamma_recov, #Recovery rate (Section 1)
       I_human = I_human, #Human prevalence (Section 1)
       boost = boost)} #Boost (See `whitetailedSIRS::Management_Alternatives_Systems` vignette for more details.)
