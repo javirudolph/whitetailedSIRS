@@ -1,5 +1,6 @@
 ---
 title: "Summarize introduction, spread, prevalence, and persistence"
+author: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Summarize introduction, spread, prevalence, and persistence}
@@ -23,13 +24,115 @@ library(stringr)
 ```
 
 ## Introduction
-Now that we have a dataset from our simulations, we can begin to visualize how various characteristics of outbreaks differ between contexts. These figures are used in the published results. Here, we load the dataset and remind R how many iterations were run in each context (nsamples).
+Now that we have a dataset from our simulations in the vignettes `whitetailedSIRS::SIRS_analysis_by_context.Rmd` and `whitetailedSIRS::SIRS_analysis_by_context_initialspill.Rmd`, we can begin to visualize how various characteristics of outbreaks differ between contexts. These figures are used in the results published in *Rosenblatt et al. In Prep.*. Here, we load the data set `whitetailedSIRS::scenario_results` summarizing each simulation (df), the data set `whitetailedSIRS::scenario_projections` containing daily compartment sizes for each simulation (outbreaks), and remind R how many iterations were run in each context (nsamples).
 ```{r}
-df <- whitetailedSIRS::example_results
+df <- whitetailedSIRS::scenario_results
+outbreaks <- whitetailedSIRS::scenario_projections
 nsamples <- 200
 ```
 
+## Strength of introduction (FOI) and spread (R0)
+
+We summarize the basic reproductive number ($R_0$) and the Force-Of_Infection from humans to deer ($FOI_{HD}$) for each scenario below, producing Figure 3 in Rosenblatt et al. In Prep.:
+
+```{r, message = F, warning = F, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
+#plot r0
+ggplot(df, aes(x = Context, y = r0)) +
+  geom_boxplot()+
+  stat_summary(fun=mean, geom="point", shape="+", size=8) +
+  theme_classic()+
+  geom_hline(yintercept = 1)+
+   coord_cartesian(ylim = c(0,20))+
+  scale_y_continuous("Basic reproductive number (r0)")+
+  theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> r0
+
+#plot FOI
+ggplot(df, aes(x = Context, y = log10(FOI))) +
+  geom_boxplot()+
+  stat_summary(fun.y=mean, geom="point", shape="+", size=8) +
+  theme_classic()+
+    coord_cartesian(ylim = c(-8,-2))+
+  scale_y_continuous("Introduction hazard from humans (FOI)", breaks = c(-6,-5,-4,-3), labels = c("1:10^6","1:10^5", "1:10^4", "1:10^3"))+
+  theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> FOI
+
+ggpubr::ggarrange(r0, FOI,nrow =1, ncol=2)
+```
+
+## Outbreak Projections
+We can visually compare the distribution of outbreak frequency, and peak size and timing across the four scenarios considered. The code below produces Figure 4 in Rosenblatt et al. In Prep.:
+```{r, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
+outbreaks %>% 
+   filter(., Context %in% c("Outdoor ranch")) %>% 
+   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+   pull(ode_df) %>%
+   list_rbind(names_to = "run_id") %>% 
+   ggplot(., aes(x = time, y = I_captive*100, group = run_id)) +
+   geom_line(size = 0.1) +
+   labs(x = "Time (days)", y = "Prevalence in captive deer (%)") +
+   scale_y_continuous(limits = c(0,100))+
+   scale_x_continuous(limits = c(0,120), breaks = c(0,30,60,90,120))+
+   theme_classic()+
+   theme(axis.title = element_text(size = 12),
+         axis.text = element_text(size = 10),
+         axis.title.x = element_blank(),
+         axis.text.x = element_blank())+
+   annotate("label", label  = "Outdoor ranch facility", x = 80, y = 60, size = 4) -> outdoor_ranch_outbreak
+
+outbreaks %>% 
+   filter(., Context %in% c("Intensive facility")) %>% 
+   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+   pull(ode_df) %>%
+   list_rbind(names_to = "run_id") %>% 
+   ggplot(., aes(x = time, y = I_captive*100, group = run_id)) +
+   geom_line(size = 0.1) +
+   labs(x = "Time (days)", y = "Prevalence in captive deer (%)") +
+   scale_y_continuous(limits = c(0,100))+
+   scale_x_continuous(limits = c(0,120), breaks = c(0,30,60,90,120))+
+   theme_classic()+
+   theme(axis.title = element_blank(),
+         axis.text = element_blank())+
+   annotate("label", label  = "Intensive facility", x = 80, y = 60, size = 4) -> intensive_facility_outbreak
+
+outbreaks %>% 
+   filter(., Context %in% c("Wild, rural")) %>% 
+   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+   pull(ode_df) %>%
+   list_rbind(names_to = "run_id") %>% 
+   ggplot(., aes(x = time, y = I_wild*100, group = run_id)) +
+   geom_line(size = 0.1) +
+   labs(x = "Time (days)", y = "Prevalence in wild deer (%)") +
+   scale_y_continuous(limits = c(0,100))+
+   scale_x_continuous(limits = c(0,120), breaks = c(0,30,60,90,120))+
+   theme_classic()+
+   theme(axis.title = element_text(size = 12),
+         axis.text = element_text(size = 10))+
+   annotate("label", label  = "Wild deer in rural setting", x = 80, y = 60, size = 4) -> wild_rural_outbreak
+
+outbreaks %>% 
+   filter(., Context %in% c("Wild, suburban")) %>% 
+   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
+   pull(ode_df) %>%
+   list_rbind(names_to = "run_id") %>% 
+   ggplot(., aes(x = time, y = I_wild*100, group = run_id)) +
+   geom_line(size = 0.1) +
+   labs(x = "Time (days)", y = "Prevalence in captive deer (%)") +
+   scale_y_continuous(limits = c(0,100))+
+   scale_x_continuous(limits = c(0,120), breaks = c(0,30,60,90,120))+
+   theme_classic()+
+   theme(axis.title.x = element_text(size = 12),
+         axis.text.x = element_text(size = 10),
+         axis.title.y = element_blank(),
+         axis.text.y = element_blank())+
+   annotate("label", label  = "Wild deer in suburban setting", x = 80, y = 60, size = 4) -> wild_suburban_outbreak
+
+ggpubr::ggarrange(outdoor_ranch_outbreak, intensive_facility_outbreak, wild_rural_outbreak, wild_suburban_outbreak)
+```
+
+
 ## Prevalence and Persistence
+
+We summarize the average prevalence, cumulative infections, and probability of persistence for each scenario below, producing Figure 5 in Rosenblatt et al. In Prep.:
+
 ```{r, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
 ggplot(df, aes(x = Context, y = Prevalence*100)) +
   geom_boxplot()+
@@ -62,94 +165,11 @@ ggplot(df, aes(x = Context, y = Cumulative_infections*100)) +
 ggpubr::ggarrange(prevalence, persistence,cumulative_infections,nrow =1, ncol=3)
 ```
 
-## Strength of introduction (FOI) and spread (R0)
-```{r, message = F, warning = F, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
-#plot r0
-ggplot(df, aes(x = Context, y = r0)) +
-  geom_boxplot()+
-  stat_summary(fun=mean, geom="point", shape="+", size=8) +
-  theme_classic()+
-  geom_hline(yintercept = 1)+
-   coord_cartesian(ylim = c(0,20))+
-  scale_y_continuous("Basic reproductive number (r0)")+
-  theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> r0
+## Interaction between strengths of introduction and spread, and prevalence, cumulative infections, and persistence.
 
-#plot FOI
-ggplot(df, aes(x = Context, y = log10(FOI))) +
-  geom_boxplot()+
-  stat_summary(fun.y=mean, geom="point", shape="+", size=8) +
-  theme_classic()+
-    coord_cartesian(ylim = c(-8,-2))+
-  scale_y_continuous("Introduction hazard from humans (FOI)", breaks = c(-6,-5,-4,-3), labels = c("1:10^6","1:10^5", "1:10^4", "1:10^3"))+
-  theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> FOI
+We summarize how how Force-Of-Infection from humans to deer ($FOI_{HD}$) and SARS-CoV-2's basic reproductive number ($R_0$) interact in outbreak characteristics. The code below produces Figure 6 in Rosenblatt et al. In Prep.:
 
-ggpubr::ggarrange(r0, FOI,nrow =1, ncol=2)
-```
-## Initial vs continual introduction
-```{r}
-df_initial_1_in_1000 <- whitetailedSIRS::initial_infection_results_1_in_1000
-df_initial_1_in_1000$introduction <- "Initial introduction 1 in 1,000"
-df_initial_1_in_1mil <- whitetailedSIRS::initial_infection_results_1_in_1mil
-df_initial_1_in_1mil$introduction <- "Initial introduction 1 in 1 million"
-df_initial_1_in_1bil <- whitetailedSIRS::initial_infection_results_1_in_1bil
-df_initial_1_in_1bil$introduction <- "Initial introduction 1 in 1 billion"
-
-df %>% 
-   mutate(introduction = "Continuous         introduction") %>% 
-   select(., -FOI) %>% 
-   rbind(.,df_initial_1_in_1000, df_initial_1_in_1mil, df_initial_1_in_1bil) %>% 
-   mutate(., introduction = factor(introduction, levels = c("Continuous         introduction", "Initial introduction 1 in 1,000", "Initial introduction 1 in 1 million", "Initial introduction 1 in 1 billion"))) %>% 
-   ggplot(., aes(x = introduction, y = Prevalence)) +
-   geom_boxplot() +
-   facet_grid(Context ~ .)+
-   scale_x_discrete(labels = function(x) 
-    stringr::str_wrap(x, width = 20)) +
-   scale_y_continuous(name = "Average prevalence (%)")+
-   theme_classic()+
-   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),strip.text.y = element_blank(), axis.title.x = element_blank())-> prevalence.intro.diff
-
-df %>% 
-   mutate(introduction = "Continuous         introduction") %>% 
-   select(., -FOI) %>% 
-   rbind(.,df_initial_1_in_1000, df_initial_1_in_1mil, df_initial_1_in_1bil) %>% 
-   mutate(., introduction = factor(introduction, levels = c("Continuous         introduction", "Initial introduction 1 in 1,000", "Initial introduction 1 in 1 million", "Initial introduction 1 in 1 billion"))) %>% 
-   ggplot(., aes(x = introduction, y = Cumulative_infections*100)) +
-   geom_boxplot() +
-   facet_grid(Context ~ .)+
-   scale_x_discrete(labels = function(x) 
-    stringr::str_wrap(x, width = 20)) +
-   scale_y_continuous(name = "Cumulative infections (%)")+
-   theme_classic()+
-   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),strip.text.y = element_text(size = 14), axis.title.x = element_blank())-> Cumulative.intro.diff
-
-df %>% 
-   mutate(introduction = "Continuous         introduction") %>% 
-   select(., -FOI) %>% 
-   rbind(.,df_initial_1_in_1000, df_initial_1_in_1mil, df_initial_1_in_1bil) %>% 
-   mutate(., introduction = factor(introduction, levels = c("Continuous         introduction", "Initial introduction 1 in 1,000", "Initial introduction 1 in 1 million", "Initial introduction 1 in 1 billion"))) %>%
-   group_by(., Context, introduction) %>% 
-   summarize(., Persistence = sum(Persist)) %>% 
-  mutate(LCL = binom.confint(Persistence, n = nsamples, methods = "exact")$lower, pred = binom.confint(Persistence, n = nsamples, methods = "exact")$mean ,UCL = binom.confint(Persistence, n = nsamples, methods = "exact")$upper) %>% 
-   ggplot(., aes(x = introduction, y = pred)) +
-   geom_point()+
-  geom_errorbar(aes(ymin = LCL, ymax = UCL))+
-  scale_fill_grey()+
-  theme_classic()+
-  scale_y_continuous("Probability of persistence", limits = c(0,1))+
-   facet_grid(Context ~ .)+
-   scale_x_discrete(labels = function(x) 
-    stringr::str_wrap(x, width = 20)) +
-   theme_classic()+
-   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),strip.text.y = element_blank(), axis.title.x = element_blank())-> Persist.intro.diff
-
-ggpubr::ggarrange(prevalence.intro.diff, Persist.intro.diff, Cumulative.intro.diff, nrow = 1, ncol = 3)
-
-```
-
-
-
-## Interaction between strengths of introduction and spread, and prevalence and persistence.
-```{r, warning=FALSE, message=FALSE, fig.align='center',fig.asp = 0.9, fig.width = 9, out.width="100%"}
+```{r, warning=FALSE, message=FALSE, fig.align='center',out.width="100%", , fig.height = 8, fig.width = 14}
 #Composite plot showing how R0 and FOI interact to impact prevelence
 df %>% 
   mutate(., r0_bin = case_when(r0 <= 1 ~ "Unsustained spread",
@@ -210,9 +230,12 @@ ggpubr::ggarrange(Prevalence.plot, Persistence.plot, Cumulative.plot,nrow =3, nc
    annotate("label", x = 0.1, y = .25, label = "C", fill = "white", size = 6)
 ```
 
-##Compare outbreak characteristics for initial and continuous spillover
-```{r}
-whitetailedSIRS::example_results %>% 
+## Compare outbreak characteristics for initial and continuous spillover
+
+Here, we visualize differences in outbreak characteristics when there is continuous transmission from humans (as all cases plotted above) vs when there is a single, initial outbreak of various sizes. These initial outbreaks range from in 0.1% (1:1,000 deer), 0.0001% (1:1 million deer), and 1e-7% (1:1 billion deer). The resulting figure corresponds with Figure 7 in Rosenblatt et al. In Prep.
+
+```{r, warning=FALSE, message=FALSE, fig.align='center',out.width="100%", fig.height = 8, fig.width = 14}
+whitetailedSIRS::scenario_results %>% 
    mutate(., intro = "Continuous\nintroduction") %>% 
    select(., -r0, -FOI) -> continuous
 

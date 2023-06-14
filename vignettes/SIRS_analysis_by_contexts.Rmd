@@ -25,6 +25,9 @@ library(binom)
 library(kableExtra)
 ```
 
+## Introduction
+This vignette details the analysis used to study differences in outbreak dynamics in four scenarios of SARS-CoV-2 transmission to and among white-tailed deer populations. The output of this vignette is used to visualize differences in the vignette `whitetailedSIRS::Visualize_by_context`. This analysis corresponds with Objectives 1-3 of *Rosenblatt et al. In Prep*.
+
 ## Basic Simulation Parameters
 After loading packages, we set several parameters that will remain constant across simulations. We set a seed for reproducible results (set.seed). We define the number of iterations for simulations for a particular context (nsamples). We set human prevalence levels (I_human_null). We define the duration for the SIRS projection in days (times). 
 ```{r base_simulations}
