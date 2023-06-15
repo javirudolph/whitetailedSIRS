@@ -2,7 +2,7 @@
 #'
 #' `simple_sirs` is written to work alongside the `deSolve::ode()` function, and
 #' it will return an object with the proportion of individuals found in each of
-#' the SIR compartments at each of the specified time points. No longer relevant for epidemiological model or alternative testing.
+#' the SIR compartments at each of the specified time points.
 #'
 #' @param time vector of values for which to generate the projection (length in
 #'   days).
@@ -38,7 +38,8 @@
 #'                     beta_dc_cw = 0.01,
 #'                     beta_dc_cc = 0.01,
 #'                     gamma_recov = 0.01,
-#'                     I_human = 0.05)
+#'                     I_human = 0.05,
+#'                     boost = 0)
 #'
 #' # run the ode function:
 #'
