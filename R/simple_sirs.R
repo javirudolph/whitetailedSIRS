@@ -2,7 +2,7 @@
 #'
 #' `simple_sirs` is written to work alongside the `deSolve::ode()` function, and
 #' it will return an object with the proportion of individuals found in each of
-#' the SIR compartments at each of the specified time points. No longer relevant for epidemiological model or alternative testing.
+#' the SIR compartments at each of the specified time points.
 #'
 #' @param time vector of values for which to generate the projection (length in
 #'   days).
@@ -12,9 +12,7 @@
 #' @param parameters list of parameters to generate projection. The parameters
 #'   should include transmission parameters, immunity and recovery rates, and
 #'   proportion of infected humans.
-#'
-#'   @details `simple_sirs`does not allow individuals to move from Susceptible to Recovered compartment by means of boosting, and contains parameters not included in the primary analysis. Use `Epi_sirs` and `Epi_sirs_with_cumulative` instead.
-#'
+#'   @details Use `simple_sirs` to calculate persistence (via `rootSolve::run_steady()`), along with how compartment sizes change through a projection. If cumulative infections are desired, use `simple_sir_with_cumulative` instead. The parameter `boost` is included in the ODE equations for captive deer to allow implementation of applying vaccine boosters to captive deer herds as a potential management alternative to influence outbreak dynamics. See the vignette `Management_Alternative_Systems.Rmd` to see an example of its use. In all other cases where boosters would not be applied, boost should be set to 0.
 #' @return when used with the `deSolve::ode()` function, it will return a
 #'   dataframe with the proportion of individuals in each of the SIR
 #'   compartments at each time point.
@@ -39,10 +37,9 @@
 #'                     beta_dc_ww = 0.01,
 #'                     beta_dc_cw = 0.01,
 #'                     beta_dc_cc = 0.01,
-#'                     phi_cw = 0,
-#'                     phi_wc = 0,
 #'                     gamma_recov = 0.01,
-#'                     I_human = 0.05)
+#'                     I_human = 0.05,
+#'                     boost = 0)
 #'
 #' # run the ode function:
 #'
@@ -57,43 +54,30 @@ simple_sirs <- function(time, state, parameters){
       dS_wild <- alpha_immunity * R_wild -
          (S_wild * ((beta_aero_ww * I_wild) + (beta_dc_ww * I_wild) +
                        (beta_aero_cw * I_captive) + (beta_dc_cw * I_captive) +
-                       (beta_aero_hw * I_human))) +
-         (phi_cw * S_captive) -
-         (phi_wc * S_wild)
+                       (beta_aero_hw * I_human)))
 
       dI_wild <- (S_wild * ((beta_aero_ww * I_wild) + (beta_dc_ww * I_wild) +
                                (beta_aero_cw * I_captive) + (beta_dc_cw * I_captive) +
-                               (beta_aero_hw * I_human))) +
-         (phi_cw * I_captive) -
-         (phi_wc * I_wild) -
+                               (beta_aero_hw * I_human))) -
          (gamma_recov * I_wild)
 
-      dR_wild <- (phi_cw * R_captive) -
-         (phi_wc * R_wild) +
-         (gamma_recov * I_wild) -
+      dR_wild <- (gamma_recov * I_wild) -
          (alpha_immunity * R_wild)
-
 
       # captive deer functions
 
       dS_captive <- alpha_immunity * R_captive -
          (S_captive * ((beta_aero_cc * I_captive) + (beta_dc_cc *I_captive) +
                           (beta_aero_cw * I_wild) + (beta_dc_cw * I_wild) +
-                          (beta_aero_hc * I_human))) -
-         (phi_cw * S_captive) +
-         (phi_wc * S_wild)
+                          (beta_aero_hc * I_human))) - (S_captive*boost)
 
       dI_captive <- (S_captive * ((beta_aero_cc * I_captive) + (beta_dc_cc *I_captive) +
                                      (beta_aero_cw*I_wild) + (beta_dc_cw * I_wild) +
                                      (beta_aero_hc * I_human))) -
-         (phi_cw * I_captive) +
-         (phi_wc * I_wild) -
          (gamma_recov * I_captive)
 
       dR_captive <- (gamma_recov * I_captive) -
-         (alpha_immunity * R_captive) -
-         (phi_cw * R_captive) +
-         (phi_wc * R_wild)
+         (alpha_immunity * R_captive) + (S_captive*boost)
 
       return(list(c(dS_wild, dI_wild, dR_wild, dS_captive, dI_captive, dR_captive)))
    })

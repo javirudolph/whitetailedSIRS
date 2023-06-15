@@ -21,16 +21,21 @@ BugReports:
 Depends: 
     R (>= 2.10)
 Imports: 
+    binom,
     deSolve,
     dplyr (>= 1.0.10),
+    ggplot2,
     greybox,
+    kableExtra,
     purrr (>= 1.0.1),
     rootSolve,
+    stringr,
     tibble,
     tidyr (>= 1.3.0)
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: 
     knitr
 Remotes: 
@@ -41,3 +46,4 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Config/testthat/edition: 3

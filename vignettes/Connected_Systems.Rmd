@@ -1,5 +1,7 @@
 ---
 title: "SARS-CoV-2 introduction and spread in connected systems"
+subtitle: "Analysis referenced in Rosenblatt et al. In Prep"
+author: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{SARS-CoV-2 introduction and spread in connected systems}
@@ -25,12 +27,14 @@ library(kableExtra)
 ```
 
 ## Introduction
-Now that we have a dataset from each context, we can test how connected systems (wild and captive seperated by a fenceline) differ in outbreak characteristics, compared to isolated contexts. The basic idea is that when these contexts are connected, there may be differences in prevalence, cumulative cases, and persistence due to fenceline interactions.
+Now that we have a dataset from each scenario (whitetailedSIRS::SIRS_analysis_by_contexts), we can test how connected systems (wild and captive separated by a fence line) differ in outbreak characteristics, compared to isolated scenario. When these scenarios are connected, there may be differences in prevalence, cumulative cases, and persistence due to fence line interactions. This analysis corresponds with Objective 5 of *Rosenblatt et al. In Prep*.
 
+## Data input and common parameter values
 Here, we load the dataset and remind R how many iterations were run in each context (nsamples). We set a seed for consistent results, identify human prevalence and duration of projection (days). We then set parameters that are used consistently across all simulations in the vignette.
+
 ```{r}
 set.seed(23)
-df <- whitetailedSIRS::example_results
+df <- whitetailedSIRS::scenario_results
 nsamples <- 200
 
 #Bring in estimates from expert elicitation
@@ -44,16 +48,15 @@ times <- seq(0, 120, by = 1)
 nWild <- rpois(nsamples,1000) #Abundance
 A_w <- 100 #Area
 habitat <- "med" #Habitat classification
-sigma_season <- 1 #Season adjustment for proximity rate
 
 C_nu_human <- rnorm(n = nsamples, mean = 10^5.6, sd = 10^1.2)#viral load in humans (genomic copies per ml)
 C_nu_deer <- 10^5.6 * get_EE_param_vals(data = elicitation_data, my_param = "Viral Load") #viral load in deer saliva, relative to humans (genomic copies per ml)
 
 r_deer <- get_EE_param_vals(data = elicitation_data, my_param = "Dose-Response")# Dose response coefficient for deer and SARS-CoV-2
 
-sigma_dc <- get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Probability of direct contact between deer, given proximity.
+epsilon_dc <- get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Probability of direct contact between deer, given proximity.
 
-nu_dc_deer_deer_null <- calc_nu_dc(C_nu = C_nu_deer, nsamples = nsamples) #Infection probability of 0.1 ml of saliva being transferred between deer on contact
+sigma_dc_deer_deer_null <- calc_sigma_dc(C_nu = C_nu_deer, nsamples = nsamples) #Infection probability of 0.1 ml of saliva being transferred between deer on contact
 
 t_contact_deer_deer_null <- get_EE_param_vals(data = elicitation_data, my_param = "Deer Proximity Duration (minutes)") #Estimate duration of deer-deer proximity event...
 
@@ -64,102 +67,108 @@ gamma_recov <- rep(1/6, nsamples)
 alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param = 'Temporary Immunity')
 ```
 
-# System calculation
-## Captive deer in outdoor ranch facilties connected to wild, rural deer
+## System calculation
+Below, we combine a wild scenario and a captive scenario, with a fence line separating these populations. For each combination, we define new parameters that have not been defined previously. As we work through these combinations, fewer parameters are added as they exist in earlier combinations.
+
+### Captive deer in outdoor ranch facilties connected to wild, rural deer
 ```{r}
 #Ranch side of the fence...
-c_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicking wild proximity rates with the influence of baiting (events per day).
+omega_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicking wild proximity rates with the influence of baiting (events per day).
 
-nu_aero_deer_deer_null <- calc_nu_aero(C_nu = C_nu_deer,
+sigma_aero_deer_deer_null <- calc_sigma_aero(C_nu = C_nu_deer,
                                         t_contact = t_contact_deer_deer_null / 60,
                                         r = r_deer, nsamples = nsamples) #...and estimate probability of infection given that duration of proximity event.
 
 t_contact_deer_human_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") #Estimate duration of human-deer proximity event in ranch facility context...
 
-c_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 #Human-to-deer proximity rate in ranch context, mimicking suburban proximitty rates (events per day).
+omega_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 #Human-to-deer proximity rate in ranch context, mimicking suburban proximitty rates (events per day).
 
-nu_aero_deer_human_ranch <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+sigma_aero_deer_human_ranch <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_ranch / 60,
                                         r = r_deer, nsamples = nsamples)#... and calculate infection probability given the duration of a human-deer proximity event.
 
 #Fenceline interactions occure
-c_cw <- 0.00072 / get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Deer-to-deer proximity rate along fenceline (events per day).
+omega_cw <- 0.00072 / get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Deer-to-deer proximity rate along fenceline (events per day).
 
 #... and on the wild side of the fence:
-c_ww <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, sigma_season = 1)
+omega_ww <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)
 
 t_contact_deer_human_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Rural (minutes)")
 
-c_hw_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") /120
+omega_hw_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") /120
 
-nu_aero_deer_human_rural <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+sigma_aero_deer_human_rural <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_rural / 60,
                                         r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
 
 ranch_rural.params <- alternative(alpha_immunity = alpha_immunity_null,
-                            c_ww = c_ww, c_cw = c_cw, c_cc = c_cc_ranch,
-                            c_hw = c_hw_rural, c_hc = c_hc_ranch,
-                            nu_aero_deer_deer_wild = nu_aero_deer_deer_null, nu_aero_deer_deer_captive = nu_aero_deer_deer_null, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+                            omega_ww = omega_ww, omega_cw = omega_cw, omega_cc = omega_cc_ranch,
+                            omega_hw = omega_hw_rural, omega_hc = omega_hc_ranch,
+                            sigma_aero_deer_deer_wild = sigma_aero_deer_deer_null, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_null, sigma_aero_deer_human_wild = sigma_aero_deer_human_rural, sigma_aero_deer_human_capt = sigma_aero_deer_human_ranch, epsilon_dc = epsilon_dc, sigma_dc_deer_deer = sigma_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
 proj_ranch_rural <- run(iter = nsamples, initial_compartments = inits.fall, initial_compartments_steady = inits.steady, params = ranch_rural.params, times = times, name = "Outdoor ranch and rural system")
 ```
 
-## Captive deer in outdoor ranch facilties connected to wild, suburban deer
-Below we modify what's happening on the wild side of the fence to a suburban context
+### Captive deer in outdoor ranch facilties connected to wild, suburban deer
+Below we modify what's happening on the wild side of the fence to a suburban context, and can keep the captive side parameterized to describe the outdoor ranch facility scenario.
 ```{r}
-#... and on the wild side of the fence:
 t_contact_deer_human_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Suburban (minutes)")
 
-c_hw_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+omega_hw_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
 
-nu_aero_deer_human_suburban <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+sigma_aero_deer_human_suburban <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_suburban / 60,
                                         r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
 
 ranch_suburban.params <- alternative(alpha_immunity = alpha_immunity_null,
-                            c_ww = c_ww, c_cw = c_cw, c_cc = c_cc_ranch,
-                            c_hw = c_hw_suburban, c_hc = c_hc_ranch,
-                            nu_aero_deer_deer_wild = nu_aero_deer_deer_null, nu_aero_deer_deer_captive = nu_aero_deer_deer_null, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_ranch, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+                            omega_ww = omega_ww, omega_cw = omega_cw, omega_cc = omega_cc_ranch,
+                            omega_hw = omega_hw_suburban, omega_hc = omega_hc_ranch,
+                            sigma_aero_deer_deer_wild = sigma_aero_deer_deer_null, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_null, sigma_aero_deer_human_wild = sigma_aero_deer_human_suburban, sigma_aero_deer_human_capt = sigma_aero_deer_human_ranch, epsilon_dc = epsilon_dc, sigma_dc_deer_deer = sigma_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
 proj_ranch_suburban <- run(iter = nsamples, initial_compartments = inits.fall, initial_compartments_steady = inits.steady, params = ranch_suburban.params, times = times, name = "Outdoor ranch and suburban system")
 ```
 
-## Captive deer in intensive facilties connected to wild, rural deer
-Below we modify what's happening on the captive side of the fence
-```{r}
-c_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)")
+### Captive deer in intensive facilties connected to wild, rural deer
+Since we have defined parameter sets for both wild scenarios, below we modify what's happening on the captive side of the fence.
 
-nu_aero_deer_deer_intensive <- calc_nu_aero(C_nu = C_nu_deer,
+```{r}
+omega_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)")
+
+sigma_aero_deer_deer_intensive <- calc_sigma_aero(C_nu = C_nu_deer,
                                             t_contact = t_contact_deer_deer_null / 60,
                                             r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
 
-c_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
 
 t_contact_deer_human_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") 
 
-nu_aero_deer_human_intensive <- calc_nu_aero(ER = 0.53, C_nu = C_nu_human, 
+sigma_aero_deer_human_intensive <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                             t_contact = t_contact_deer_human_intensive / 60,
                                             r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
 
 intensive_rural.params <- alternative(alpha_immunity = alpha_immunity_null,
-                            c_ww = c_ww, c_cw = c_cw, c_cc = c_cc_intensive,
-                            c_hw = c_hw_rural, c_hc = c_hc_intensive,
-                            nu_aero_deer_deer_wild = nu_aero_deer_deer_null, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_rural, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+                            omega_ww = omega_ww, omega_cw = omega_cw, omega_cc = omega_cc_intensive,
+                            omega_hw = omega_hw_rural, omega_hc = omega_hc_intensive,
+                            sigma_aero_deer_deer_wild = sigma_aero_deer_deer_null, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_intensive, sigma_aero_deer_human_wild = sigma_aero_deer_human_rural, sigma_aero_deer_human_capt = sigma_aero_deer_human_intensive, epsilon_dc = epsilon_dc, sigma_dc_deer_deer = sigma_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
 proj_intensive_rural <- run(iter = nsamples, initial_compartments = inits.fall, initial_compartments_steady = inits.steady, params = intensive_rural.params, times = times, name = "Intensive facility and rural system")
 ```
 
-## Captive deer in intensive facilties connected to wild, suburban deer
+### Captive deer in intensive facilties connected to wild, suburban deer
+Finally, the final combination of intensive captive facilities and wild, suburban deer.
+
 ```{r}
 intensive_suburban.params <- alternative(alpha_immunity = alpha_immunity_null,
-                            c_ww = c_ww, c_cw = c_cw, c_cc = c_cc_intensive,
-                            c_hw = c_hw_suburban, c_hc = c_hc_intensive,
-                            nu_aero_deer_deer_wild = nu_aero_deer_deer_null, nu_aero_deer_deer_captive = nu_aero_deer_deer_intensive, nu_aero_deer_human_wild = nu_aero_deer_human_suburban, nu_aero_deer_human_capt = nu_aero_deer_human_intensive, sigma_dc = sigma_dc, nu_dc_deer_deer = nu_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+                            omega_ww = omega_ww, omega_cw = omega_cw, omega_cc = omega_cc_intensive,
+                            omega_hw = omega_hw_suburban, omega_hc = omega_hc_intensive,
+                            sigma_aero_deer_deer_wild = sigma_aero_deer_deer_null, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_intensive, sigma_aero_deer_human_wild = sigma_aero_deer_human_suburban, sigma_aero_deer_human_capt = sigma_aero_deer_human_intensive, epsilon_dc = epsilon_dc, sigma_dc_deer_deer = sigma_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
 proj_intensive_suburban <- run(iter = nsamples, initial_compartments = inits.fall, initial_compartments_steady = inits.steady, params = intensive_suburban.params, times = times, name = "Intensive facility and suburban system")
 ```
 
 ## Summarize prevalence, cumulative infections, and persistence for each system
+As we did in `whitetailedSIRS::SIRS_analysis_by_context`, we compute the average prevalence, cumulative infections, and persistence for each system (captive:wild scenario combination).
+
 ```{r}
 persist.threshold <- 0.001 #Set prevalence threshold
 
@@ -257,6 +266,10 @@ proj_intensive_suburban %>%
 
 ```
 
+## Compare outbreak metrics to simulations with isolated scenarios
+
+Below, we take the results from `whitetailedSIRS::SIRS_analysis_by_contexts` and calculate differences in prevalence, cumulative infections, and persistence when fenceline interactions can occur.
+
 ```{r}
 #Calculate change in prevalence and persistence
 #step 1: prep single context run_ids to correspond to systems
@@ -334,6 +347,8 @@ Prev_cumulative_persist_intensive_suburban_system_df %>%
    select(., Context, Change_Prev_Wild, Change_Prev_Captive, Proportional_Change_Prev_Wild, Proportional_Change_Prev_Captive, Change_Cumulative_Wild, Change_Cumulative_Captive, Change_Persist_Wild, Change_Persist_Captive) %>% 
    rename(., System = Context) -> intensive_suburban_results
 ```
+
+We can then combine and summarize the differences in outbreak metrics. The resulting table is presented in *Rosenblatt et al. In Prep* as Table 2.
 
 ```{r}
 sirs_results_systems <- rbind(ranch_suburban_results,intensive_suburban_results,ranch_rural_results,intensive_rural_results)

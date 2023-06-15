@@ -58,16 +58,27 @@
 #'
 "contact_rate_params"
 
-#' example_results
+#' scenario_results
 #'
 #' A dataframe containing results used to compare degrees of introduction, spread, prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations. 200 iterations (run_id) were run for each scenario (Context). Scenarios included captive deer in outdoor ranch facilities, captive deer in intensive facilities, wild deer in rural areas, and wild deer in suburban areas. Setting indicates whether deer were captive or wild. r0, or basic reproductive number, indicates the number of secondary infections caused by a single infectious deer over the course of it's infection. FOI, or Force-Of-Infection, is a hazard rate of a deer becoming infected from infectious humans, per day. Prevalence is the percent of a population infected, averaged over a simulated 120-day projection. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and `run_steady()` from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium. Cumulative infections reports the total proportion of the population infected over the course of the 120-fall projection, and can exceed 1, indicating that all individuals were infected at least once during the fall season.
 #'
-#' @format `example_results`
+#' @format `scenario_results`
 #'
 #'
 #' @source Derived using `SIRS_analysis_by_contexts.Rmd`
 #'
-"example_results"
+'scenario_results'
+
+#' scenario_projections
+#'
+#' A tibble containing projected SIR compartment sizes for every simulation run. Columns in this tibble include the scenario (Context), scenario run (run_id), and a list containing daily (time) compartment sizes for wild and captive SIR compartments (S_wild, I_wild, R_wild, & S_captive, I_captive, R_captive) and cumulative infections (I_wild_cumulative and I_captive_cumulative).
+#'
+#' @format `scenario_projections`
+#'
+#'
+#' @source Derived using `SIRS_analysis_by_contexts.Rmd`
+#'
+'scenario_projections'
 
 #' alternatives_across_systems
 #'

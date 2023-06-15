@@ -1,6 +1,6 @@
-#' @title Calculate probability of infection via aerosol \eqn{\nu^{AERO}}
+#' @title Calculate probability of infection via aerosol \eqn{\sigma^{AERO}}
 #'
-#' @description `calc_nu_aero` will calculate one value for probability of infection using
+#' @description `calc_sigma_aero` will calculate one value for probability of infection using
 #' defaults if no arguments are provided. Defaults are described in the
 #' sir_model_description document and are sourced from the literature or expert
 #' elicitation.
@@ -37,15 +37,15 @@
 #'   \cdot C \cdot t_{contact}} The dose \eqn{Q_A} is converted into a
 #'   probability of infection using the Wells-Riley infection model as a
 #'   function of the dose received and a species-specific probability of
-#'   infection from 1 quantum. \deqn{\nu^{AERO} = 1 - e^{-rQ}}
+#'   infection from 1 quantum. \deqn{\sigma^{AERO} = 1 - e^{-rQ}}
 #'
-#' @return a numeric vector of length equal to nsamples for values of nu_aero
+#' @return a numeric vector of length equal to nsamples for values of sigma_aero
 #' @export
 #'
 #' @examples
-#' calc_nu_aero() # will return a single value using defaults
-#' calc_nu_aero(nsamples = 10)
-calc_nu_aero <- function(AER = NULL,
+#' calc_sigma_aero() # will return a single value using defaults
+#' calc_sigma_aero(nsamples = 10)
+calc_sigma_aero <- function(AER = NULL,
                          s = NULL,
                          lambda = NULL,
                          C_nu = NULL,
@@ -96,8 +96,8 @@ calc_nu_aero <- function(AER = NULL,
 
    # Use Wells-Riley model to transform amount of virus inhaled
    # into a probability of infection via aerosol
-   nu_aero <- 1 - exp(-r * Q)
+   sigma_aero <- 1 - exp(-r * Q)
 
-   return(nu_aero)
+   return(sigma_aero)
 
 }

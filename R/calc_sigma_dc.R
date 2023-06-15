@@ -1,6 +1,6 @@
-#'@title Calculate probability of infection given physical contact \eqn{\nu^{DC}}
+#'@title Calculate probability of infection given physical contact \eqn{\sigma^{DC}}
 #'
-#'@description `calc_nu_dc` will calculate one value for probability of infection using
+#'@description `calc_sigma_dc` will calculate one value for probability of infection using
 #' defaults if no arguments are provided. Defaults are described in the
 #' sir_model_description document and are sourced from the literature or expert
 #' elicitation.
@@ -23,7 +23,7 @@
 #' concentration of SARS-CoV-2 in sputum (\eqn{C_{\nu}}). We initially assume
 #' that at each contact \eqn{100\mu l} of sputum is transferred between
 #' individuals making contact.
-#' \deqn{\nu^{DC} = 1 - e^{-(d^{DC}/k)}} where
+#' \deqn{\sigma^{DC} = 1 - e^{-(d^{DC}/k)}} where
 #' \deqn{d^{DC} = V^{DC} \cdot C_{\nu} \cdot pfuConv}
 #'
 #'
@@ -31,9 +31,9 @@
 #' @export
 #'
 #' @examples
-#' calc_nu_dc() # will run the defaults
-#' calc_nu_dc(nsamples = 10) # use defaults with a random draw for values of C_nu from expert elicitation
-calc_nu_dc <- function(V_DC = NULL,
+#' calc_sigma_dc() # will run the defaults
+#' calc_sigma_dc(nsamples = 10) # use defaults with a random draw for values of C_nu from expert elicitation
+calc_sigma_dc <- function(V_DC = NULL,
                       C_nu = NULL,
                       pfu_conv = NULL,
                       k = NULL,
@@ -54,7 +54,7 @@ calc_nu_dc <- function(V_DC = NULL,
    d_DC <- V_DC * C_nu * pfu_conv
 
    # calculate infection probability
-   nu_DC <- 1 - exp(-d_DC/k)
+   sigma_DC <- 1 - exp(-d_DC/k)
 
-   return(nu_DC)
+   return(sigma_DC)
 }
