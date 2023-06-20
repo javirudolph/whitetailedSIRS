@@ -25,13 +25,12 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
-    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems (still being developed)</a>
+    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
     <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/default_projection.html">default_projection</a>
-    <a class="dropdown-item" href="../articles/example_values.html">example_values</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">sir_model_description</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -63,17 +62,17 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">alternative</span><span class="op">(</span></span>
 <span>  alpha_immunity <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  c_ww <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  c_cw <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  c_cc <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  c_hw <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  c_hc <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nu_aero_deer_deer_wild <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nu_aero_deer_deer_captive <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nu_aero_deer_human_wild <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nu_aero_deer_human_capt <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  sigma_dc <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nu_dc_deer_deer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  omega_ww <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  omega_cw <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  omega_cc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  omega_hw <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  omega_hc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sigma_aero_deer_deer_wild <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sigma_aero_deer_deer_captive <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sigma_aero_deer_human_wild <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sigma_aero_deer_human_capt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  epsilon_dc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sigma_dc_deer_deer <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gamma_recov <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  I_human <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  boost <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -86,48 +85,48 @@
 <dd><p>Inverse of duration of temporary immunity after entering recovered compartment (per day, 0-1).</p></dd>
 
 
-<dt>c_ww</dt>
+<dt>omega_ww</dt>
 <dd><p>Deer-deer proximity rate in a wild setting (proximity events per day).</p></dd>
 
 
-<dt>c_cw</dt>
+<dt>omega_cw</dt>
 <dd><p>Captive and wild deer proximity rate along fence lines demarking captive and wild populations (proximity events per day).</p></dd>
 
 
-<dt>c_cc</dt>
+<dt>omega_cc</dt>
 <dd><p>Deer-deer proximity rate in a captive setting (proximity events per day).</p></dd>
 
 
-<dt>c_hw</dt>
+<dt>omega_hw</dt>
 <dd><p>Human-deer proximity rate in a wild setting (proximity events per day).</p></dd>
 
 
-<dt>c_hc</dt>
+<dt>omega_hc</dt>
 <dd><p>Human-deer proximity rate in a captive setting(proximity events per day).</p></dd>
 
 
-<dt>nu_aero_deer_deer_wild</dt>
-<dd><p>Probability of infection via aerosol transmission between wild deer. Derived using the calc_nu_aero() function.</p></dd>
+<dt>sigma_aero_deer_deer_wild</dt>
+<dd><p>Probability of infection via aerosol transmission between wild deer. Derived using the calc_sigma_aero() function.</p></dd>
 
 
-<dt>nu_aero_deer_deer_captive</dt>
-<dd><p>Probability of infection via aerosol transmission in captive deer. Derived using the calc_nu_aero() function.</p></dd>
+<dt>sigma_aero_deer_deer_captive</dt>
+<dd><p>Probability of infection via aerosol transmission in captive deer. Derived using the calc_sigma_aero() function.</p></dd>
 
 
-<dt>nu_aero_deer_human_wild</dt>
-<dd><p>Probability of infection via aerosol transmission from humans to wild deer. Derived using the calc_nu_aero() function.</p></dd>
+<dt>sigma_aero_deer_human_wild</dt>
+<dd><p>Probability of infection via aerosol transmission from humans to wild deer. Derived using the calc_sigma_aero() function.</p></dd>
 
 
-<dt>nu_aero_deer_human_capt</dt>
-<dd><p>Probability of infection via aerosol transmission from humans to captive deer. Derived using the calc_nu_aero() function.</p></dd>
+<dt>sigma_aero_deer_human_capt</dt>
+<dd><p>Probability of infection via aerosol transmission from humans to captive deer. Derived using the calc_sigma_aero() function.</p></dd>
 
 
-<dt>sigma_dc</dt>
+<dt>epsilon_dc</dt>
 <dd><p>Probability of direct contact between deer, given proximity.</p></dd>
 
 
-<dt>nu_dc_deer_deer</dt>
-<dd><p>Probability of infection via fluid transmission between deer. Derived using the calc_nu_dc() function.</p></dd>
+<dt>sigma_dc_deer_deer</dt>
+<dd><p>Probability of infection via fluid transmission between deer. Derived using the calc_sigma_dc() function.</p></dd>
 
 
 <dt>gamma_recov</dt>
@@ -150,18 +149,18 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>alternative() creates a list of parameter values that will be fed into a SIRS ODE solver. The length of each item in the output is determined by the length of all arguments, which must be equal. If argument(s) is not filled with outputs from another function in this package (e.g. calc_contact_rate, calc_nu_aero, calc_nu_dc, draw_elicitation_samples), the user must fill argument with vector of values of the same length as the other arguments.</p>
+    <p>alternative() creates a list of parameter values that will be fed into a SIRS ODE solver. The length of each item in the output is determined by the length of all arguments, which must be equal. If argument(s) is not filled with outputs from another function in this package (e.g. calc_contact_rate, calc_sigma_aero, calc_sigma_dc, draw_elicitation_samples), the user must fill argument with vector of values of the same length as the other arguments.</p>
 <p>Parameter values defined with this function remained fixed during SIRS ODE solves. While these parameter values can be derived through random processes, projections are deterministic.</p>
-<p>Proximity, by default with the calc_nu_aero() function, is defined as two individuals entering within 1.5m of each other. This proximity limit can be modified in V_air argument in the calc_nu_aero() function, which defines a half-sphere volume into which aerosolized virus is exhaled from an infectious individual.</p>
+<p>Proximity, by default with the calc_sigma_aero() function, is defined as two individuals entering within 1.5m of each other. This proximity limit can be modified in V_air argument in the calc_sigma_aero() function, which defines a half-sphere volume into which aerosolized virus is exhaled from an infectious individual.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="run.html">run()</a></code>, <code><a href="calc_contact_rate.html">calc_contact_rate()</a></code>, <code><a href="calc_nu_aero.html">calc_nu_aero()</a></code>, <code><a href="calc_nu_dc.html">calc_nu_dc()</a></code>, <code><a href="draw_elicitation_samples.html">draw_elicitation_samples()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="run.html">run()</a></code>, <code><a href="calc_contact_rate.html">calc_contact_rate()</a></code>, <code><a href="calc_sigma_aero.html">calc_sigma_aero()</a></code>, <code><a href="calc_sigma_dc.html">calc_sigma_dc()</a></code>, <code><a href="draw_elicitation_samples.html">draw_elicitation_samples()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">alternative</span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">30</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">60</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">90</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">120</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">150</span><span class="op">)</span><span class="op">)</span>, c_ww <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">10</span>,<span class="fl">5</span><span class="op">)</span>, c_cw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span><span class="op">)</span>, c_cc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">20</span>,<span class="fl">5</span><span class="op">)</span>, c_hw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.01</span>,<span class="fl">5</span><span class="op">)</span>, c_hc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.25</span>,<span class="fl">5</span><span class="op">)</span>, nu_aero_deer_deer_wild <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.01</span>,<span class="fl">5</span><span class="op">)</span>, nu_aero_deer_deer_captive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.1</span>,<span class="fl">5</span><span class="op">)</span>, nu_aero_deer_human_wild <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.001</span>,<span class="fl">5</span><span class="op">)</span>, nu_aero_deer_human_capt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.05</span>,<span class="fl">5</span><span class="op">)</span>, sigma_dc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.2</span>,<span class="fl">5</span><span class="op">)</span>, nu_dc_deer_deer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.02</span>,<span class="fl">5</span><span class="op">)</span>, gamma_recov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span>,<span class="fl">5</span><span class="op">)</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.05</span>,<span class="fl">5</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">alternative</span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">30</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">60</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">90</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">120</span><span class="op">)</span>,<span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">150</span><span class="op">)</span><span class="op">)</span>, omega_ww <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">10</span>,<span class="fl">5</span><span class="op">)</span>, omega_cw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span><span class="op">)</span>, omega_cc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">20</span>,<span class="fl">5</span><span class="op">)</span>, omega_hw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.01</span>,<span class="fl">5</span><span class="op">)</span>, omega_hc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.25</span>,<span class="fl">5</span><span class="op">)</span>, sigma_aero_deer_deer_wild <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.01</span>,<span class="fl">5</span><span class="op">)</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.1</span>,<span class="fl">5</span><span class="op">)</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.001</span>,<span class="fl">5</span><span class="op">)</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.05</span>,<span class="fl">5</span><span class="op">)</span>, epsilon_dc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.2</span>,<span class="fl">5</span><span class="op">)</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.02</span>,<span class="fl">5</span><span class="op">)</span>, gamma_recov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span>,<span class="fl">5</span><span class="op">)</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.05</span>,<span class="fl">5</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $alpha_immunity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.033333333 0.016666667 0.011111111 0.008333333 0.006666667</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -205,7 +204,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Javi Rudolph, Fer Arce, Elias Rosenblatt.</p>
+  <p></p><p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
 </div>
 
 <div class="pkgdown-footer-right">

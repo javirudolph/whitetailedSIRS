@@ -25,13 +25,12 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
-    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems (still being developed)</a>
+    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
     <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/default_projection.html">default_projection</a>
-    <a class="dropdown-item" href="../articles/example_values.html">example_values</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">sir_model_description</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -78,7 +77,11 @@
 
 
 <dt>initial_compartments</dt>
-<dd><p>Initial compartment sizes (proportions, stored as list)</p></dd>
+<dd><p>Initial compartment sizes, including  (proportions, stored as list)</p></dd>
+
+
+<dt>initial_compartments_steady</dt>
+<dd><p>Initial compartment sizes for steady state calculation (proportions, stored as list)</p></dd>
 
 
 <dt>times</dt>
@@ -97,7 +100,7 @@
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>#List containing iteration details, including initial compartment sizes, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.</p>
+<p>#List containing iteration details, including initial compartment sizes for ODE solver and steady state calculation, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.</p>
     </div>
 
     <div class="section level2">
@@ -105,6 +108,11 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">nsamples</span> <span class="op">=</span> <span class="fl">10</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">example_inits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S_wild <span class="op">=</span> <span class="fl">1</span>, I_wild <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>                   R_wild <span class="op">=</span> <span class="fl">0</span>, I_wild_cumulative <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>                   S_captive <span class="op">=</span> <span class="fl">1</span>, I_captive <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>                   R_captive <span class="op">=</span> <span class="fl">0</span>, I_captive_cumulative <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">example_inits_steady</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S_wild <span class="op">=</span> <span class="fl">1</span>, I_wild <span class="op">=</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>                   R_wild <span class="op">=</span> <span class="fl">0</span>, S_captive <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>                   I_captive <span class="op">=</span> <span class="fl">0</span>, R_captive <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -125,8 +133,8 @@
 <span class="r-in"><span>                    I_human <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
 <span class="r-in"><span>                    boost <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">run</span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">example_inits</span>, params <span class="op">=</span> <span class="va">example_params</span>, times <span class="op">=</span> <span class="va">example_times</span>, name <span class="op">=</span> <span class="va">Test</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in run(iter = nsamples, initial_compartments = example_inits, params = example_params,     times = example_times, name = Test):</span> object 'Test' not found</span>
+<span class="r-in"><span><span class="fu">run</span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">example_inits</span>, initial_compartments_steady <span class="op">=</span> <span class="va">example_inits_steady</span>, params <span class="op">=</span> <span class="va">example_params</span>, times <span class="op">=</span> <span class="va">example_times</span>, name <span class="op">=</span> <span class="va">Test</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in run(iter = nsamples, initial_compartments = example_inits, initial_compartments_steady = example_inits_steady,     params = example_params, times = example_times, name = Test):</span> object 'Test' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -134,7 +142,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Javi Rudolph, Fer Arce, Elias Rosenblatt.</p>
+  <p></p><p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
 </div>
 
 <div class="pkgdown-footer-right">

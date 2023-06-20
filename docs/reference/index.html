@@ -25,13 +25,12 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
-    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems (still being developed)</a>
+    <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
     <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
     <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/default_projection.html">default_projection</a>
-    <a class="dropdown-item" href="../articles/example_values.html">example_values</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">sir_model_description</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -66,16 +65,6 @@
 
       <dl><dt>
           
-          <code><a href="Epi_sirs.html">Epi_sirs()</a></code> 
-        </dt>
-        <dd>Simple function to generate SIRS model projections</dd>
-      </dl><dl><dt>
-          
-          <code><a href="Epi_sirs_with_cumulative.html">Epi_sirs_with_cumulative()</a></code> 
-        </dt>
-        <dd>Simple function to generate SIRS model projections</dd>
-      </dl><dl><dt>
-          
           <code><a href="alternative.html">alternative()</a></code> 
         </dt>
         <dd>Define parameters for solving white-tailed deer SIRS ODE equations under different management alternatives</dd>
@@ -91,14 +80,14 @@
         <dd>Contact rate calculation for wild deer</dd>
       </dl><dl><dt>
           
-          <code><a href="calc_nu_aero.html">calc_nu_aero()</a></code> 
+          <code><a href="calc_sigma_aero.html">calc_sigma_aero()</a></code> 
         </dt>
-        <dd>Calculate probability of infection via aerosol \(\nu^{AERO}\)</dd>
+        <dd>Calculate probability of infection via aerosol \(\sigma^{AERO}\)</dd>
       </dl><dl><dt>
           
-          <code><a href="calc_nu_dc.html">calc_nu_dc()</a></code> 
+          <code><a href="calc_sigma_dc.html">calc_sigma_dc()</a></code> 
         </dt>
-        <dd>Calculate probability of infection given physical contact \(\nu^{DC}\)</dd>
+        <dd>Calculate probability of infection given physical contact \(\sigma^{DC}\)</dd>
       </dl><dl><dt>
           
           <code><a href="contact_rate_params.html">contact_rate_params</a></code> 
@@ -119,11 +108,6 @@
           <code><a href="elicitation_data.html">elicitation_data</a></code> 
         </dt>
         <dd>elicitation_data</dd>
-      </dl><dl><dt>
-          
-          <code><a href="example_results.html">example_results</a></code> 
-        </dt>
-        <dd>example_results</dd>
       </dl><dl><dt>
           
           <code><a href="get_EE_param_vals.html">get_EE_param_vals()</a></code> 
@@ -156,12 +140,22 @@
         <dd>Run ODE Solver for SIRS model</dd>
       </dl><dl><dt>
           
-          <code><a href="run_sirs_projection.html">run_sirs_projection()</a></code> 
+          <code><a href="scenario_projections.html">scenario_projections</a></code> 
         </dt>
-        <dd>In progress Run SIRS projection</dd>
+        <dd>scenario_projections</dd>
+      </dl><dl><dt>
+          
+          <code><a href="scenario_results.html">scenario_results</a></code> 
+        </dt>
+        <dd>scenario_results</dd>
       </dl><dl><dt>
           
           <code><a href="simple_sirs.html">simple_sirs()</a></code> 
+        </dt>
+        <dd>Simple function to generate SIRS model projections</dd>
+      </dl><dl><dt>
+          
+          <code><a href="simple_sirs_with_cumulative.html">simple_sirs_with_cumulative()</a></code> 
         </dt>
         <dd>Simple function to generate SIRS model projections</dd>
       </dl></div>
@@ -169,7 +163,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Javi Rudolph, Fer Arce, Elias Rosenblatt.</p>
+  <p></p><p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
 </div>
 
 <div class="pkgdown-footer-right">
