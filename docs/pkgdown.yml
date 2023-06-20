@@ -1,4 +1,4 @@
-pandoc: 2.19.2
+pandoc: 3.1.1
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
@@ -9,5 +9,5 @@ articles:
   Visualize_by_context: Visualize_by_context.html
   example_values: example_values.html
   sir_model_description: sir_model_description.html
-last_built: 2023-06-20T01:53Z
+last_built: 2023-06-20T12:58Z
 
