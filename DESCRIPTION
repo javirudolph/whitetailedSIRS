@@ -2,9 +2,9 @@ Package: whitetailedSIRS
 Title: Generate Deer Disease Dyanmics Under an SIRS Framework
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Javi", "Rudolph", , "f.javierarudolph@gmail.com", role = c("aut", "cre")),
+    person("Elias", "Rosenblatt", , "erosenbl@uvm.edu", role = c("aut", "cre")),
+    person("Javi", "Rudolph", , "f.javierarudolph@gmail.com", role = c("aut", "ctb")),
     person("Fer", "Arce", , "farcego@gmail.com", role = c("aut", "ctb")),
-    person("Elias", "Rosenblatt", , "erosenbl@uvm.edu", role = c("aut", "ctb")),
     person("Jonathan", "Cook", , "jcook@usgs.gov", role = "ctb"),
     person("Graziella", "DiRenzo", , "gdirenzo@umass.edu", role = "ctb"),
     person("Brittany", "Mosher", , "brittany.mosher@uvm.edu", role = "ctb"),
