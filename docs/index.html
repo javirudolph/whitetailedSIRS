@@ -44,13 +44,12 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
-    <a class="dropdown-item" href="articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems (still being developed)</a>
+    <a class="dropdown-item" href="articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
     <a class="dropdown-item" href="articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
     <a class="dropdown-item" href="articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
     <a class="dropdown-item" href="articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="articles/default_projection.html">default_projection</a>
-    <a class="dropdown-item" href="articles/example_values.html">example_values</a>
-    <a class="dropdown-item" href="articles/sir_model_description.html">sir_model_description</a>
+    <a class="dropdown-item" href="articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul>
@@ -73,11 +72,37 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="whitetailedsirs">whitetailedSIRS<a class="anchor" aria-label="anchor" href="#whitetailedsirs"></a>
+<div class="page-header"><h1 id="whitetailedsirs-a-package-to-project-sars-cov-2-outbreak-dynamics-in-white-tailed-deer">whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer<a class="anchor" aria-label="anchor" href="#whitetailedsirs-a-package-to-project-sars-cov-2-outbreak-dynamics-in-white-tailed-deer"></a>
 </h1></div>
+<div class="section level2">
+<h2 id="authors">Authors<a class="anchor" aria-label="anchor" href="#authors"></a>
+</h2>
+<p>Elias Rosenblatt (<a href="mailto:erosenbl@uvm.edu" class="email">erosenbl@uvm.edu</a>), Rubenstein School of Environment and Natural Resources, 81 Carrigan Drive, Burlington, VT, USA</p>
+<p>F. Javiera Rudolph, Department of Ecosystem Sciences and Management, Pennsylvania State University, University Park, PA, USA</p>
+<p>Fernando Arce, Department of Environmental Conservation, University of Massachusetts, Amherst, MA, USA</p>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>The goal of whitetailedSIRS is to provide a simple package to generate epidemic projections in white tailed deer populations using a <strong>S</strong>usceptible-<strong>I</strong>nfected-<strong>R</strong>ecovered-<strong>S</strong>usceptible (SIRS) modeling framework. The outputs of this package are ggplot friendly, and for the most part, we use a list-column workflow when working with multiple simulations. Details on the model can be found in the vignettes.</p>
+</div>
+<div class="section level2">
+<h2 id="information">Information<a class="anchor" aria-label="anchor" href="#information"></a>
+</h2>
+<p>Repository Type: Program R scripts</p>
+<p>Year of Origin: 2023</p>
+<p>Year of Version: 2023</p>
+<p>Version: 1.0.0</p>
+<p>Digital Object Identifier (DOI): ______</p>
+<p>USGS Information Product Data System (IPDS) no.: IP-_______</p>
+</div>
+<div class="section level2">
+<h2 id="suggested-citation-for-software">Suggested Citation for Software<a class="anchor" aria-label="anchor" href="#suggested-citation-for-software"></a>
+</h2>
+<p>Rosenblatt, E, Rudolph, J.F., and Arce, F., 2023. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, <a href="https://doi.org/______/______" class="external-link uri">https://doi.org/______/______</a></p>
+</div>
+<div class="section level2">
+<h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
+</h2>
+<p>This software release contains several R scripts that generate epidemic projections of SARS-CoV-2 in white tailed deer populations using a <strong>S</strong>usceptible-<strong>I</strong>nfected-<strong>R</strong>ecovered-<strong>S</strong>usceptible (SIRS) modeling framework. We provide a workflow of vignettes used in Rosenblatt et al. In Prep and Cook et al. In Prep. Users are able to specify transmission parameters for human-deer and deer-deer transmission to quantify changes in outbreak dynamics. The outputs of this package are ggplot friendly, and for the most part, we use a list-column workflow when working with multiple simulations. Details on the model can be found in the vignettes.</p>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -87,14 +112,150 @@
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"disease-decision-analysis-and-research/whitetailedSIRS"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
+</h2>
+<div class="section level3">
+<h3 id="vignette-1-sir_model_descriptionrmd">Vignette 1: sir_model_description.Rmd<a class="anchor" aria-label="anchor" href="#vignette-1-sir_model_descriptionrmd"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: A introductory vignette detailing the SIRS ODE equations and corresponding functions, used in Rosenblatt et al. In prep and Cook et al. In Prep.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="vignette-2-example_valuesrmd">Vignette 2: example_values.Rmd<a class="anchor" aria-label="anchor" href="#vignette-2-example_valuesrmd"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: A vignette stepping through the suggested work-flow when using the <code>whitetailedSIRS</code> package. Other vignettes use the same work-flow, so this vignette is useful for new users to understand how to replicate or modify the analysis presented.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="vignette-3-sirs_analysis_by_contextrmd">Vignette 3: SIRS_analysis_by_context.Rmd<a class="anchor" aria-label="anchor" href="#vignette-3-sirs_analysis_by_contextrmd"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: This vignette details the analysis used to study differences in outbreak dynamics in four scenarios of SARS-CoV-2 transmission to and among white-tailed deer populations. The output of this vignette is used to visualize differences in the vignette <code>whitetailedSIRS::Visualize_by_context</code>. This analysis corresponds with Objectives 1-3 of <em>Rosenblatt et al. In Prep</em>.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="vignette-4-sirs_analysis_by_context_initialspillrmd">Vignette 4: SIRS_analysis_by_context_initialspill.Rmd<a class="anchor" aria-label="anchor" href="#vignette-4-sirs_analysis_by_context_initialspillrmd"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: This vignette follows the same blueprint as <code>whitetailedSIRS::SIRS_analysis_by_context</code>. The primary difference here is that initial infected compartment sizes are set non-zero values and human prevalence is set to zero. This mimics an initial spillover event of a given magnitude, to test how outbreak dynamics differ from continuous spillover detailed in <code>whitetailedSIRS::SIRS_analysis_by_context</code>. These differences are visualized in the vignette <code>whitetailedSIRS::Visualize_by_context</code>. Most of the simulation code is suppresed in the rendered vignette, but can be viewed in the .Rmd file. This analysis corresponds with Objective 4 of <em>Rosenblatt et al. In Prep</em>.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="vignette-5-visualize_by_contextrmd">Vignette 5: Visualize_by_context.Rmd<a class="anchor" aria-label="anchor" href="#vignette-5-visualize_by_contextrmd"></a>
+</h3>
+<p>Data inputs: data/scenario_results.rda; data/scenario_projections.rda</p>
+<p>Details: This vignette demonstrates how to visualize the differences in various characteristics of outbreaks between scenarios. These figures are used in the results published in <em>Rosenblatt et al. In Prep.</em>.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="vignette-6-connected_systemsrmd">Vignette 6: Connected_Systems.Rmd<a class="anchor" aria-label="anchor" href="#vignette-6-connected_systemsrmd"></a>
+</h3>
+<p>Data inputs: data/scenario_results.rda</p>
+<p>Details: This vignette tests how connected systems (wild and captive separated by a fence line) differ in outbreak characteristics, compared to isolated scenario. When these scenarios are connected, there may be differences in prevalence, cumulative cases, and persistence due to fence line interactions. This analysis corresponds with Objective 5 of <em>Rosenblatt et al. In Prep</em>.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="vignette-7-management_alternatives_systemsrmd">Vignette 7: Management_Alternatives_Systems.Rmd<a class="anchor" aria-label="anchor" href="#vignette-7-management_alternatives_systemsrmd"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: This vignette runs outbreak simulations to estimate the effects of various management alternatives on the dynamics of a SARS-CoV-2 outbreak in wild and captive white-tailed deer. We considered captive:wild systems that are separated by a fence. These management alternatives may be implemented in both wild and captive populations, or in one scenario. We focus on 11 alternatives, ranging across agriculture, public health, and wildlife sectors. These alternatives are detailed in Cook et al. In Prep..</p>
+<p>Outputs: N/A</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a>
+</h2>
+<div class="section level3">
+<h3 id="function-1-draw_elicitation_samplesr">Function 1: draw_elicitation_samples.R<a class="anchor" aria-label="anchor" href="#function-1-draw_elicitation_samplesr"></a>
+</h3>
+<p>Data inputs: elicitation_data.rda</p>
+<p>Details: R function that samples a user-specified number of values from expert-elicited parameter estimates used in Rosenblatt et al. In Prep and Cook et al. In Prep.</p>
+<p>Outputs: A data frame listing expert-elicited parameters, error distribution characteristics (mean, standard deviation, and family) and user-specified number of random samples from the error distribution.</p>
+</div>
+<div class="section level3">
+<h3 id="function-2-get_ee_param_valsr">Function 2: get_EE_param_vals.R<a class="anchor" aria-label="anchor" href="#function-2-get_ee_param_valsr"></a>
+</h3>
+<p>Data inputs: Output object from elicitation_data.rda</p>
+<p>Details: R function that prepare random draws from elicitation_data.rda for inputs in the SIRS ODE equations.</p>
+<p>Outputs: A vector object containing drawn values for an expert-elicited parameter, with a length specified by the user.</p>
+</div>
+<div class="section level3">
+<h3 id="function-3-calc_contact_rater">Function 3: calc_contact_rate.R<a class="anchor" aria-label="anchor" href="#function-3-calc_contact_rater"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: R function that uses proximity rate model developed by Habib et al. (2011) to estimate proximity rates for deer in wild or wild-like captive settings, conditional on density and habitat availability. This function can also be used for captive settings with conditions that result in identical deer-deer proximity rates.</p>
+<p>Outputs: A vector object containing drawn deer-deer proximity rate values (proximity events per day), with a length specified by the user.</p>
+</div>
+<div class="section level3">
+<h3 id="function-4-calc_sigma_aeror">Function 4: calc_sigma_aero.R<a class="anchor" aria-label="anchor" href="#function-4-calc_sigma_aeror"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: R function that calculates probability of infection from aerosol transmission of SARS-CoV-2. User can specify number of probabilities generated for this derived parameter, an specific parameters influencing these probabilities (e.g. duration of proximity, dose-response, etc.).</p>
+<p>Outputs: A vector object containing drawn infection probabilities for aerosol transmission, with a length specified by the user.</p>
+</div>
+<div class="section level3">
+<h3 id="function-5-calc_sigma_dcr">Function 5: calc_sigma_dc.R<a class="anchor" aria-label="anchor" href="#function-5-calc_sigma_dcr"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: R function that calculates probability of infection from fluid transmission of SARS-CoV-2. User can specify number of probabilities generated for this derived parameter, an specific parameters influencing these probabilities (e.g. duration of proximity, dose-response, etc.).</p>
+<p>Outputs: A vector object containing drawn infection probabilities for fluid transmission, with a length specified by the user.</p>
+</div>
+<div class="section level3">
+<h3 id="function-6-initial_compartmentsr">Function 6: initial_compartments.R<a class="anchor" aria-label="anchor" href="#function-6-initial_compartmentsr"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: R function that populates a list of initial Susceptible (S) - Infected (I) - Recovered (R) compartment sizes. The function has an argument to format the output to allow the calculation of the size of each compartment at equilibrium (steady = TRUE), or to format the output to allow the calculation of cumulative infections over the course of a projected outbreak (steady = FALSE). These two process cannot be done in the same execution of the function, but rather be run separately. The length of each vector object in the list is determined by the user. The formatted output is ready to be fed into the run.R function, which uses Epi_sirs.R and Epi_sirs_with_cumulative.R functions to project how these compartment sizes change through a projection.</p>
+<p>Outputs: A list object containing vector objects containing the starting size of each SIR compartment. If steady = FALSE, the list includes 2 additional vectors “I_wild_cumulative” and “I_captive_cumulative”. This list object is prepared to be fed into the run.R function.</p>
+</div>
+<div class="section level3">
+<h3 id="function-7-alternativer">Function 7: alternative.R<a class="anchor" aria-label="anchor" href="#function-7-alternativer"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: R function that helps to prepare parameters used to solve SIRS ODE equations for both wild and captive deer, to be fed into the params argument of the run.R function. 15 parameters must be defined with lengths equal to the number of simulations run. This function takes these parameter inputs and calculates derived transmission rate parameters for use with the ODE equations.</p>
+<p>Outputs: A list of vector objects containing estimates for derived parameters, for use with the run.R function.</p>
+</div>
+<div class="section level3">
+<h3 id="function-8-runr">Function 8: run.R<a class="anchor" aria-label="anchor" href="#function-8-runr"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: R function that Run ODE Solver for SIRS model, using parameter estimates (output from alternatives.R), initial compartment sizes for projection (output from initial_compartments.R with argument steady = FALSE) and initial compartment sizes formatted for steady state calculation (output from initial_compartments.R with argument steady = TRUE).</p>
+<p>Outputs: A list containing a run identifier (run_id), initial compartment sizes for projection (inits.fall), initial compartment sizes for steady state calculation (inits.steady), parameter values used for each run (params), compartment sizes for each time step in reach run (ode_proj), compartment sizes at steady-state equilibrium (steady_state), and the scenario label for each run_id (Context). This output is used for all visualization and table summaries. For results from Rosenblatt et al. In Prep, this output is stored in the package in scenario_results.rda.</p>
+</div>
+<div class="section level3">
+<h3 id="function-9-simple_sirsr">Function 9: simple_sirs.R<a class="anchor" aria-label="anchor" href="#function-9-simple_sirsr"></a>
+</h3>
+<p>Data inputs: Outputs from alternatives.R and initial_compartments.R.</p>
+<p>Details: R function that defines the ODE SIR equations to work alongside the <code><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">deSolve::ode()</a></code> function, and it will return an object with the proportion of individuals found in each of the SIR compartments at each of the specified time points. This function is used in this package to calculate persistence, or the steady state equilibrium (via <code>rootSolve::run_steady()</code>), along with how compartment sizes change through a projection.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="function-10-simple_sirs_with_cumulativer">Function 10: simple_sirs_with_cumulative.R<a class="anchor" aria-label="anchor" href="#function-10-simple_sirs_with_cumulativer"></a>
+</h3>
+<p>Data inputs: Outputs from alternatives.R and initial_compartments.R.</p>
+<p>Details: Similar to <code><a href="reference/simple_sirs.html">whitetailedSIRS::simple_sirs</a></code>, this R function defines the ODE SIR equations to work alongside the <code><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">deSolve::ode()</a></code> function, and it will return an object with the proportion of individuals found in each of the SIR compartments at each of the specified time points. An added feature is that this function has ODE equations to calculate the cumulative infections from day 0 to day t.</p>
+<p>Outputs: N/A</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example to run a simple projection using the base function:</p>
+<p>Below is a basic example to run a simple projection using basic functions and fake data. Functions in <code>whitetailedSIRS</code> allow more complex calculations, but the core concepts remain the same.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/disease-decision-analysis-and-research/whitetailedSIRS" class="external-link">whitetailedSIRS</a></span><span class="op">)</span></span>
 <span><span class="co">## basic example code</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_inits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S_wild <span class="op">=</span> <span class="fl">1</span>, </span>
+<span>                   I_wild <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>                   R_wild <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>                   I_wild_cumulative <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>                   S_captive <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                   I_captive <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>                   R_captive <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>                   I_captive_cumulative <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">example_inits_steady</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S_wild <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>                   I_wild <span class="op">=</span> <span class="fl">0</span>, </span>
 <span>                   R_wild <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>                   S_captive <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -117,18 +278,20 @@
 <span>                    phi_cw <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>                    phi_wc <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>                    gamma_recov <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    I_human <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<span>                    I_human <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>                    boost <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://desolve.r-forge.r-project.org/" class="external-link">deSolve</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">rootSolve</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">example_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits</span>, times <span class="op">=</span> <span class="va">example_times</span>, parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="reference/simple_sirs.html">simple_sirs</a></span><span class="op">)</span></span>
+<span><span class="va">example_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits</span>, times <span class="op">=</span> <span class="va">example_times</span>, parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="reference/simple_sirs_with_cumulative.html">simple_sirs_with_cumulative</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">example_eq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rootSolve/man/runsteady.html" class="external-link">runsteady</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits</span>, parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="reference/simple_sirs.html">simple_sirs</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">example_eq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rootSolve/man/runsteady.html" class="external-link">runsteady</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits_steady</span>, parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="reference/simple_sirs.html">simple_sirs</a></span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="va">example_out</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="op">-</span><span class="va">I_wild_cumulative</span>, <span class="op">-</span><span class="va">I_captive_cumulative</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="op">-</span><span class="va">time</span>, names_to <span class="op">=</span> <span class="st">"compartment"</span>, values_to <span class="op">=</span> <span class="st">"proportion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/separate.html" class="external-link">separate</a></span><span class="op">(</span><span class="va">compartment</span>, sep <span class="op">=</span> <span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sir_type"</span>, <span class="st">"pop_type"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sir_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sir_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="st">"I"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -140,6 +303,19 @@
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-viz_results-1.png" width="100%"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">example_out</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="op">-</span><span class="va">S_wild</span>, <span class="op">-</span><span class="va">I_wild</span>, <span class="op">-</span><span class="va">R_wild</span>, <span class="op">-</span><span class="va">S_captive</span>, <span class="op">-</span><span class="va">I_captive</span>, <span class="op">-</span><span class="va">R_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">.</span>, Wild <span class="op">=</span> <span class="va">I_wild_cumulative</span>, Captive <span class="op">=</span> <span class="va">I_captive_cumulative</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="op">-</span><span class="va">time</span>, names_to <span class="op">=</span> <span class="st">"population"</span>, values_to <span class="op">=</span> <span class="st">"cumulative_proportion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>population <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">population</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wild"</span>, <span class="st">"Captive"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">cumulative_proportion</span>, linetype <span class="op">=</span> <span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Cumulative infections"</span>, y <span class="op">=</span> <span class="st">"Proportion of population"</span>, x <span class="op">=</span> <span class="st">"Time in days"</span>,</span>
+<span>        linetype <span class="op">=</span> <span class="st">"Population type"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-cumulative_cases-1.png" width="100%"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_eq</span><span class="op">$</span><span class="va">y</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble_row</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"compartment"</span>, values_to <span class="op">=</span> <span class="st">"proportion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -155,6 +331,12 @@
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-2-1.png" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Cook, J.D., E. Rosenblatt, G.V. Direnzo, E.H.C. Grant, B.A. Mosher, F. Arce, S. Christensen, R. Ghai, M.C. Runge. In Prep. Using decision science to evaluate the risk and management of SARS-CoV-2 zoonotic transmission between humans and white-tailed deer.</p>
+<p>Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -184,10 +366,9 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Javi Rudolph <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Elias Rosenblatt <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Javi Rudolph <br><small class="roles"> Author, contributor </small>  </li>
 <li>Fer Arce <br><small class="roles"> Author, contributor </small>  </li>
-<li>Elias Rosenblatt <br><small class="roles"> Author, contributor </small>  </li>
-<li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
 
@@ -199,7 +380,7 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Javi Rudolph, Fer Arce, Elias Rosenblatt.</p>
+<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
 </div>
 
 <div class="pkgdown-footer-right">
