@@ -1,6 +1,6 @@
 ---
-title: "Evaluation of management alternatives across systems"
-subtitle: "Analysis referenced in Cook et al. In Prep"
+title: "Management_Alternatives_Systems"
+subtitle: "Evaluation of management alternatives across systems"
 authors: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >

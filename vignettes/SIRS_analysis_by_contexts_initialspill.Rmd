@@ -1,6 +1,6 @@
 ---
-title: "SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover"
-subtitle: "Analysis referenced in Rosenblatt et al. In Prep"
+title: "SIRS_analysis_by_contexts_initialspill"
+subtitle: "SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover"
 author: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >

@@ -1,5 +1,6 @@
 ---
-title: "Summarize introduction, spread, prevalence, and persistence"
+title: "Visualize_by_context"
+subtitle: "Summarize introduction, spread, prevalence, and persistence"
 author: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >

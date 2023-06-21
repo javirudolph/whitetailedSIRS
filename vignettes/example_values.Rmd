@@ -1,5 +1,6 @@
 ---
-title: "Introduction to a simple projection using whitetailedSIRS"
+title: "example_values"
+subtitle: "Introduction to a simple projection using whitetailedSIRS"
 author: "F. Javiera Rudolph, Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >

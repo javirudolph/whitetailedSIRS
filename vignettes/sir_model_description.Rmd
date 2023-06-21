@@ -1,5 +1,6 @@
 ---
-title: "Epidemiological model overview for SARS-CoV-2 in white-tailed deer"
+title: "sir_model_description"
+subtitle: "Epidemiological model overview for SARS-CoV-2 in white-tailed deer"
 author: F. Javiera Rudolph, Elias Rosenblatt
 output: rmarkdown::html_vignette
 vignette: >

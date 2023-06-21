@@ -1,6 +1,6 @@
 ---
-title: "SARS-CoV-2 outbreak characteristics across wild and captive settings"
-subtitle: "Analysis referenced in Rosenblatt et al. 2023"
+title: "SIRS_analysis_by_contexts"
+subtitle: "SARS-CoV-2 outbreak characteristics across wild and captive settings"
 author: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >

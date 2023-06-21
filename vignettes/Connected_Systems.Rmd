@@ -1,6 +1,6 @@
 ---
-title: "SARS-CoV-2 introduction and spread in connected systems"
-subtitle: "Analysis referenced in Rosenblatt et al. In Prep"
+title: "Connected_Systems"
+subtitle: "SARS-CoV-2 introduction and spread in connected systems"
 author: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >
