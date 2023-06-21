@@ -38,21 +38,21 @@ We summarize the basic reproductive number ($R_0$) and the Force-Of_Infection fr
 ```{r, message = F, warning = F, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
 #plot r0
 ggplot(df, aes(x = Context, y = r0)) +
-  geom_boxplot()+
+  geom_boxplot(width = 0.5)+
   stat_summary(fun=mean, geom="point", shape="+", size=8) +
   theme_classic()+
   geom_hline(yintercept = 1)+
    coord_cartesian(ylim = c(0,20))+
-  scale_y_continuous("Basic reproductive number (r0)")+
+  scale_y_continuous("Basic reproductive number (R0)")+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> r0
 
 #plot FOI
-ggplot(df, aes(x = Context, y = log10(FOI))) +
-  geom_boxplot()+
+ggplot(df, aes(x = Context, y = log10(FOI*100))) +
+  geom_boxplot(width = 0.5)+
   stat_summary(fun.y=mean, geom="point", shape="+", size=8) +
   theme_classic()+
-    coord_cartesian(ylim = c(-8,-2))+
-  scale_y_continuous("Introduction hazard from humans (FOI)", breaks = c(-6,-5,-4,-3), labels = c("1:10^6","1:10^5", "1:10^4", "1:10^3"))+
+    coord_cartesian(ylim = c(-9,0))+
+  scale_y_continuous("Percent susceptible deer infected\nby humans per day (FOI; log-10 scale)", breaks = c(-9,-6,-3,-1))+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> FOI
 
 ggpubr::ggarrange(r0, FOI,nrow =1, ncol=2)
@@ -135,7 +135,7 @@ We summarize the average prevalence, incidence proportion, and probability of pe
 
 ```{r, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
 ggplot(df, aes(x = Context, y = Prevalence*100)) +
-  geom_boxplot()+
+  geom_boxplot(width = 0.5)+
   stat_summary(fun=mean, geom="point", shape="+", size=8) +
   theme_classic()+
   scale_y_continuous("Average prevalence (%)")+
@@ -148,14 +148,14 @@ group_by(df, Context) %>%
   mutate(Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
   ggplot(., aes(x = Context, y = pred))+
   geom_point()+
-  geom_errorbar(aes(ymin = LCL, ymax = UCL))+
+  geom_errorbar(aes(ymin = LCL, ymax = UCL), width = 0.5)+
   scale_fill_grey()+
   theme_classic()+
   scale_y_continuous("Probability of persistence", limits = c(0,1))+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> persistence
 
 ggplot(df, aes(x = Context, y = Cumulative_infections)) +
-  geom_boxplot()+
+  geom_boxplot(width = 0.5)+
   stat_summary(fun=mean, geom="point", shape="+", size=8) +
   theme_classic()+
   scale_y_continuous("Incidence proportion")+
@@ -176,13 +176,14 @@ df %>%
                                r0 > 1 & r0 <= 3 ~ "Low spread",
                                r0 > 3 & r0 <= 5 ~ "Medium spread",
                                r0 > 5 ~ "High spread"), 
-         r0_bin = factor(r0_bin, levels = c("Unsustained spread","Low spread","Medium spread","High spread"))) %>%
+         r0_bin = factor(r0_bin, levels = c("Unsustained spread","Low spread","Medium spread","High spread"))) %>% 
   ggplot(., aes(log10(FOI),Prevalence*100))+
   geom_point(aes(color = Context))+
   facet_grid(.~r0_bin)+
   scale_color_manual(values = c("black","gray80", "#66A61E","#66D61E"))+
   stat_smooth(method = "glm", method.args = list(family=quasi(link='log')), formula = y~x, color = "black")+
   scale_y_continuous(name = "Average prevalence (%)", limits = c(0,20))+
+   scale_x_continuous(name = "Introduction hazard from humans (log10 FOI)", breaks = c(-9,-6,-4))+
   theme_classic()+
   theme(strip.text = element_text(size = 12),
         axis.text.x = element_blank(),
@@ -200,7 +201,8 @@ df %>%
   scale_color_manual(values = c("black","gray80", "#66A61E","#66D61E"))+
   facet_grid(.~r0_bin)+
   stat_smooth(method = "glm",method.args = list(family = "binomial"), se = F, color = "gray20")+
-  scale_y_continuous(name = "Probability of persistence", limits = c(0,1), breaks = c(0,0.5,1))+
+  scale_y_continuous(name = "Probability of persistence", limits = c(0,1), breaks = c(0,1))+
+   scale_x_continuous(name = "Introduction hazard from humans (log10 FOI)", breaks = c(-9,-6,-4))+
   theme_classic()+
   theme(strip.text = element_text(size = 12),
         axis.text.x = element_blank(),
@@ -213,13 +215,13 @@ df %>%
                                r0 > 3 & r0 <= 5 ~ "Medium spread",
                                r0 > 5 ~ "High spread"), 
          r0_bin = factor(r0_bin, levels = c("Unsustained spread","Low spread","Medium spread","High spread"))) %>%
-  ggplot(., aes(log10(FOI),Cumulative_infections))+
+  ggplot(., aes(log10(FOI*100),Cumulative_infections))+
   geom_point(aes(color = Context))+
   facet_grid(.~r0_bin)+
   scale_color_manual(values = c("black","gray80", "#66A61E","#66D61E"))+
   stat_smooth(method = "glm", method.args = list(family=quasi(link='log')), formula = y~x, color = "black")+
   scale_y_continuous(name = "Incidence proportion")+
-scale_x_continuous(name = "Introduction hazard from humans (FOI)", breaks = c(-9,-6,-4), labels = c("1:10^9","1:10^6","1:10 000"))+
+scale_x_continuous(name = "Percent susceptible deer infected by humans per day (FOI; log-10 scale)", breaks = c(-9,-6,-3,-1))+
   theme_classic()+
   theme(strip.text = element_text(size = 12),
         axis.title.y = element_text(size = 12),axis.text = element_text(size = 10), legend.text = element_text(size=10), legend.title = element_text(size=12)) -> Incidence.plot
@@ -240,24 +242,24 @@ whitetailedSIRS::scenario_results %>%
    select(., -r0, -FOI) -> continuous
 
 whitetailedSIRS::initial_infection_results_1_in_1000 %>% 
-   mutate(., intro = "Initial introduction\n1 in 1,000") %>% 
+   mutate(., intro = "0.1%\ninitially infected") %>% 
    select(., -r0) -> initial_high
 
 whitetailedSIRS::initial_infection_results_1_in_1mil %>% 
-   mutate(., intro = "Initial introduction\n1 in 1 million") %>% 
+   mutate(., intro = "0.0001%\ninitially infected") %>% 
    select(., -r0) -> initial_med
 
 whitetailedSIRS::initial_infection_results_1_in_1bil %>% 
-   mutate(., intro = "Initial introduction\n1 in 1 billion") %>% 
+   mutate(., intro = "10e-7%\ninitially infected") %>% 
    select(., -r0) -> initial_low
 
 rbind(continuous, initial_high, initial_med, initial_low) %>% 
-   mutate(intro = factor(intro, levels = c("Continuous\nintroduction","Initial introduction\n1 in 1,000", "Initial introduction\n1 in 1 million", "Initial introduction\n1 in 1 billion")),
+   mutate(intro = factor(intro, levels = c("Continuous\nintroduction","0.1%\ninitially infected", "0.0001%\ninitially infected", "10e-7%\ninitially infected")),
           Cumulative_infections = Cumulative_infections)-> spillover.df
 
 spillover.df %>% 
    ggplot(., aes(x = intro, y = Prevalence))+
-   geom_boxplot()+
+   geom_boxplot(width = 0.5)+
    facet_grid(Context ~.)+
    scale_y_continuous(name = "Average prevalence (%)")+
    theme_classic()+
@@ -272,7 +274,7 @@ spillover.df %>%
              UCL = binom.confint(x = sum(Persist),n = 200, methods = "exact", conf.level = 0.95)$upper) %>% 
    ggplot(., aes(x = intro, y = mean))+
    geom_point()+
-   geom_errorbar(aes(ymin = LCL, ymax = UCL))+
+   geom_errorbar(aes(ymin = LCL, ymax = UCL), width = 0.5)+
    facet_grid(Context ~.)+
    scale_y_continuous(name = "Probability of persistence")+
    theme_classic()+
@@ -282,7 +284,7 @@ spillover.df %>%
 
 spillover.df %>% 
    ggplot(., aes(x = intro, y = Cumulative_infections))+
-   geom_boxplot()+
+   geom_boxplot(width = 0.5)+
    facet_grid(Context ~.)+
    scale_y_continuous(name = "Incidence proportion")+
    theme_classic()+
@@ -290,4 +292,3 @@ spillover.df %>%
 
 ggpubr::ggarrange(spillover_prev_plot, spillover_presist_plot, spillover_cumulative_plot, ncol = 3)
 ```
-
