@@ -200,7 +200,7 @@ sirs_results %>%
 ode_df %>%
    ggplot(., aes(x = time, y = I_wild_cumulative, group = run_id)) +
    geom_line() +
-   labs(x = "Time in days", y = "Proportion of I_w individuals") +
+   labs(x = "Time in days", y = "Incidence proportion") +
    theme_bw()
 ```
 

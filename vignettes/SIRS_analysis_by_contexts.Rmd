@@ -304,7 +304,7 @@ We will develop plots and tables of this results data frame. Here is a simple su
 ```{r}
 df %>% 
   group_by(., Context) %>% 
-  reframe(., R0.Median = round(quantile(r0,probs = c(0.5)),2), FOI.Median = round(log10(quantile(FOI,probs = c(0.5))),2), Prevalence.Median = round(quantile(Prevalence, probs = c(0.5)),6), Prevalence.Mean = round(mean(Prevalence),4), Persistence.Mean = round(sum(Persist)/nsamples,2), Cumulative_cases = median(Cumulative_infections)) -> median.results
+  reframe(., R0.Median = round(quantile(r0,probs = c(0.5)),2), FOI.Median = round(log10(quantile(FOI,probs = c(0.5))),2), Prevalence.Median = round(quantile(Prevalence, probs = c(0.5)),6), Prevalence.Mean = round(mean(Prevalence),4), Persistence.Mean = round(sum(Persist)/nsamples,2), Incidence_Proportion  = median(Cumulative_infections)) -> median.results
 
 median.results %>%
   kbl() %>%
