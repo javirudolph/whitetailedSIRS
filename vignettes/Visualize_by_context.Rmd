@@ -39,7 +39,6 @@ We summarize the basic reproductive number ($R_0$) and the Force-Of_Infection fr
 #plot r0
 ggplot(df, aes(x = Context, y = r0)) +
   geom_boxplot(width = 0.5)+
-  stat_summary(fun=mean, geom="point", shape="+", size=8) +
   theme_classic()+
   geom_hline(yintercept = 1)+
    coord_cartesian(ylim = c(0,20))+
@@ -49,13 +48,19 @@ ggplot(df, aes(x = Context, y = r0)) +
 #plot FOI
 ggplot(df, aes(x = Context, y = log10(FOI*100))) +
   geom_boxplot(width = 0.5)+
-  stat_summary(fun.y=mean, geom="point", shape="+", size=8) +
   theme_classic()+
     coord_cartesian(ylim = c(-9,0))+
   scale_y_continuous("Percent susceptible deer infected\nby humans per day (FOI; log-10 scale)", breaks = c(-9,-6,-3,-1))+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> FOI
 
-ggpubr::ggarrange(r0, FOI,nrow =1, ncol=2)
+#Plot P>=1 infection out of 100
+ggplot(df, aes(x = Context, y = 1-(exp(-FOI*120))^1000)) +
+  geom_boxplot(width = 0.5)+
+  theme_classic()+
+  scale_y_continuous("Probability of at least 1 HtD transmission\nper 1000 deer during 120-day projection", limits = c(0,1))+
+  theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> pinfect
+
+ggpubr::ggarrange(FOI, pinfect ,r0, nrow =1, ncol=3)
 ```
 
 ## Outbreak Projections
@@ -136,7 +141,6 @@ We summarize the average prevalence, incidence proportion, and probability of pe
 ```{r, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
 ggplot(df, aes(x = Context, y = Prevalence*100)) +
   geom_boxplot(width = 0.5)+
-  stat_summary(fun=mean, geom="point", shape="+", size=8) +
   theme_classic()+
   scale_y_continuous("Average prevalence (%)")+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> prevalence
@@ -156,7 +160,6 @@ group_by(df, Context) %>%
 
 ggplot(df, aes(x = Context, y = Cumulative_infections)) +
   geom_boxplot(width = 0.5)+
-  stat_summary(fun=mean, geom="point", shape="+", size=8) +
   theme_classic()+
   scale_y_continuous("Incidence proportion")+
   theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 14), strip.text.x = element_text(size = 14), axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, size = 12)) -> incidence_proportion
