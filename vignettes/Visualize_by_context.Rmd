@@ -28,7 +28,7 @@ Now that we have a dataset from our simulations in the vignettes `whitetailedSIR
 ```{r}
 df <- whitetailedSIRS::scenario_results
 outbreaks <- whitetailedSIRS::scenario_projections
-nsamples <- 200
+nsamples <- 1000
 ```
 
 ## Strength of introduction (FOI) and spread (R0)
@@ -71,6 +71,7 @@ outbreaks %>%
    mutate(ode_df = map(ode_proj, as.data.frame)) %>%
    pull(ode_df) %>%
    list_rbind(names_to = "run_id") %>% 
+   filter(., run_id %in% sample(unique(.$run_id),200)) %>% 
    ggplot(., aes(x = time, y = I_captive*100, group = run_id)) +
    geom_line(size = 0.1) +
    labs(x = "Time (days)", y = "Prevalence in captive deer (%)") +
@@ -88,6 +89,7 @@ outbreaks %>%
    mutate(ode_df = map(ode_proj, as.data.frame)) %>%
    pull(ode_df) %>%
    list_rbind(names_to = "run_id") %>% 
+   filter(., run_id %in% sample(unique(.$run_id),200)) %>% 
    ggplot(., aes(x = time, y = I_captive*100, group = run_id)) +
    geom_line(size = 0.1) +
    labs(x = "Time (days)", y = "Prevalence in captive deer (%)") +
@@ -103,6 +105,7 @@ outbreaks %>%
    mutate(ode_df = map(ode_proj, as.data.frame)) %>%
    pull(ode_df) %>%
    list_rbind(names_to = "run_id") %>% 
+   filter(., run_id %in% sample(unique(.$run_id),200)) %>% 
    ggplot(., aes(x = time, y = I_wild*100, group = run_id)) +
    geom_line(size = 0.1) +
    labs(x = "Time (days)", y = "Prevalence in wild deer (%)") +
@@ -118,6 +121,7 @@ outbreaks %>%
    mutate(ode_df = map(ode_proj, as.data.frame)) %>%
    pull(ode_df) %>%
    list_rbind(names_to = "run_id") %>% 
+   filter(., run_id %in% sample(unique(.$run_id),200)) %>% 
    ggplot(., aes(x = time, y = I_wild*100, group = run_id)) +
    geom_line(size = 0.1) +
    labs(x = "Time (days)", y = "Prevalence in captive deer (%)") +
@@ -272,9 +276,9 @@ spillover.df %>%
 
 spillover.df %>% 
    group_by(Context, intro) %>% 
-   summarize(., LCL = binom.confint(x = sum(Persist),n = 200, methods = "exact", conf.level = 0.95)$lower,
-             mean = binom.confint(x = sum(Persist),n = 200, methods = "exact", conf.level = 0.95)$mean,
-             UCL = binom.confint(x = sum(Persist),n = 200, methods = "exact", conf.level = 0.95)$upper) %>% 
+   summarize(., LCL = binom.confint(x = sum(Persist),n = nsamples, methods = "exact", conf.level = 0.95)$lower,
+             mean = binom.confint(x = sum(Persist),n = nsamples, methods = "exact", conf.level = 0.95)$mean,
+             UCL = binom.confint(x = sum(Persist),n = nsamples, methods = "exact", conf.level = 0.95)$upper) %>% 
    ggplot(., aes(x = intro, y = mean))+
    geom_point()+
    geom_errorbar(aes(ymin = LCL, ymax = UCL), width = 0.5)+

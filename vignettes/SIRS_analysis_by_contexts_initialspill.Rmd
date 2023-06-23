@@ -30,7 +30,7 @@ This vignette follows the same blueprint as `whitetailedSIRS::SIRS_analysis_by_c
 
 ```{r base_simulations, echo=FALSE}
 set.seed(23)
-nsamples <- 200
+nsamples <- 1000
 I_human_null <- 0
 times <- seq(0, 120, by = 1)
 ```
