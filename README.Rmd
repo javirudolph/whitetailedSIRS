@@ -19,9 +19,19 @@ knitr::opts_chunk$set(
 
 Elias Rosenblatt (erosenbl@uvm.edu), Rubenstein School of Environment and Natural Resources, 81 Carrigan Drive, Burlington, VT, USA
 
-F. Javiera Rudolph, Department of Ecosystem Sciences and Management, Pennsylvania State University, University Park, PA, USA
+F. Javiera Rudolph, Department of Ecosystem Sciences and Management, Pennsylvania State University, University Park, PA, USA; U.S. Geological Survey, Eastern Ecological Science Center, Laurel, MD, USA
 
 Fernando Arce, Department of Environmental Conservation, University of Massachusetts, Amherst, MA, USA
+
+Jonathan D. Cook, U.S. Geological Survey, Eastern Ecological Science Center, Laurel, MD, USA
+
+Graziella V. DiRenzo, U. S. Geological Survey, Massachusetts Cooperative Fish and Wildlife Research Unit, University of Massachusetts, Amherst, MA, USA; Department of Environmental Conservation, University of Massachusetts, Amherst, MA, USA
+
+Evan H.C. Grant, U.S. Geological Survey, Eastern Ecological Science Center, Turner’s Falls, Massachusetts, USA
+
+Michael C. Runge, U.S. Geological Survey, Eastern Ecological Science Center, Laurel, MD, USA
+
+Brittany A. Mosher, Rubenstein School of Environment and Natural Resources, 81 Carrigan Drive, Burlington, VT, USA
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -41,11 +51,15 @@ Digital Object Identifier (DOI): ______
 USGS Information Product Data System (IPDS) no.: IP-_______
 
 ## Suggested Citation for Software
-Rosenblatt, E, Rudolph, J.F., and Arce, F., 2023. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, https://doi.org/______/______
+Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V., Grant, E.H.C., Runge, M.C., and Mosher, B.A.. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, https://doi.org/______/______
 
 ## Abstract
 
 This software release contains several R scripts that generate epidemic projections of SARS-CoV-2 in white tailed deer populations using a **S**usceptible-**I**nfected-**R**ecovered-**S**usceptible (SIRS) modeling framework. We provide a workflow of vignettes used in Rosenblatt et al. In Prep and Cook et al. In Prep. Users are able to specify transmission parameters for human-deer and deer-deer transmission to quantify changes in outbreak dynamics. The outputs of this package are ggplot friendly, and for the most part, we use a list-column workflow when working with multiple simulations. Details on the model can be found in the vignettes.
+
+## Acknowledgements
+
+We thank Daniel Walsh, Susan Shriner, and Kim Pepin for their continued feedback as part of a broader decision analysis detailed in Cook et al. In Prep and Rosenblatt et al. In Prep. This effort was funded through the ________
 
 ## Installation
 

@@ -9,10 +9,28 @@ Elias Rosenblatt (<erosenbl@uvm.edu>), Rubenstein School of Environment
 and Natural Resources, 81 Carrigan Drive, Burlington, VT, USA
 
 F. Javiera Rudolph, Department of Ecosystem Sciences and Management,
-Pennsylvania State University, University Park, PA, USA
+Pennsylvania State University, University Park, PA, USA; U.S. Geological
+Survey, Eastern Ecological Science Center, Laurel, MD, USA
 
 Fernando Arce, Department of Environmental Conservation, University of
 Massachusetts, Amherst, MA, USA
+
+Jonathan D. Cook, U.S. Geological Survey, Eastern Ecological Science
+Center, Laurel, MD, USA
+
+Graziella V. DiRenzo, U. S. Geological Survey, Massachusetts Cooperative
+Fish and Wildlife Research Unit, University of Massachusetts, Amherst,
+MA, USA; Department of Environmental Conservation, University of
+Massachusetts, Amherst, MA, USA
+
+Evan H.C. Grant, U.S. Geological Survey, Eastern Ecological Science
+Center, Turner’s Falls, Massachusetts, USA
+
+Michael C. Runge, U.S. Geological Survey, Eastern Ecological Science
+Center, Laurel, MD, USA
+
+Brittany A. Mosher, Rubenstein School of Environment and Natural
+Resources, 81 Carrigan Drive, Burlington, VT, USA
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -33,9 +51,10 @@ USGS Information Product Data System (IPDS) no.: IP-\_\_\_\_\_\_\_
 
 ## Suggested Citation for Software
 
-Rosenblatt, E, Rudolph, J.F., and Arce, F., 2023. whitetailedSIRS: A
-package to project SARS-CoV-2 outbreak dynamics in white-tailed deer.
-Version 1.0.0: U.S. Geological Survey software release,
+Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V.,
+Grant, E.H.C., Runge, M.C., and Mosher, B.A.. whitetailedSIRS: A package
+to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version
+1.0.0: U.S. Geological Survey software release,
 <https://doi.org/______/______>
 
 ## Abstract
