@@ -167,7 +167,7 @@ suburban.params <- alternative(omega_ww = omega_ww_suburban, omega_cw = omega_cw
 
 ## Compile parameters and run SIRS ODE solver for context
 With the same transmission parameters as we used in `whitetailedSIRS::SIRS_analysis_by_context`, we can compile a result dataset for intial outbreaks of different sizes.
-```{r Compiler 1:1000, warning=FALSE, message=FALSE}
+```{r Compiler 1:1000, warning=FALSE, message=FALSE, results='hide'}
 captive.inits.fall <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples)
 captive.inits.steady <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples, steady = TRUE)
 
@@ -258,7 +258,7 @@ merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumula
   mutate(Context = factor(Context,  levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) -> df_initial_infections_1_in_1000
 ```
 
-```{r Compiler 1:1 mil, warning=FALSE, message=FALSE}
+```{r Compiler 1:1 mil, warning=FALSE, message=FALSE, results='hide'}
 captive.inits.fall <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999, I_captive_prop = 0.000001, draws = nsamples)
 captive.inits.steady <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999, I_captive_prop = 0.000001, draws = nsamples, steady = TRUE)
 
@@ -351,7 +351,7 @@ merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumula
 ```
 
 
-```{r Compiler 1:1 bil, warning=FALSE, message=FALSE}
+```{r Compiler 1:1 bil, warning=FALSE, message=FALSE, results='hide'}
 captive.inits.fall <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999999, I_captive_prop = 0.000000001, draws = nsamples)
 captive.inits.steady <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999999, I_captive_prop = 0.000000001, draws = nsamples, steady = TRUE)
 
