@@ -70,6 +70,13 @@ this package are ggplot friendly, and for the most part, we use a
 list-column workflow when working with multiple simulations. Details on
 the model can be found in the vignettes.
 
+## Acknowledgements
+
+We thank Daniel Walsh, Susan Shriner, and Kim Pepin for their continued
+feedback as part of a broader decision analysis detailed in Cook et
+al. In Prep and Rosenblatt et al. In Prep. This work was supported by
+the Coronavirus Aid, Relief, and Economic Security Act (P.L. 116-136).
+
 ## Installation
 
 You can install the development version of whitetailedSIRS from

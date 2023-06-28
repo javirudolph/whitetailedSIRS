@@ -59,7 +59,7 @@ This software release contains several R scripts that generate epidemic projecti
 
 ## Acknowledgements
 
-We thank Daniel Walsh, Susan Shriner, and Kim Pepin for their continued feedback as part of a broader decision analysis detailed in Cook et al. In Prep and Rosenblatt et al. In Prep. This effort was funded through the ________
+We thank Daniel Walsh, Susan Shriner, and Kim Pepin for their continued feedback as part of a broader decision analysis detailed in Cook et al. In Prep and Rosenblatt et al. In Prep. This work was supported by the Coronavirus Aid, Relief, and Economic Security Act (P.L. 116-136).
 
 ## Installation
 
