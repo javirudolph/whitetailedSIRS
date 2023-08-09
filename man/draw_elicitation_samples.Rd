@@ -32,6 +32,10 @@ otherwise specified in the \code{return_df} argument.
 Random draw of parameters from expert elicitation
 }
 \examples{
-draw_elicitation_samples() # this will return the default elicitation_data with an additional column for a random sample of 1 for each parameter.
-draw_elicitation_samples(return_df = TRUE) # will return the same as above but expanded as a dataframe instead of a tibble with a list column
+\dontrun{
+draw_elicitation_samples() # this will return the default elicitation_data
+with an additional column for a random sample of 1 for each parameter.
+draw_elicitation_samples(return_df = TRUE) # will return the same as above
+but expanded as a dataframe instead of a tibble with a list column}
+
 }

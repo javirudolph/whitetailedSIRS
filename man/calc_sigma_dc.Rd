@@ -2,7 +2,8 @@
 % Please edit documentation in R/calc_sigma_dc.R
 \name{calc_sigma_dc}
 \alias{calc_sigma_dc}
-\title{Calculate probability of infection given physical contact \eqn{\sigma^{DC}}}
+\title{Calculate probability of infection given physical contact
+\eqn{\sigma^{DC}}}
 \usage{
 calc_sigma_dc(
   V_DC = NULL,
@@ -17,7 +18,8 @@ calc_sigma_dc(
 \item{V_DC}{Transferred volume (ml). Default is 0.1}
 
 \item{C_nu}{viral load in sputum; RNA copies/ml. Default samples from expert
-elicited distribution of parameter 'Viral Load'. Concentration of infectious particles in sputum (gc per ml)}
+elicited distribution of parameter 'Viral Load'. Concentration of
+infectious particles in sputum (gc per ml)}
 
 \item{pfu_conv}{conversion value (PFU per GC). Set to 1/10^5.2}
 
@@ -29,10 +31,12 @@ elicited distribution of parameter 'Viral Load'. Concentration of infectious par
 distributions.}
 }
 \value{
-returns a number or vector of probability values for probability of infection via direct contact.
+returns a number or vector of probability values for probability of
+infection via direct contact.
 }
 \description{
-\code{calc_sigma_dc} will calculate one value for probability of infection using
+\code{calc_sigma_dc} will calculate one value for probability of
+infection using
 defaults if no arguments are provided. Defaults are described in the
 sir_model_description document and are sourced from the literature or expert
 elicitation.
@@ -51,6 +55,9 @@ individuals making contact.
 \deqn{d^{DC} = V^{DC} \cdot C_{\nu} \cdot pfuConv}
 }
 \examples{
+\dontrun{
 calc_sigma_dc() # will run the defaults
-calc_sigma_dc(nsamples = 10) # use defaults with a random draw for values of C_nu from expert elicitation
+calc_sigma_dc(nsamples = 10) # use defaults with a random draw for values of
+C_nu from expert elicitation}
+
 }

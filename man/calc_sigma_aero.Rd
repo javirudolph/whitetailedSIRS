@@ -25,7 +25,8 @@ calc_sigma_aero(
 
 \item{s}{settling rate; \eqn{hr^{-1}} Default is set to \eqn{0.24 hr^{-1}}}
 
-\item{lambda}{inactivation rates \eqn{hr^{-1}}. Default is set to \eqn{0.63 hr^{-1}}}
+\item{lambda}{inactivation rates \eqn{hr^{-1}}. Default is set to \eqn{0.63
+hr^{-1}}}
 
 \item{C_nu}{viral load in sputum; RNA copies/ml. Default samples from expert
 elicited distribution of parameter 'Viral Load'}
@@ -39,7 +40,8 @@ elicited distribution of parameter 'Viral Load'}
 \item{V_d}{exhaled droplet volume concentration; ml exhaled droplets/
 \eqn{m^3}. Default to 0.009}
 
-\item{V_air}{fixed volume; \eqn{m^3}. Default to \eqn{7.07m^3}, corresponding to a half-sphere with a 1.5m radius}
+\item{V_air}{fixed volume; \eqn{m^3}. Default to \eqn{7.07m^3}, corresponding
+to a half-sphere with a 1.5m radius}
 
 \item{t_contact}{time of contact with contaminated airspace (hr).}
 
@@ -55,7 +57,8 @@ the default distributions of parameters}
 a numeric vector of length equal to nsamples for values of sigma_aero
 }
 \description{
-\code{calc_sigma_aero} will calculate one value for probability of infection using
+\code{calc_sigma_aero} will calculate one value for probability of
+infection using
 defaults if no arguments are provided. Defaults are described in the
 sir_model_description document and are sourced from the literature or expert
 elicitation.
@@ -78,6 +81,8 @@ function of the dose received and a species-specific probability of
 infection from 1 quantum. \deqn{\sigma^{AERO} = 1 - e^{-rQ}}
 }
 \examples{
+\dontrun{
 calc_sigma_aero() # will return a single value using defaults
-calc_sigma_aero(nsamples = 10)
+calc_sigma_aero(nsamples = 10)}
+
 }
