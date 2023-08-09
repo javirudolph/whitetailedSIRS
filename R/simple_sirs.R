@@ -12,13 +12,25 @@
 #' @param parameters list of parameters to generate projection. The parameters
 #'   should include transmission parameters, immunity and recovery rates, and
 #'   proportion of infected humans.
-#'   @details Use `simple_sirs` to calculate persistence (via `rootSolve::run_steady()`), along with how compartment sizes change through a projection. If cumulative infections are desired, use `simple_sir_with_cumulative` instead. The parameter `boost` is included in the ODE equations for captive deer to allow implementation of applying vaccine boosters to captive deer herds as a potential management alternative to influence outbreak dynamics. See the vignette `Management_Alternative_Systems.Rmd` to see an example of its use. In all other cases where boosters would not be applied, boost should be set to 0.
+#'
+#' @details Use `simple_sirs` to calculate persistence
+#' (via `rootSolve::run_steady()`), along with how compartment sizes change
+#' through a projection. If cumulative infections are desired, use
+#' `simple_sir_with_cumulative` instead. The parameter `boost` is included in
+#' the ODE equations for captive deer to allow implementation of applying
+#' vaccine boosters to captive deer herds as a potential management alternative
+#' to influence outbreak dynamics. See the vignette
+#' `Management_Alternative_Systems.Rmd` to see an example of its use. In all
+#' other cases where boosters would not be applied, boost should be set to 0.
+#'
 #' @return when used with the `deSolve::ode()` function, it will return a
 #'   dataframe with the proportion of individuals in each of the SIR
 #'   compartments at each time point.
+#'
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # prepare the input parameters:
 #' example_inits <- c(S_wild = 1, I_wild = 0,
 #'                    R_wild = 0, S_captive = 1,
@@ -43,7 +55,9 @@
 #'
 #' # run the ode function:
 #'
-#' deSolve::ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs)
+#' deSolve::ode(y = example_inits, times = example_times,
+#' parms = example_params, func = whitetailedSIRS::simple_sirs)
+#' }
 #'
 #'
 simple_sirs <- function(time, state, parameters){

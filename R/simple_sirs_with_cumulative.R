@@ -1,24 +1,35 @@
 #' Simple function to generate SIRS model projections
 #'
-#' `simple_sirs_with_cumulative` is written to work alongside the `deSolve::ode()` function, and
-#' it will return an object with the proportion of individuals found in each of
-#' the SIR compartments at each of the specified time points.
+#' `simple_sirs_with_cumulative` is written to work alongside the
+#' `deSolve::ode()` function, and it will return an object with the proportion
+#' of individuals found in each of the SIR compartments at each of the specified
+#' time points.
 #'
 #' @param time vector of values for which to generate the projection (length in
 #'   days).
 #' @param state initial state for compartment populations. This should be a
-#'   named vector for starting values of S_wild, I_wild, R_wild, I_wild_cumulative, S_captive,
-#'   I_captive, R_captive, I_captive_cumulative.
+#'   named vector for starting values of S_wild, I_wild, R_wild,
+#'   I_wild_cumulative, S_captive, I_captive, R_captive, I_captive_cumulative.
 #' @param parameters list of parameters to generate projection. The parameters
 #'   should include transmission parameters, immunity and recovery rates, and
 #'   proportion of infected humans.
 #'
-#' @details `simple_sirs_with_cumulative()` cannot be run with `run_steady()` to estimate probability of persistence. Instead, use `simple_sirs()`, which does not return cumulative proportion of population infected. The parameter `boost` is included in the ODE equations for captive deer to allow implementation of applying vaccine boosters to captive deer herds as a potential management alternative to influence outbreak dynamics. See the vignette `Management_Alternative_Systems.Rmd` to see an example of its use. In all other cases where boosters would not be applied, boost should be set to 0.
+#' @details `simple_sirs_with_cumulative()` cannot be run with `run_steady()` to
+#' estimate probability of persistence. Instead, use `simple_sirs()`, which does
+#' not return cumulative proportion of population infected. The parameter
+#' `boost` is included in the ODE equations for captive deer to allow
+#' implementation of applying vaccine boosters to captive deer herds as a
+#' potential management alternative to influence outbreak dynamics. See the
+#' vignette `Management_Alternative_Systems.Rmd` to see an example of its use.
+#' In all other cases where boosters would not be applied, boost should be set
+#' to 0.
 #'
 #' @return when used with the `deSolve::ode()` function, it will return a
-#'   dataframe with the proportion of individuals in each of the SIR
-#'   compartments at each time point, as well as a cumulative case count (proportion)
+#' dataframe with the proportion of individuals in each of the SIR compartments
+#' at each time point, as well as a cumulative case count (proportion)
 #' @export
+#'
+#'
 #'
 #' @examples
 #' # prepare the input parameters:

@@ -16,34 +16,52 @@ initial_compartments(
 )
 }
 \arguments{
-\item{S_wild_prop}{Size of susceptible compartment in wild population (proportion)}
+\item{S_wild_prop}{Size of susceptible compartment in wild population
+(proportion)}
 
-\item{I_wild_prop}{Size of infectious compartment in wild population (proportion)}
+\item{I_wild_prop}{Size of infectious compartment in wild population
+(proportion)}
 
-\item{R_wild_prop}{Size of recovered compartment in wild population (proportion)}
+\item{R_wild_prop}{Size of recovered compartment in wild population
+(proportion)}
 
-\item{S_captive_prop}{Size of susceptible compartment in captive population (proportion)}
+\item{S_captive_prop}{Size of susceptible compartment in captive population
+(proportion)}
 
-\item{I_captive_prop}{Size of infectious compartment in captive population (proportion)}
+\item{I_captive_prop}{Size of infectious compartment in captive population
+(proportion)}
 
-\item{R_captive_prop}{Size of recovered compartment in captive population (proportion)}
+\item{R_captive_prop}{Size of recovered compartment in captive population
+(proportion)}
 
-\item{draws}{$Number of iterations of simulation}
+\item{draws}{Number of iterations of simulation}
 
-\item{I_wild_cumulative}{Cumulative infected in wild segment, starting always at 0}
-
-\item{I_captive_cumulative}{Cumulative infected in captive segment, starting always at 0}
+\item{steady}{Logical argument to state whether these initial compartments
+will be used to calculate compartment sizes as steady state equilibrium
+(steady = TRUE), or for a projection through a specified time period
+(steady = FALSE; default).}
 }
 \value{
-List of six vectors, repeating starting conditions specified by user. Length of vectors are determined by draws argument.
+List of six vectors (steady == TRUE) or eight vectors (steady ==
+FALSE), repeating starting conditions specified by user. Length of vectors
+are determined by draws argument. When steady == FALSE, output will contain
+starting values for tracking cumulative infections (I_wild_cumulative and
+I_captive_cumulative), both set to zero.
 }
 \description{
 Define starting compartment sizes for SIRS ODE Solver
 }
 \details{
-Provides a vector of compartment sizes for wild and captive populations. This function pairs wild and captive deer populations so that transmission between populations can occur. Values (except for draws parameter) must be proportions, and must sum to one for each population.
+Provides a vector of compartment sizes for wild and captive
+populations. This function pairs wild and captive deer populations so that
+transmission between populations can occur. Values (except for draws
+parameter) must be proportions, and must sum to one for each population.
 }
 \examples{
-initial_compartments(S_wild_prop = 0, draws = 5) #Starting conditions for a simulation focused only on captive deer
-initial_compartments(draws = 5) #Starting conditions for a simulation of introduction and spread in both wild and captive deer.
+\dontrun{
+initial_compartments(S_wild_prop = 0, draws = 5) #Starting conditions for a
+#simulation focused only on captive deer
+initial_compartments(draws = 5) #Starting conditions for a simulation of
+#introduction and spread in both wild and captive deer.}
+
 }
