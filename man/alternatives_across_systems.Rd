@@ -6,6 +6,24 @@
 \title{alternatives_across_systems}
 \format{
 \code{alternatives_across_systems}
+A data frame with 9 columns and 10000 rows storing the results of outbreak
+simulations given a particular management alternative (Alternative). Each row
+corresponds to an iteration of the simulation, with a specific complex,
+alternative implemented, and random draw of epidemiological parameters:
+\describe{
+\item{run_id}{Identifier of run iteration}
+\item{Complex}{Combination of wild and captive scenarios interacting along
+a fenceline}
+\item{Alternative}{Management alternative implemented}
+\item{meanWild}{Mean daily prevelance in wild deer in the complex}
+\item{meanCaptive}{Mean daily prevelance in captive deer in the complex}
+\item{cumulativeWild}{Incidence proportion in wild deer in the complex}
+\item{cumulativeCaptive}{Incidence proportion in captive deer in the
+complex}
+\item{persistWild}{Probability of persistence in wild deer in the complex}
+\item{persistCaptive}{Probability of persistence in captive deer in the
+complex}
+}
 }
 \source{
 Derived from \code{Management_Alternatives_Systems.Rmd}
@@ -14,6 +32,58 @@ Derived from \code{Management_Alternatives_Systems.Rmd}
 alternatives_across_systems
 }
 \description{
-A dataframe containing results used to compare influences of potential management alternatives on the prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations. 1000 iterations (run_id) were run for captive and wild populations of white-tailed deer, seperated by a single fenceline that allows proximity and direct contact between captive and wild deer (Complex), under each alternative implemented (Alternative). Complexes include captive deer in outdoor ranch facilities and wild deer in rural areas (Outdoor ranch and rural deer), captive deer in outdoor ranch facilities and wild deer in suburban areas (Outdoor ranch and suburban deer), captive deer in intensive facilities and wild deer in rural areas (Intensive facility and rural deer), and captive deer in intensive facilities and wild deer in suburban areas (Intensive facility and suburban deer). Management alternatives (Alternative) include 1) no action (baseline), 2) improve separation between captive and wild deer by improving fencing (double-fence captive facilities), 3) reduce and eliminate baiting practices through legislation, enforcement, and education (Eliminate baiting), 4) increase air flow in indoor facilities to match air exchange rate in outdoor settings (Improve indoor facility air quality; only applies for complexes with intensive facilities), 5) Cease research activities that would bring research and management staff in close proximity with wild deer (Pause Research), 6) Require personal protective equipment for humans during interactions with deer in both captive and wild settings (PPE, Both), 7) Require PPE in captive settings only (PPE, Captive), 8) Require PPE in wild settings only (PPE, Wild), 9) Reduce wild deer densities by 10\% to reduce deer-deer contact rate and spread of SARS-CoV-2 (Reduce wild density by 10\%), 10) Reduce wild deer densities by 25\% to reduce deer-deer contact rate and spread of SARS-CoV-2 (Reduce wild density by 25\%), 11) restrict human activities in areas posing elevated probability of human-deer interactions, such as suburban neighborhoods, parks, trail heads, etc. (Restrict human interactions), 12) Vaccinate and repeatedly boost captive deer (Vaccinate and boost captive deer), and 13) provide initial vaccination to captive deer with no secondary boosting (Vaccinate captive deer). Wild and captive prevalence (meanWild and meanCaptive, respectively) are reported as the percent of a population infected, averaged over a simulated 120-day projection (run_id), for a particular alternative applied to a particular context. Cumulative infections reports the total proportion of the wild and captive populations infected over the course of the 120-fall projection (cumulativeWild and cumulativeCaptive, respectively), and can exceed 1, indicating that all individuals were infected at least once during the fall season, for a particular alternative applied to a particular context. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and \code{run_steady()} from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium for wild and captive deer (persistWild and persistCaptive, respectively), for a particular alternative applied to a particular context.
+A dataframe containing results used to compare influences of potential
+management alternatives on the prevalence, persistence and cumulative
+infections of SARS-CoV-2 in simulated white-tailed deer populations. 1000
+iterations (run_id) were run for captive and wild populations of white-tailed
+deer, seperated by a single fenceline that allows proximity and direct
+contact between captive and wild deer (Complex), under each alternative
+implemented (Alternative). Complexes include captive deer in outdoor ranch
+facilities and wild deer in rural areas (Outdoor ranch and rural deer),
+captive deer in outdoor ranch facilities and wild deer in suburban areas
+(Outdoor ranch and suburban deer), captive deer in intensive facilities and
+wild deer in rural areas (Intensive facility and rural deer), and captive
+deer in intensive facilities and wild deer in suburban areas (Intensive
+facility and suburban deer). Management alternatives (Alternative) include
+\enumerate{
+\item no action (baseline), 2) improve separation between captive and wild deer
+by improving fencing (double-fence captive facilities), 3) reduce and
+eliminate baiting practices through legislation, enforcement, and education
+(Eliminate baiting), 4) increase air flow in indoor facilities to match air
+exchange rate in outdoor settings (Improve indoor facility air quality; only
+applies for complexes with intensive facilities), 5) Cease research
+activities that would bring research and management staff in close proximity
+with wild deer (Pause Research), 6) Require personal protective equipment for
+humans during interactions with deer in both captive and wild settings (PPE,
+Both), 7) Require PPE in captive settings only (PPE, Captive), 8) Require PPE
+in wild settings only (PPE, Wild), 9) Reduce wild deer densities by 10\% to
+reduce deer-deer contact rate and spread of SARS-CoV-2 (Reduce wild density
+by 10\%), 10) Reduce wild deer densities by 25\% to reduce deer-deer contact
+rate and spread of SARS-CoV-2 (Reduce wild density by 25\%), 11) restrict
+human activities in areas posing elevated probability of human-deer
+interactions, such as suburban neighborhoods, parks, trail heads, etc.
+(Restrict human interactions), 12) Vaccinate and repeatedly boost captive
+deer (Vaccinate and boost captive deer), and 13) provide initial vaccination
+to captive deer with no secondary boosting (Vaccinate captive deer). Wild and
+captive prevalence (meanWild and meanCaptive, respectively) are reported as
+the percent of a population infected, averaged over a simulated 120-day
+projection (run_id), for a particular alternative applied to a particular
+context. Cumulative infections reports the total proportion of the wild and
+captive populations infected over the course of the 120-fall projection
+(cumulativeWild and cumulativeCaptive, respectively), and can exceed 1,
+indicating that all individuals were infected at least once during the fall
+season, for a particular alternative applied to a particular context.
+Persistence is a logical condition indicating if equilibrium determined by
+SIRS ODE equations and \code{run_steady()} from the rootSolve package predicts at
+least 1 in 1,000 deer infected at equilibrium for wild and captive deer
+(persistWild and persistCaptive, respectively), for a particular alternative
+applied to a particular context.
+}
+}
+\examples{
+\dontrun{
+head(alternatives_across_systems)
+}
+
 }
 \keyword{datasets}

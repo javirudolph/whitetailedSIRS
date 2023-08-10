@@ -6,6 +6,14 @@
 \title{scenario_projections}
 \format{
 \code{scenario_projections}
+A tibble with 3 columns and 4000 rows storing daily SIRS compartment sizes
+a season's projection for multiple iterations of a particular simulated
+context:
+\describe{
+\item{Context}{Scenario of focus for iteration}
+\item{run_id}{Identifier of run iteration}
+\item{ode_proj}{A list storing daily SIR compartment sizes}
+}
 }
 \source{
 Derived using \code{SIRS_analysis_by_contexts.Rmd}
@@ -14,6 +22,16 @@ Derived using \code{SIRS_analysis_by_contexts.Rmd}
 scenario_projections
 }
 \description{
-A tibble containing projected SIR compartment sizes for every simulation run. Columns in this tibble include the scenario (Context), scenario run (run_id), and a list containing daily (time) compartment sizes for wild and captive SIR compartments (S_wild, I_wild, R_wild, & S_captive, I_captive, R_captive) and cumulative infections (I_wild_cumulative and I_captive_cumulative).
+A tibble containing projected SIR compartment sizes for every simulation run.
+Columns in this tibble include the scenario (Context), scenario run (run_id),
+and a list containing daily (time) compartment sizes for wild and captive SIR
+compartments (S_wild, I_wild, R_wild, & S_captive, I_captive, R_captive) and
+cumulative infections (I_wild_cumulative and I_captive_cumulative).
+}
+\examples{
+\dontrun{
+head(scenario_projections)
+}
+
 }
 \keyword{datasets}

@@ -7,7 +7,8 @@
 \format{
 \subsection{\code{elicitation_data}}{
 
-A data frame with 4 columns and 15 rows, each row corresponding to an elicited parameter:
+A data frame with 4 columns and 15 rows, each row corresponding to an
+elicited parameter:
 \describe{
 \item{parameter}{Parameter elicited}
 \item{mu}{mean value}
@@ -23,8 +24,11 @@ Contact: Elias Rosenblatt erosenbl@uvm.edu
 elicitation_data
 }
 \description{
-Group averaged (using quantile averaging) parameter estimates for
-parameters derived using expert elicitation. Parameters include 1) Days until a recovered individual can be
+Group averaged (using quantile averaging) parameter estimates
+for parameters derived using expert elicitation.
+}
+\details{
+Parameters include 1) Days until a recovered individual can be
 reinfected with SARS-CoV-2 (Parameter = Temporary Immunity; units = days), 2)
 Number of individuals infected via wastewater for every 100 individuals
 infected via direct transmission (Parameter = Wastewater Infections; units =
@@ -42,5 +46,11 @@ proximity duration, rural (minutes), 11) deer-human proximity rate, suburban
 deer-human proximity rate, captive (per 120 days), 14) deer-human proximity
 duration, captive (minutes), 15) deer-deer proximity rate in captivity (per
 day).
+}
+\examples{
+\dontrun{
+head(elicitation_data)
+}
+
 }
 \keyword{datasets}
