@@ -1,10 +1,16 @@
 Package: whitetailedSIRS
 Title: Generate Deer Disease Dyanmics Under an SIRS Framework
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(
     person("Elias", "Rosenblatt", , "erosenbl@uvm.edu", role = c("aut", "cre")),
-    person("Javi", "Rudolph", , "f.javierarudolph@gmail.com", role = c("aut", "ctb")),
-    person("Fer", "Arce", , "farcego@gmail.com", role = c("aut", "ctb"))
+    person("Javi", "Rudolph", , "f.javierarudolph@gmail.com", role = c("aut", 
+    "ctb")),
+    person("Fer", "Arce", , "farcego@gmail.com", role = c("aut", "ctb")),
+    person("Jonathan", "Cook", , "jcook@usgs.gov", role = c("aut", "ctb")),
+    person("Graziella", "DiRenzo", , "gdirenzo@umass.edu", role = c("aut", "ctb")),
+    person("Evan", "Grant", , "ehgrant@usgs.gov", role = c("aut", "ctb")),
+    person("Michael", "Runge", , "mrunge@usgs.gov", role = c("aut", "ctb")),
+    person("Brittany", "Mosher", , "Brittany.Mosher@uvm.edu", role = c("aut", "ctb"))
   )
 Description: Collection of functions to generate disease dynamics
     projections for deer populations using an SIRS framework.
