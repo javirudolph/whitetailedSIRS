@@ -23,7 +23,6 @@ equilibrium}
 course of the 120-day fall simulation}
 }
 }
-}
 \source{
 Derived from \code{SIRS_analysis_by_contexts_initialspill.Rmd}, to be
 compared with continual introduction results from

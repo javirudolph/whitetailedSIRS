@@ -335,7 +335,6 @@
 #'    \item{Cumulative_infections}{Total proportion of deer infected over the
 #'    course of the 120-day fall simulation}
 #' }
-#' }
 #'
 #'@examples
 #' \dontrun{
@@ -388,7 +387,6 @@
 #'    \item{Cumulative_infections}{Total proportion of deer infected over the
 #'    course of the 120-day fall simulation}
 #' }
-#' }
 #'
 #'@examples
 #' \dontrun{
@@ -439,7 +437,6 @@
 #'    equilibrium}
 #'    \item{Cumulative_infections}{Total proportion of deer infected over the
 #'    course of the 120-day fall simulation}
-#' }
 #' }
 #'
 #'@examples
