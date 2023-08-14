@@ -36,7 +36,7 @@
 #'
 get_EE_param_vals <- function(data, my_param){
    data %>%
-      filter(parameter == my_param) %>%
-      unnest(cols = c(my_sample)) %>%
+      filter(.data$parameter == my_param) %>%
+      unnest(cols = c(.data$my_sample)) %>%
       pull(my_sample)
 }
