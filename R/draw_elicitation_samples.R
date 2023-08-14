@@ -37,14 +37,14 @@ draw_elicitation_samples <- function(elicitation_data = NULL, nsamples = NULL,
    if(is.null(elicitation_data)) elicitation_data <- whitetailedSIRS::elicitation_data
    elicitation_data |>
       # create a random sample using the parameters depending on the specified distribution
-      dplyr::mutate(my_sample = ifelse(family == "log-normal",
-                                       purrr::pmap(list(mu, sd), function(mu, sd) rlnorm(nsamples, mu, sd)),
-                                       purrr::pmap(list(mu, sd),
+      dplyr::mutate(my_sample = ifelse(.data$family == "log-normal",
+                                       purrr::pmap(list(.data$mu, .data$sd), function(mu, sd) rlnorm(nsamples, mu, sd)),
+                                       purrr::pmap(list(.data$mu, .data$sd),
                                                    function(mu, sd) greybox::rlogitnorm(nsamples, mu, sd)))) -> elicitation_data_with_samples
 
    if(return_df == TRUE){
       elicitation_data_with_samples |>
-         tidyr::unnest(cols = my_sample) -> my_df
+         tidyr::unnest(cols = .data$my_sample) -> my_df
       return(my_df)
    } else (
       return(elicitation_data_with_samples)
