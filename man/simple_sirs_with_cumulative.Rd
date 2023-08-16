@@ -65,7 +65,10 @@ example_params <- c(alpha_immunity = 0.03,
 
 # run the ode function:
 
-deSolve::ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs_with_cumulative)
+deSolve::ode(y = example_inits,
+times = example_times,
+parms = example_params,
+func = whitetailedSIRS::simple_sirs_with_cumulative)
 
 
 }

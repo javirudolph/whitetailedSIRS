@@ -69,6 +69,11 @@ example_params <- c(alpha_immunity = 0.03,
                     I_human = 0.05,
                     boost = 0)
 
-run(iter = nsamples, initial_compartments = example_inits, initial_compartments_steady = example_inits_steady, params = example_params, times = example_times, name = Test)}
+run(iter = nsamples,
+initial_compartments = example_inits,
+initial_compartments_steady = example_inits_steady,
+params = example_params,
+times = example_times,
+name = Test)}
 
 }

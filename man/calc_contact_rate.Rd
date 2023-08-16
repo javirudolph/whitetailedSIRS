@@ -62,7 +62,19 @@ attractants on a landscape.
 \examples{
  \dontrun{
 calc_contact_rate(type_contact = "low")
-calc_contact_rate(rho_attractant = 1, kappa = 16.37, N_w = 1000, q = 0.53, A_w = 100, type_contact = "manual")
-calc_contact_rate(c(1,1), c(16.37, 16.37), rpois(2, 1000), c(0.53, 0.53), c(100, 100), type_contact = "manual")}
+
+calc_contact_rate(rho_attractant = 1,
+kappa = 16.37,
+N_w = 1000,
+q = 0.53,
+A_w = 100,
+type_contact = "manual")
+
+calc_contact_rate(rho_attractant = c(1,1),
+kappa = c(16.37, 16.37),
+N_w = rpois(2, 1000),
+q = c(0.53, 0.53),
+A_w = c(100, 100),
+type_contact = "manual")}
 
 }

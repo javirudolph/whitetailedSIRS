@@ -58,12 +58,27 @@
 #' @return Returns a list of vectors for each parameter
 #' @export
 #'
-#' @seealso `run()`, `calc_contact_rate()`, `calc_sigma_aero()`, `calc_sigma_dc()`, `draw_elicitation_samples()`
+#' @seealso `run()`, `calc_contact_rate()`, `calc_sigma_aero()`,
+#' `calc_sigma_dc()`, `draw_elicitation_samples()`
 #'
 #'
 #' @examples
 #' \dontrun{
-#' alternative(alpha_immunity = c((1/30),(1/60),(1/90),(1/120),(1/150)), omega_ww = rep(10,5), omega_cw = rep(1,5), omega_cc = rep(20,5), omega_hw = rep(0.01,5), omega_hc = rep(0.25,5), sigma_aero_deer_deer_wild = rep(0.01,5), sigma_aero_deer_deer_captive = rep(0.1,5), sigma_aero_deer_human_wild = rep(0.001,5), sigma_aero_deer_human_capt = rep(0.05,5), epsilon_dc = rep(0.2,5), sigma_dc_deer_deer = rep(0.02,5), gamma_recov = rep(1/6,5), I_human = rep(0.05,5), boost = rep(0,5))}
+#' alternative(alpha_immunity = c((1/30),(1/60),(1/90),(1/120),(1/150)),
+#' omega_ww = rep(10,5),
+#' omega_cw = rep(1,5),
+#' omega_cc = rep(20,5),
+#' omega_hw = rep(0.01,5),
+#' omega_hc = rep(0.25,5),
+#' sigma_aero_deer_deer_wild = rep(0.01,5),
+#' sigma_aero_deer_deer_captive = rep(0.1,5),
+#' sigma_aero_deer_human_wild = rep(0.001,5),
+#' sigma_aero_deer_human_capt = rep(0.05,5),
+#' epsilon_dc = rep(0.2,5),
+#' sigma_dc_deer_deer = rep(0.02,5),
+#' gamma_recov = rep(1/6,5),
+#' I_human = rep(0.05,5),
+#' boost = rep(0,5))}
 #'
 alternative <- function(alpha_immunity = NULL, omega_ww = NULL, omega_cw = NULL, omega_cc = NULL, omega_hw = NULL, omega_hc = NULL, sigma_aero_deer_deer_wild = NULL, sigma_aero_deer_deer_captive = NULL, sigma_aero_deer_human_wild = NULL, sigma_aero_deer_human_capt = NULL, epsilon_dc = NULL, sigma_dc_deer_deer = NULL, gamma_recov = NULL, I_human = NULL, boost = NULL)
 

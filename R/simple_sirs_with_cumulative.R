@@ -56,7 +56,10 @@
 #'
 #' # run the ode function:
 #'
-#' deSolve::ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs_with_cumulative)
+#' deSolve::ode(y = example_inits,
+#' times = example_times,
+#' parms = example_params,
+#' func = whitetailedSIRS::simple_sirs_with_cumulative)
 #'
 #'
 simple_sirs_with_cumulative <- function(time, state, parameters){
