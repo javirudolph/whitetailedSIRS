@@ -35,8 +35,13 @@
 #' get_EE_param_vals(my_param = "Temporary Immunity")}
 #'
 get_EE_param_vals <- function(data, my_param){
+
+   #Establish objects
+   parameter <- my_sample <- NULL
+
+   #Extract sample values
    data %>%
-      filter(.data$parameter == my_param) %>%
-      unnest(cols = c(.data$my_sample)) %>%
+      filter(parameter == my_param) %>%
+      unnest(cols = c(my_sample)) %>%
       pull(my_sample)
 }

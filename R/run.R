@@ -68,7 +68,13 @@ run <- function(iter = NULL, initial_compartments = NULL, initial_compartments_s
    if(is.null(params)) {stop("User must specify all parameters for ODE equation, either by hand or with alternative function")}
    if(is.null(name)) {stop("User must name context for data storage")}
 
-   tibble(run_id = 1:iter, inits.fall = map(.data$run_id, ~ initial_compartments %>% map_dbl(., .x)), inits.steady = map(.data$run_id, ~ initial_compartments_steady %>% map_dbl(., .x)), params = map(.data$run_id, function(x) params %>% map_dbl(., x)))%>%
-      mutate(ode_proj = pmap(list(y = .data$inits.fall, parms = params), ode, times = times, func = simple_sirs_with_cumulative)) %>%
-      mutate(steady_state = pmap(list(y = .data$inits.steady, parms = params), runsteady, func = simple_sirs, mf = 10)) %>%
-      mutate(Context = rep(name, nsamples))}
+   #Establish objects
+   run_id <- inits.fall <- inits.steady <- NULL
+
+   tibble(run_id = 1:iter,
+          inits.fall = map(run_id, ~ initial_compartments %>% map_dbl(., .x)),
+          inits.steady = map(run_id, ~ initial_compartments_steady %>% map_dbl(., .x)),
+          params = map(run_id, function(x) params %>% map_dbl(., x)))%>%
+      mutate(ode_proj = pmap(list(y = inits.fall, parms = params), ode, times = times, func = simple_sirs_with_cumulative)) %>%
+      mutate(steady_state = pmap(list(y = inits.steady, parms = params), runsteady, func = simple_sirs, mf = 10)) %>%
+      mutate(Context = rep(name, iter))}
