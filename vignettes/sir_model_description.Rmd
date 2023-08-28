@@ -550,7 +550,7 @@ Several epidemiological metrics can be calculated using outputs from solved SIRS
 
 -   Force-Of-Infection (FOI): The susceptible individuals infected per day
 
--   Basic reproductive number (\R_{0}): The number of secondary infections caused by an infected deer over the course of its infection
+-   Basic reproductive number (R_{0}): The number of secondary infections caused by an infected deer over the course of its infection
 
 -   Average daily prevalence in deer: The average proportion of deer infected during an outbreak
 
