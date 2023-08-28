@@ -341,6 +341,6 @@ results %>%
 ```
 
 ## Next Steps
-This vignette detailed the simulations run in Rosenblatt et al. (In Prep). The next vignette runs a similar process, but simulates outbreaks caused by [initial infections in a deer population, rather than continual introduction from humans](SIRS_analysis_by_context_initialspill.html). Results from both this and the next vignette are collated into [another vignette to produce the figures published in Rosenblatt et al. In Prep.](Visualize_by_context.html).
+This vignette detailed the simulations run in Rosenblatt et al. (In Prep) from continuous exposure to humans infected with SARS-CoV-2. The next vignette runs a similar process, but simulates outbreaks caused by [initial infections in a deer population, rather than continual introduction from humans](SIRS_analysis_by_context_initialspill.html). Results from both this and the next vignette are collated into [another vignette to produce the figures published in Rosenblatt et al. In Prep.](Visualize_by_context.html).
 
 Click [here](example_values.html) to return to the vignette demonstrating an example use of whitetailedSIRS.
