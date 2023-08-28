@@ -1,10 +1,10 @@
 ---
-title: "SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover"
+title: "SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover"
 subtitle: "Analysis referenced in Rosenblatt et al. In Prep"
 author: "Elias Rosenblatt"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{SIRS_analysis_by_contexts}
+  %\VignetteIndexEntry{SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,28 +26,65 @@ library(kableExtra)
 ```
 
 ## Introduction
-This vignette follows the same blueprint as `whitetailedSIRS::SIRS_analysis_by_context`. The primary difference here is that initial infected compartment sizes are set non-zero values and human prevalence is set to zero. This mimics an initial spillover event of a given magnitude, to test how outbreak dynamics differ from continuous spillover detailed in `whitetailedSIRS::SIRS_analysis_by_context`. These differences are visualized in the vignette `whitetailedSIRS::Visualize_by_context`. Most of the simulation code is suppresed in the rendered vignette, but can be viewed in the .Rmd file. This analysis corresponds with Objective 4 of *Rosenblatt et al. In Prep*.
+This vignette follows the same blueprint as the [SIRS_analysis_by_context vignette](SIRS_analysis_by_context.html). The primary difference here is that initial infected compartment sizes are set non-zero values and human prevalence is set to zero. This mimics an initial spillover event of a given magnitude, to test how outbreak dynamics differ from continuous spillover detailed in `whitetailedSIRS::SIRS_analysis_by_context`. These differences are visualized in the vignette [Visualize_by_context](Visualize_by_context.html). Most of the simulation code is suppresed in the rendered vignette, but can be viewed in the .Rmd file. This analysis corresponds with Objective 4 of *Rosenblatt et al. In Prep*.
 
-```{r base_simulations, echo=FALSE}
+Again, general approach with simulating SARS-CoV-2 outbreaks here is to:
+
+1.  Set the number of simulations
+
+2.  Draw a random sample of parameters used to estimate infection probabilities, contact rates, and other important parameters.
+
+3.  Derive parameters used the SIRS ODE equation set
+
+4.  Define initial SIR compartment sizes
+
+5.  Solve the SIRS ODE equations and calculate daily compartment sizes
+
+6.  Calculate risk of introduction and magnitude of spread given parameters
+
+7.  Calculate average daily prevalence, probability of persistence, and incidence proportion.
+
+## 1. Set number of simulations to run and context of simulation
+
+The same scenarios are considered in this vignette as detailed in [the vignette simulating continuous human introduction](SIRS_analysis_by_contexts.html). The major difference here is that there is an initial infection in the population and that human prevalence is set to 0%. By comparing results between an initial spillover and continual spillover, we can get a sense of how clustered exposures to a single event differ in outbreak dynamics compared to continuous spillover. Below are the scenario descriptions again.
+
+**Wild deer in rural conditions**: In this scenario, wild deer are free-ranging in an area with a rural human density (3.1 humans/km2). We assumed that deer in this context were subject to regulated hunting either using still-hunting, or ground blind or treestand approaches. We also assumed that baiting and backyard feeding were illegal but may still occur. We again used Habib et al.’s (2011) proximity rate model. We estimated the duration of deer-deer proximity events, and rates and duration of human-deer proximity events using expert elicitation.
+
+**Wild deer in suburban conditions**: Wild deer are free-ranging in an area of suburban human density (100 humans/km2). Deer-to-deer proximity rates were derived using the same parameters as used in the rural setting. The primary difference between this context and the wild, rural context are higher human-to-deer proximity rates and longer duration of proximity events as estimated by expert elicitation.
+
+**Outdoor captive ranch**: We modeled a population of captive deer housed in an outdoor ranching facility. We assumed proximity rates between deer in this context was the same as estimated in wild contexts, with the increase of these proximity rates due to supplemental feeding. We assume that proximity rates between humans and deer in this context are the same as those estimated for the wild, suburban context, but the duration of these proximity events are longer, reflecting those typical of a captive facility.
+
+**Intensive captive facility**: We considered captive deer held in a facility focused on captive breeding or exposition. Deer in this facility were predominantly indoors with high stocking densities and low indoor air exchange rates (AER; 1-hr). We estimated all proximity rates and duration of proximity using expert elicitation.
+
+We set a seed so the results here are repeatable, and set the number of samples to the desired amount (nsamples). For this example, we ran 1000 simulations.
+
+```{r base_simulations}
 set.seed(23)
 nsamples <- 1000
-I_human_null <- 0
-times <- seq(0, 120, by = 1)
 ```
 
-```{r, echo=FALSE}
-elicitation_data <- draw_elicitation_samples(nsamples = nsamples)
+## 2. Sample parameters for simulations
+Next, we draw an assortment of parameters to solve the SIRS ODE equations for a SARS-CoV-2 outbreak. If you have not read them, see the [SIR model description](sir_model_description.html) and [example](example_values.html) vignettes to understand the workflow here.
+```{r}
+elicitation_data <- whitetailedSIRS::draw_elicitation_samples(nsamples = nsamples)
 ```
 
-```{r Ranch Proximity, echo=FALSE}
+Following Rosenblatt et al. (2023), four contexts were defined, including outdoor captive ranch, intensive captive facility, wild deer in rural conditions, and wild deer in suburban conditions. In this RMD file, these scenarios will be simulated independently of each other.
+
+### Outdoor captive ranch
+#### Proximity Rates
+Proximity rates were derived from a rate model developed by Habib et al. (2011), as a function of habitat conditions (habitat) and density (nwild/A_W). For all uses of the Habib et al. (2011) model in this analysis, we fixed density at 10 deer per sq km and habitat at 26% wooded habitat (classified in the calc_contact_rate function as type_contact = "med"). We also used expert elicitation estimates of the probability of direct contact for fluid transmission.
+```{r Ranch Proximity}
 nWild <- rpois(nsamples,1000) #Abundance
 A_w <- 100 #Area
 habitat <- "med" #Habitat classification
+sigma_season <- 1 #Season adjustment for proximity rate
 
 epsilon_dc <- get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Probability of direct contact between deer, given proximity.
 ```
 
-```{r, echo=FALSE}
+Next, we define various proximity rates for the ranch context. Object names reflect other parameters that must be included in the SIRS ODE solver (e.g. omega_ww_ranch, set to 0).
+```{r}
 omega_ww_ranch <- rep(0, nsamples) #Deer-to-deer proximity rate in wild (set to 0; events per day).
 omega_cw_null <- rep(0, nsamples) #Deer-to-deer proximity rate along fenceline (set to 0; events per day).
 omega_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, rho_attractant = get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
@@ -56,7 +93,10 @@ omega_hw_ranch <- rep(0, nsamples) #Human-to-deer proximity rate in wild (set to
 omega_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 #Human-to-deer proximity rate in ranch context, mimicing suburban proximitty rates (events per day).
 ```
 
-```{r common infection parameters, echo=FALSE}
+#### Infection probabilities
+We calculate infection probabilities for three transmission pathways - aerosol transmission from deer-to-deer, fluid transmission from deer-to-deer, and aerosol transmission from human-to-deer. Below, we will use various package functions to define parameters to estimate the infection probability given proximity or contact.
+
+```{r common infection parameters}
 C_nu_human <- rnorm(n = nsamples, mean = 10^5.6, sd = 10^1.2)#viral load in humans (genomic copies per ml)
 C_nu_deer <- 10^5.6 * get_EE_param_vals(data = elicitation_data, my_param = "Viral Load") #viral load in deer saliva, relative to humans (genomic copies per ml)
 
@@ -64,7 +104,7 @@ r_deer <- get_EE_param_vals(data = elicitation_data, my_param = "Dose-Response")
 ```
 
 
-``` {r infection probability, echo=FALSE}
+``` {r infection probability}
 #Infection probability calculation of aerosol transmission from deer-to-deer
 t_contact_deer_deer_null <- get_EE_param_vals(data = elicitation_data, my_param = "Deer Proximity Duration (minutes)") #Estimate duration of proximity event...
 sigma_aero_deer_deer_ranch <- calc_sigma_aero(C_nu = C_nu_deer,
@@ -85,17 +125,9 @@ sigma_aero_deer_human_wild_null <- rep(0, nsamples)#Estimate human-to-deer infec
 
 ```
 
-```{r, echo=FALSE}
-gamma_recov <- rep(1/6, nsamples)
-alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param = 'Temporary Immunity')
-
-ranch.params <- alternative(alpha_immunity = alpha_immunity_null,
-                            omega_ww = omega_ww_ranch, omega_cw = omega_cw_null,omega_cc = omega_cc_ranch,
-                            omega_hw = omega_hw_ranch, omega_hc = omega_hc_ranch,
-                            sigma_aero_deer_deer_wild = sigma_aero_deer_deer_wild_null, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_ranch, sigma_aero_deer_human_wild = sigma_aero_deer_human_wild_null, sigma_aero_deer_human_capt = sigma_aero_deer_human_ranch, epsilon_dc = epsilon_dc, sigma_dc_deer_deer = sigma_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
-```
-
-```{r intensive captive, echo = FALSE}
+### Intensive captive facility
+Below, we list additional parameters used for the "Intensive captive facility" scenario. Note that this scenario will use objects defined earlier in this RMarkdown.
+```{r Intensive facility}
 omega_ww_intensive <- rep(0, nsamples)
 omega_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)")
 omega_hw_intensive <- rep(0, nsamples)
@@ -110,16 +142,11 @@ t_contact_deer_human_intensive <- get_EE_param_vals(data = elicitation_data, my_
 sigma_aero_deer_human_intensive <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                             t_contact = t_contact_deer_human_intensive / 60,
                                             r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
-
-intensive.params <- alternative(
-   omega_ww = omega_ww_intensive, omega_cw = omega_cw_null, omega_cc = omega_cc_intensive, 
-   omega_hw = omega_hw_intensive, omega_hc = omega_hc_intensive, 
-   sigma_aero_deer_deer_wild = sigma_aero_deer_human_wild_null, sigma_aero_deer_deer_captive =  sigma_aero_deer_deer_intensive, sigma_aero_deer_human_wild = sigma_aero_deer_human_wild_null, sigma_aero_deer_human_capt = sigma_aero_deer_human_intensive, sigma_dc_deer_deer = sigma_dc_deer_deer_null,
-   alpha_immunity = alpha_immunity_null, epsilon_dc = epsilon_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 ```
 
-
-```{r wild and rural, echo = FALSE}
+### Wild deer in rural conditions
+Again, we list additional parameters used for the "Wild deer in rural conditions" scenario. Note that this scenario will use objects defined earlier in this RMarkdown.
+```{r wild and rural}
 omega_ww_rural <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)
 omega_cc_rural <- rep(0, nsamples)
 omega_hw_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") /120
@@ -139,14 +166,11 @@ sigma_aero_deer_human_rural <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human,
 
 sigma_aero_deer_human_captive_null <- rep(0, nsamples)
 
-wild.inits.fall <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples)
-wild.inits.steady <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples, steady = TRUE)
-
-rural.params <- alternative(omega_ww = omega_ww_rural, omega_cw = omega_cw_null, omega_cc = omega_cc_rural, omega_hw = omega_hw_rural, omega_hc = omega_hc_rural, sigma_aero_deer_deer_wild = sigma_aero_deer_deer_rural, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_captive_null, sigma_aero_deer_human_wild = sigma_aero_deer_human_rural,  sigma_aero_deer_human_capt = sigma_aero_deer_human_captive_null, sigma_dc_deer_deer = sigma_dc_deer_deer_null,alpha_immunity = alpha_immunity_null, epsilon_dc = epsilon_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
-
 ```
 
-```{r wild and captive}
+### Wild deer in suburban conditions
+Again, we list additional parameters used for the "Wild deer in suburban conditions" scenario. Note that this scenario will use objects defined earlier in this RMarkdown.
+```{r wild and suburban}
 omega_ww_suburban <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)
 omega_cc_suburban <- rep(0, nsamples)
 omega_hw_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
@@ -161,31 +185,104 @@ sigma_aero_deer_deer_suburban <- calc_sigma_aero(C_nu = C_nu_deer,
 sigma_aero_deer_human_suburban <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_suburban / 60,
                                         r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
+```
+
+#### Recovery and Immunity Loss Rates
+For all simulations, animals recover from their infection at a given rate (gamma_recov), and lose their immunity and become susceptible at a given rate (alpha_immunity). We use a recovery rate based on a 6 day infectious period (Palmer et al. 2021), and immunity loss rate based on expert elicited estimates. The recovery rate is repeated across all iterations of a simulation (nsamples). The immunity loss rate is derived from [nsamples] draws from an error distribution estimated by the expert elicitation process. **Note that human prevalence is fixed at 0.**
+```{r}
+gamma_recov <- rep(1/6, nsamples)
+alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param = 'Temporary Immunity')
+I_human_null <- 0
+```
+
+## 3. Derive parameters used in the SIRS ODE euqation set.
+Next, we create derived parameters for each scenario:
+```{r }
+ranch.params <- alternative(alpha_immunity = alpha_immunity_null,
+                            omega_ww = omega_ww_ranch, omega_cw = omega_cw_null,omega_cc = omega_cc_ranch,
+                            omega_hw = omega_hw_ranch, omega_hc = omega_hc_ranch,
+                            sigma_aero_deer_deer_wild = sigma_aero_deer_deer_wild_null, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_ranch, sigma_aero_deer_human_wild = sigma_aero_deer_human_wild_null, sigma_aero_deer_human_capt = sigma_aero_deer_human_ranch, epsilon_dc = epsilon_dc, sigma_dc_deer_deer = sigma_dc_deer_deer_null, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+intensive.params <- alternative(
+   omega_ww = omega_ww_intensive, omega_cw = omega_cw_null, omega_cc = omega_cc_intensive, 
+   omega_hw = omega_hw_intensive, omega_hc = omega_hc_intensive, 
+   sigma_aero_deer_deer_wild = sigma_aero_deer_human_wild_null, sigma_aero_deer_deer_captive =  sigma_aero_deer_deer_intensive, sigma_aero_deer_human_wild = sigma_aero_deer_human_wild_null, sigma_aero_deer_human_capt = sigma_aero_deer_human_intensive, sigma_dc_deer_deer = sigma_dc_deer_deer_null,
+   alpha_immunity = alpha_immunity_null, epsilon_dc = epsilon_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
+
+rural.params <- alternative(omega_ww = omega_ww_rural, omega_cw = omega_cw_null, omega_cc = omega_cc_rural, omega_hw = omega_hw_rural, omega_hc = omega_hc_rural, sigma_aero_deer_deer_wild = sigma_aero_deer_deer_rural, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_captive_null, sigma_aero_deer_human_wild = sigma_aero_deer_human_rural,  sigma_aero_deer_human_capt = sigma_aero_deer_human_captive_null, sigma_dc_deer_deer = sigma_dc_deer_deer_null,alpha_immunity = alpha_immunity_null, epsilon_dc = epsilon_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 
 suburban.params <- alternative(omega_ww = omega_ww_suburban, omega_cw = omega_cw_null, omega_cc = omega_cc_suburban, omega_hw = omega_hw_suburban, omega_hc = omega_hc_suburban, sigma_aero_deer_deer_wild = sigma_aero_deer_deer_suburban, sigma_aero_deer_deer_captive = sigma_aero_deer_deer_captive_null, sigma_aero_deer_human_wild = sigma_aero_deer_human_suburban,  sigma_aero_deer_human_capt = sigma_aero_deer_human_captive_null, sigma_dc_deer_deer = sigma_dc_deer_deer_null,alpha_immunity = alpha_immunity_null, epsilon_dc = epsilon_dc, gamma_recov = gamma_recov, I_human = rep(I_human_null, nsamples), boost = rep(0, nsamples))
 ```
 
-## Compile parameters and run SIRS ODE solver for context
-With the same transmission parameters as we used in `whitetailedSIRS::SIRS_analysis_by_context`, we can compile a result dataset for intial outbreaks of different sizes.
-```{r Compiler 1:1000, warning=FALSE, message=FALSE, results='hide'}
-captive.inits.fall <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples)
-captive.inits.steady <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples, steady = TRUE)
+## 4. Define initial SIR compartment sizes
+Next, we define three sets of compartment sizes for both captive and wild scenarios that differ in the size of the initial exposure. These range from a widespread exposure (1 in 1000 deer), a minimal exposure (1 in 1 million), and a extremely rare exposure (1 in 1 billion).
 
-wild.inits.fall <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples)
-wild.inits.steady <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples, steady = TRUE)
+```{r}
+captive.inits.fall.1in1000 <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples)
+captive.inits.steady.1in1000 <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999, I_captive_prop = 0.001, draws = nsamples, steady = TRUE)
 
-proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = ranch.params, times = times, name = "Outdoor ranch")
+wild.inits.fall.1in1000 <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples)
+wild.inits.steady.1in1000 <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999, I_wild_prop = 0.001, draws = nsamples, steady = TRUE)
 
-proj.intensive <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = intensive.params, times = times, name = "Intensive facility")
+captive.inits.fall.1in1mil <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999, I_captive_prop = 0.000001, draws = nsamples)
+captive.inits.steady.1in1mil <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999, I_captive_prop = 0.000001, draws = nsamples, steady = TRUE)
 
-proj.rural <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady ,params = rural.params, times = times, name = "Wild, rural")
+wild.inits.fall.1in1mil<- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999, I_wild_prop = 0.000001, draws = nsamples)
+wild.inits.steady.1in1mil <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999, I_wild_prop = 0.000001, draws = nsamples, steady = TRUE)
 
-proj.suburban <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady, params = suburban.params, times = times, name = "Wild, suburban")
+captive.inits.fall.1in1bil <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999999, I_captive_prop = 0.000000001, draws = nsamples)
+captive.inits.steady.1in1bil <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999999, I_captive_prop = 0.000000001, draws = nsamples, steady = TRUE)
+
+wild.inits.fall.1in1bil <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999999, I_wild_prop = 0.000000001, draws = nsamples)
+wild.inits.steady.1in1bil <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999999, I_wild_prop = 0.000000001, draws = nsamples, steady = TRUE)
 ```
 
-```{r, Summarize prev and cumulative infections, echo=FALSE, message = FALSE}
-sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
+## 5. Solve the SIRS ODE equations and calculate daily compartment sizes
+We solve the SIRS ODE equations based on various initial exposures.
+```{r, warnings=F, message=F}
+times <- seq(0, 120, by = 1)
 
+#1 in 1000 deer
+proj.ranch.1in1000 <- run(iter = nsamples, initial_compartments = captive.inits.fall.1in1000, initial_compartments_steady = captive.inits.steady.1in1000, params = ranch.params, times = times, name = "Outdoor ranch")
+
+proj.intensive.1in1000 <- run(iter = nsamples, initial_compartments = captive.inits.fall.1in1000, initial_compartments_steady = captive.inits.steady.1in1000, params = intensive.params, times = times, name = "Intensive facility")
+
+proj.rural.1in1000 <- run(iter = nsamples, initial_compartments = wild.inits.fall.1in1000, initial_compartments_steady = wild.inits.steady.1in1000 ,params = rural.params, times = times, name = "Wild, rural")
+
+proj.suburban.1in1000 <- run(iter = nsamples, initial_compartments = wild.inits.fall.1in1000, initial_compartments_steady = wild.inits.steady.1in1000, params = suburban.params, times = times, name = "Wild, suburban")
+
+sirs_results_contexts.1in1000 <- rbind(proj.ranch.1in1000,proj.intensive.1in1000, proj.rural.1in1000, proj.suburban.1in1000)
+
+#1 in 1 million deer
+proj.ranch.1in1mil <- run(iter = nsamples, initial_compartments = captive.inits.fall.1in1mil, initial_compartments_steady = captive.inits.steady.1in1mil, params = ranch.params, times = times, name = "Outdoor ranch")
+
+proj.intensive.1in1mil <- run(iter = nsamples, initial_compartments = captive.inits.fall.1in1mil, initial_compartments_steady = captive.inits.steady.1in1mil, params = intensive.params, times = times, name = "Intensive facility")
+
+proj.rural.1in1mil <- run(iter = nsamples, initial_compartments = wild.inits.fall.1in1mil, initial_compartments_steady = wild.inits.steady.1in1mil ,params = rural.params, times = times, name = "Wild, rural")
+
+proj.suburban.1in1mil <- run(iter = nsamples, initial_compartments = wild.inits.fall.1in1mil, initial_compartments_steady = wild.inits.steady.1in1mil, params = suburban.params, times = times, name = "Wild, suburban")
+
+#1 in 1 billion deer
+proj.ranch.1in1bil <- run(iter = nsamples, initial_compartments = captive.inits.fall.1in1bil, initial_compartments_steady = captive.inits.steady.1in1bil, params = ranch.params, times = times, name = "Outdoor ranch")
+
+proj.intensive.1in1bil <- run(iter = nsamples, initial_compartments = captive.inits.fall.1in1bil, initial_compartments_steady = captive.inits.steady.1in1bil, params = intensive.params, times = times, name = "Intensive facility")
+
+proj.rural.1in1bil <- run(iter = nsamples, initial_compartments = wild.inits.fall.1in1bil, initial_compartments_steady = wild.inits.steady.1in1bil ,params = rural.params, times = times, name = "Wild, rural")
+
+proj.suburban.1in1bil <- run(iter = nsamples, initial_compartments = wild.inits.fall.1in1bil, initial_compartments_steady = wild.inits.steady.1in1bil, params = suburban.params, times = times, name = "Wild, suburban")
+
+```
+
+## 6 and 7: Calculate risk of introduction and magnitude of spread given parameters, average daily prevalence, probability of persistence, and incidence proportion.
+
+We are going to calculate several metrics for each iteration to summarize across contexts. We combine the projections for each context into one list object, and summarize the average prevalence (Infected) and incidence proportion (Cumulative_infections). We 
+
+We save these resulting summary data frame for future use.
+
+### 1 in 1000 deer initially infected
+
+First, we record prevelence and incidence proportion:
+```{r, Summarize prev and cumulative infections, echo=FALSE, message = FALSE}
 sirs_results_contexts %>%
   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
   pull(ode_df) %>%
@@ -200,6 +297,7 @@ sirs_results_contexts %>%
 
 ```
 
+#Next, we record SARS-CoV-2 persistence:
 ```{r, Summarize persistence, echo = F, warning=FALSE, message=FALSE}
 
 persist.threshold <- 0.001
@@ -219,6 +317,7 @@ sirs_results_contexts %>%
 
 ```
 
+We then calculate $R_0$ and FOI for each scenario, and combine with outbreak dynamics above to create one object for export.
 ```{r, FOI and R0 calc, echo = F, warning=FALSE, message=FALSE}
 ranch.df <- list_cbind(map(ranch.params, as_data_frame))
 colnames(ranch.df) <-  names(ranch.params)
@@ -258,23 +357,9 @@ merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumula
   mutate(Context = factor(Context,  levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) -> df_initial_infections_1_in_1000
 ```
 
-```{r Compiler 1:1 mil, warning=FALSE, message=FALSE, results='hide'}
-captive.inits.fall <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999, I_captive_prop = 0.000001, draws = nsamples)
-captive.inits.steady <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999, I_captive_prop = 0.000001, draws = nsamples, steady = TRUE)
+### 1 in 1 million deer initially infected
 
-wild.inits.fall <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999, I_wild_prop = 0.000001, draws = nsamples)
-wild.inits.steady <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999, I_wild_prop = 0.000001, draws = nsamples, steady = TRUE)
-
-proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = ranch.params, times = times, name = "Outdoor ranch")
-
-proj.intensive <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = intensive.params, times = times, name = "Intensive facility")
-
-proj.rural <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady ,params = rural.params, times = times, name = "Wild, rural")
-
-proj.suburban <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady, params = suburban.params, times = times, name = "Wild, suburban")
-```
-
-
+First, we record prevelence and incidence proportion:
 ```{r, Summarize prev and cumulative infections 1 in 1mil, echo=FALSE, warning=FALSE, message=FALSE}
 sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
 
@@ -292,6 +377,7 @@ sirs_results_contexts %>%
 
 ```
 
+#Next, we record SARS-CoV-2 persistence:
 ```{r, Summarize persistence 1 in 1mil, echo = F, warning=FALSE, message=FALSE}
 
 persist.threshold <- 0.001
@@ -311,6 +397,7 @@ sirs_results_contexts %>%
 
 ```
 
+We then calculate $R_0$ and FOI for each scenario, and combine with outbreak dynamics above to create one object for export.
 ```{r, FOI and R0 calc 1 in 1mil, echo = F, warning=FALSE, message=FALSE}
 ranch.df <- list_cbind(map(ranch.params, as_data_frame))
 colnames(ranch.df) <-  names(ranch.params)
@@ -350,24 +437,9 @@ merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumula
   mutate(Context = factor(Context,  levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) -> df_initial_infections_1_in_1mil
 ```
 
+### 1 in 1 billion deer initially infected
 
-```{r Compiler 1:1 bil, warning=FALSE, message=FALSE, results='hide'}
-captive.inits.fall <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999999, I_captive_prop = 0.000000001, draws = nsamples)
-captive.inits.steady <- initial_compartments(S_wild_prop = 0, S_captive_prop = 0.999999999, I_captive_prop = 0.000000001, draws = nsamples, steady = TRUE)
-
-wild.inits.fall <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999999, I_wild_prop = 0.000000001, draws = nsamples)
-wild.inits.steady <- initial_compartments(S_captive_prop = 0, S_wild_prop = 0.999999999, I_wild_prop = 0.000000001, draws = nsamples, steady = TRUE)
-
-proj.ranch <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = ranch.params, times = times, name = "Outdoor ranch")
-
-proj.intensive <- run(iter = nsamples, initial_compartments = captive.inits.fall, initial_compartments_steady = captive.inits.steady, params = intensive.params, times = times, name = "Intensive facility")
-
-proj.rural <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady ,params = rural.params, times = times, name = "Wild, rural")
-
-proj.suburban <- run(iter = nsamples, initial_compartments = wild.inits.fall, initial_compartments_steady = wild.inits.steady, params = suburban.params, times = times, name = "Wild, suburban")
-```
-
-
+First, we record prevelence and incidence proportion:
 ```{r, Summarize prev and cumulative infections 1 in 1bil, echo=FALSE, warning=FALSE, message=FALSE}
 sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
 
@@ -385,6 +457,7 @@ sirs_results_contexts %>%
 
 ```
 
+#Next, we record SARS-CoV-2 persistence:
 ```{r, Summarize persistence 1 in 1bil, echo = F, warning=FALSE, message=FALSE}
 
 persist.threshold <- 0.001
@@ -404,6 +477,7 @@ sirs_results_contexts %>%
 
 ```
 
+We then calculate $R_0$ and FOI for each scenario, and combine with outbreak dynamics above to create one object for export.
 ```{r, FOI and R0 calc 1 in 1bil, echo = F, warning=FALSE, message=FALSE}
 ranch.df <- list_cbind(map(ranch.params, as_data_frame))
 colnames(ranch.df) <-  names(ranch.params)
@@ -451,3 +525,7 @@ initial_infection_results_1_in_1mil <- df_initial_infections_1_in_1mil
 initial_infection_results_1_in_1bil <- df_initial_infections_1_in_1bil
 ```
 
+## Next Steps:
+This vignette showed an example of how we can use various whitetailedSIRS functions to project disease outbreaks in white-tailed deer, and summarize outbreak characteristics across simulations. With reading this vignette and previous vignettes, users are prepared to start exploring their own simulations using whitetailedSIRS. In the following vignettes, we will illustrate the use of whitetailedSIRS in analyses published in Rosenblatt et al. (In Prep) and Cook et al. (In Prep). We will start with running simulations for [Rosenblatt et al.'s (In Prep) analysis of outbreak dynamics given continuous spillover from humans in wild and captive settings.](SIRS_analysis_by_context.html)
+
+Click [here](sir_model_description.html) to return to the vignette detailing the SIRS ODE equations used in whitetailedSIRS.

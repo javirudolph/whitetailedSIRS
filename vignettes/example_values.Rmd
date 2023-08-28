@@ -426,4 +426,4 @@ sirs_results %>%
 ## Next Steps
 This vignette showed an example of how we can use various whitetailedSIRS functions to project disease outbreaks in white-tailed deer, and summarize outbreak characteristics across simulations. With reading this vignette and previous vignettes, users are prepared to start exploring their own simulations using whitetailedSIRS. In the following vignettes, we will illustrate the use of whitetailedSIRS in analyses published in Rosenblatt et al. (In Prep) and Cook et al. (In Prep). We will start with running simulations for [Rosenblatt et al.'s (In Prep) analysis of outbreak dynamics given continuous spillover from humans in wild and captive settings.](SIRS_analysis_by_context.html)
 
-Click [here](Introduction.html) to return to the vignette introducing the whitetailedSIRS package.
+Click [here](sir_model_description.html) to return to the vignette detailing the SIRS ODE equations used in whitetailedSIRS.
