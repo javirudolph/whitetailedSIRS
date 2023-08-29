@@ -60,7 +60,7 @@ We set a seed so the results here are repeatable, and set the number of samples 
 
 ```{r base_simulations}
 set.seed(23)
-nsamples <- 1000
+nsamples <- 100
 ```
 
 ## 2. Sample parameters for simulations

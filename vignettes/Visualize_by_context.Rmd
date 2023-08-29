@@ -24,16 +24,42 @@ library(stringr)
 ```
 
 ## Introduction
-Now that we have a dataset from our simulations in the vignettes `whitetailedSIRS::SIRS_analysis_by_context.Rmd` and `whitetailedSIRS::SIRS_analysis_by_context_initialspill.Rmd`, we can begin to visualize how various characteristics of outbreaks differ between contexts. These figures are used in the results published in *Rosenblatt et al. In Prep.*. Here, we load the data set `whitetailedSIRS::scenario_results` summarizing each simulation (df), the data set `whitetailedSIRS::scenario_projections` containing daily compartment sizes for each simulation (outbreaks), and remind R how many iterations were run in each context (nsamples).
+
+This vignette demonstrates how to manipulated, summarize, and plot key results from the projection of SARS-CoV-2 infections in simulated white-tailed deer populations. Now that we have a dataset from our simulations in the vignettes detailing [continuous introduction from humans](SIRS_analysis_by_context.html) and [a single, initial introduction without continuous introduction from humans](SIRS_analysis_by_context_initialspill.html), we can begin to visualize how various characteristics of outbreaks differ between contexts. Here, we load the data set `whitetailedSIRS::scenario_results` summarizing each simulation (df), the data set `whitetailedSIRS::scenario_projections` containing daily compartment sizes for each simulation (outbreaks), and remind R how many iterations were run in each context (nsamples). These figures are used in the results published in *Rosenblatt et al. In Prep.*. The tasks demonstrated in this vignette include:
+
+-   Load data
+
+-   Plot Force-Of-Infection, Hazard infection rate, and $R_0$
+
+-   Plot projected infections for each scenario
+
+-   Plot prevalence, persistence, and incidence proportions for each scenario
+
+-   Plot interaction between FOI and $R_0$ influencing prevalence, persistence, and incidence proportion
+
+-   Plot comparison of continuous introduction from humans and a single introductory event
+
+## Load data
+whitetailedSIRS comes with the simulation results reported in Rosenblatt et al. (In Prep), which we load to illustrate the visualization of outbreak dynamics. We load the scenario results that report various outbreak metrics for each iteration in each scenario (df). 
 ```{r}
 df <- whitetailedSIRS::scenario_results
+head(df)
+```
+
+We also load the daily compartment sizes for each itneration in each scenario (scenario_projections). 
+```{r}
 outbreaks <- whitetailedSIRS::scenario_projections
+head(outbreaks)
+head(outbreaks$ode_proj[[1]])
+```
+Finally, we set the number of iterations (nsamples) to match that of these stored datasets (nsample = 1000)
+```{r}
 nsamples <- 1000
 ```
 
-## Strength of introduction (FOI) and spread (R0)
+## Plot Force-Of-Infection, Hazard infection rate, and $R_0$
 
-We summarize the basic reproductive number ($R_0$) and the Force-Of_Infection from humans to deer ($FOI_{HD}$) for each scenario below, producing Figure 3 in Rosenblatt et al. In Prep.:
+We summarize the Force-Of_Infection from humans to deer ($FOI_{HD}$), the hazard probability of at least 1 deer infected per 1000 deer during the 120-day simulation, and the basic reproductive number ($R_0$) and  for each scenario below, producing Figure 3 in Rosenblatt et al. In Prep.:
 
 ```{r, message = F, warning = F, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
 #plot r0
@@ -63,8 +89,10 @@ ggplot(df, aes(x = Context, y = 1-(exp(-FOI*120))^1000)) +
 ggpubr::ggarrange(FOI, pinfect ,r0, nrow =1, ncol=3)
 ```
 
-## Outbreak Projections
-We can visually compare the distribution of outbreak frequency, and peak size and timing across the four scenarios considered. The code below produces Figure 4 in Rosenblatt et al. In Prep.:
+## Plot projected infections for each scenario
+
+We can visually compare the distribution of outbreak frequency, and peak size and timing across the four scenarios considered. This figure is not featured in Rosenblatt et al. (In Prep.), but may be of interest for the user.
+
 ```{r, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
 outbreaks %>% 
    filter(., Context %in% c("Outdoor ranch")) %>% 
@@ -137,10 +165,9 @@ outbreaks %>%
 ggpubr::ggarrange(outdoor_ranch_outbreak, intensive_facility_outbreak, wild_rural_outbreak, wild_suburban_outbreak)
 ```
 
+## Plot prevalence, persistence, and incidence proportions for each scenario
 
-## Prevalence, Incidence, and Persistence
-
-We summarize the average prevalence, incidence proportion, and probability of persistence for each scenario below, producing Figure 5 in Rosenblatt et al. In Prep.:
+We summarize the average prevalence, incidence proportion, and probability of persistence for each scenario below, producing Figure 4 in Rosenblatt et al. In Prep.:
 
 ```{r, fig.asp = 0.8, fig.width = 7, out.width = "100%"}
 ggplot(df, aes(x = Context, y = Prevalence*100)) +
@@ -172,9 +199,9 @@ ggplot(df, aes(x = Context, y = Cumulative_infections)) +
 ggpubr::ggarrange(prevalence, persistence,incidence_proportion,nrow =1, ncol=3)
 ```
 
-## Interaction between strengths of introduction and spread, and prevalence, cumulative infections, and persistence.
+## Plot interaction between FOI and $R_0$ influencing prevalence, persistence, and incidence proportion
 
-We summarize how how Force-Of-Infection from humans to deer ($FOI_{HD}$) and SARS-CoV-2's basic reproductive number ($R_0$) interact in outbreak characteristics. The code below produces Figure 6 in Rosenblatt et al. In Prep.:
+We summarize how how Force-Of-Infection from humans to deer ($FOI_{HD}$) and SARS-CoV-2's basic reproductive number ($R_0$) interact in outbreak characteristics. The code below produces Figure 5 in Rosenblatt et al. In Prep.:
 
 ```{r, warning=FALSE, message=FALSE, fig.align='center',out.width="100%", , fig.height = 8, fig.width = 14}
 #Composite plot showing how R0 and FOI interact to impact prevelence
@@ -239,9 +266,9 @@ ggpubr::ggarrange(Prevalence.plot, Persistence.plot, Incidence.plot,nrow =3, nco
    annotate("label", x = 0.1, y = .25, label = "C", fill = "white", size = 6)
 ```
 
-## Compare outbreak characteristics for initial and continuous spillover
+## Plot comparison of continuous introduction from humans and a single introductory event
 
-Here, we visualize differences in outbreak characteristics when there is continuous transmission from humans (as all cases plotted above) vs when there is a single, initial outbreak of various sizes. These initial outbreaks range from in 0.1% (1:1,000 deer), 0.0001% (1:1 million deer), and 1e-7% (1:1 billion deer). The resulting figure corresponds with Figure 7 in Rosenblatt et al. In Prep.
+Here, we visualize differences in outbreak characteristics when there is continuous transmission from humans (as all cases plotted above) vs when there is a single, initial outbreak of various sizes. These initial outbreaks range from in 0.1% (1:1,000 deer), 0.0001% (1:1 million deer), and 1e-7% (1:1 billion deer). These initial outbreak simulations come from [the vignette demonstrating how to model outbreaks from a single, initial introduction](SIRS_analysis_by_contexts_initialspill.html). The resulting figure corresponds with Figure 6 in Rosenblatt et al. In Prep.
 
 ```{r, warning=FALSE, message=FALSE, fig.align='center',out.width="100%", fig.height = 8, fig.width = 14}
 whitetailedSIRS::scenario_results %>% 
@@ -299,3 +326,6 @@ spillover.df %>%
 
 ggpubr::ggarrange(spillover_prev_plot, spillover_presist_plot, spillover_cumulative_plot, ncol = 3)
 ```
+
+## Next Steps
+This vignette detailed comparing outbreak dynamics from different captive and wild scenarios. The next vignette looks at [how to simulate outbreaks that could transmit between wild and captive scenarios via fence line interations](Connected_Systems.html).
