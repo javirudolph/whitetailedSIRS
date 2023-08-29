@@ -25,10 +25,27 @@ library(binom)
 library(kableExtra)
 ```
 
-##Introduction: 
-Here, we run outbreak simulations to estimate the effects of various management alternatives on the dynamics of a SARS-CoV-2 outbreak in wild and captive white-tailed deer. We considered captive:wild systems that are separated by a fence. These management alternatives may be implemented in both wild and captive populations, or in one scenario. 
+## Introduction:
 
-We focus on 11 alternatives, ranging across agriculture, public health, and wildlife sectors. These alternatives are detailed in Cook et al. In Prep., and include:
+In this vignette, we run outbreak simulations to estimate the effects of various management alternatives on the dynamics of a SARS-CoV-2 outbreak in wild and captive white-tailed deer. We considered captive:wild systems that are separated by a fence. These management alternatives may be implemented in both wild and captive populations, or in one scenario. We focus on 11 alternatives, ranging across agriculture, public health, and wildlife sectors. These alternatives are detailed in Cook et al. In Prep.. These alternatives (and parameter changes) include:
+
+-   Local reductions in wild deer populations through agency culling or hunter harvest (Reduce wild deer densities by 10% and 25%)
+
+-   Prohibit deer feeding and baiting to reduce congregations of wild deer (Remove inflation factor of proximity rates due to bait and supplemental feeding)
+
+-   Pause/reduce research permits for work on wild deer or other susceptible wildlife/animal species (Reduce human-wild deer interaction)
+
+-   Encourage limiting human-deer interactions including participating in conduct that attracts wildlife (Proportionally reduce human-deer proximity rates reflecting rural:suburban rates)
+
+-   Encourage (and train on the proper) use of enhanced personal protective equipment during interactions with captive and wild deer (Integrate effects of masks in aerosol transmission from humans to deer)
+
+-   Animal vaccination requirement (All captive deer start simulations as recovered; All captive deer start simulations as recovered and are boosted when immunity wanes)
+
+-   Upgrade fences to double fences that prevent transmission between captive and wild deer (Transmission between captive and wild deer is set to zero)
+
+-   Increase ventilation in indoor, intensive facilities (Increase air exchange rate)
+
+We detail the alternatives and the systems where they can be implemented:
 
 ```{r}
 ActionTable <- data.frame(Alternative = c("Reduce wild density by 10%", "Reduce wild density by 25%", "Eliminate baiting", "Pause Research", "Restrict human interactions with deer","PPE, Wild" , "PPE, Captive", "PPE, Both", "Vaccinate captive deer", "Vaccinate and boost captive deer", "Double-fence captive facilities", "Increase air exchange rate in intensive facilities"), Sector = c("Wildlife", "Wildlife", "Wildlife", "Wildlife", "Public Health","Public Health","Public Health","Public Health", "Agriculture", "Agriculture","Agriculture", "Agriculture"), Ranch_Rural_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE), Ranch_Suburban_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE), Intensive_Facility_Rural_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE), Intensive_Facility_Suburban_System = c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE))
@@ -38,126 +55,185 @@ ActionTable %>%
   kable_paper("hover", full_width = F)
 
 ```
-##Common Parameters
-First, we set basic simulation parameters across all simulations.
+
+To evaluate the effects of these interventions, we follow the same analytical framework as in other vignettes. Because of we are looking at multiple systems, our work flow will differ a little in this vignette. Steps include:
+
+1.  Set number of simulations to run
+
+2.  Sample parameters for simulations
+
+3.  Establish systems and test alternatives
+
+4.  Combine and summarize results across alternatives and systems
+
+5.  Impact of cross-sector collaborations (multiple alternatives implemented in concert).
+
+## 1. Set number of simulations to run
+
+Like in other vignettes, we set a seed and sample size. We use a small sample size for ease of vignette loading. We also define the length of the simulation here.
+
 ```{r base_simulations, include = FALSE}
 set.seed(23)
-nsamples <- 200
-I_human_null <- 0.05
+nsamples <- 50
 times <- seq(0, 120, by = 1)
 ```
+
+## 2. Sample parameters for simulations
+
+### Common Parameters
+
 We bring in elicitation data for various parameters included in these simulations.
+
 ```{r, include = FALSE}
 elicitation_data <- draw_elicitation_samples(nsamples = nsamples)
 ```
 
 We can then define a number of parameters that will be used in every system in which we want to test alternatives.
+
 ```{r shared parameters, include = FALSE}
-nWild <- rpois(nsamples,1000) #Abundance
-A_w <- 100 #Area
-habitat <- "med" #Habitat classification
+#Deer abundance
+nWild <- rpois(nsamples,1000)
 
-epsilon_dc <- get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Probability of direct contact between deer, given proximity.
+#Area
+A_w <- 100 
 
-C_nu_human <- rnorm(n = nsamples, mean = 10^5.6, sd = 10^1.2)#viral load in humans (genomic copies per ml)
-C_nu_deer <- 10^5.6 * get_EE_param_vals(data = elicitation_data, my_param = "Viral Load") #viral load in deer saliva, relative to humans (genomic copies per ml)
+#Habitat classification
+habitat <- "med" 
 
-r_deer <- get_EE_param_vals(data = elicitation_data, my_param = "Dose-Response")# Dose response coefficient for deer and SARS-CoV-2
+#Probability of direct contact between deer, given proximity.
+epsilon_dc <- get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") 
 
-t_contact_deer_deer_null <- get_EE_param_vals(data = elicitation_data, my_param = "Deer Proximity Duration (minutes)") #Estimate duration of proximity event...
+#viral load in humans (genomic copies per ml)
+C_nu_human <- rnorm(n = nsamples, mean = 10^5.6, sd = 10^1.2)
 
-gamma_recov <- rep(1/6, nsamples) #Recovery rate from infection (6 days)
-alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param = 'Temporary Immunity') #Rate of temporary immunity loss
+#viral load in deer saliva, relative to humans (genomic copies per ml)
+C_nu_deer <- 10^5.6 * get_EE_param_vals(data = elicitation_data, my_param = "Viral Load") 
 
-#shared derived parameter
-sigma_dc_deer_deer_null <- calc_sigma_dc(C_nu = C_nu_deer, nsamples = nsamples) #Infection probability for fluid transmission
+#Dose response coefficient for deer and SARS-CoV-2
+r_deer <- get_EE_param_vals(data = elicitation_data, my_param = "Dose-Response")
+
+#Estimate duration of proximity event between deer
+t_contact_deer_deer_null <- get_EE_param_vals(data = elicitation_data, my_param = "Deer Proximity Duration (minutes)") 
+
+#Recovery rate from infection (6 days)
+gamma_recov <- rep(1/6, nsamples)
+
+#Rate of temporary immunity loss
+alpha_immunity_null <- 1 / get_EE_param_vals(data = elicitation_data, my_param = 'Temporary Immunity') 
+
+#Human prevalence
+I_human_null <- 0.05
+
+#Infection probability for fluid transmission between deer (shared across all systems)
+sigma_dc_deer_deer_null <- calc_sigma_dc(C_nu = C_nu_deer, nsamples = nsamples)
+
+#Deer-to-deer proximity rate along fenceline (events per day).
+omega_cw <- 0.00072 / get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") 
 ```
 
-##Scenario parameters
-Here, we define parameter values used for the baseline projection for each system.
+### Scenario parameters
 
-###Outdoor ranch facilities
+Here, we define parameter values used for the baseline projection for each system:
+
+#### Captive deer in outdoor ranch facilities
 
 ```{r}
 #Ranch Parameters
-omega_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
-omega_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 #Human-to-deer proximity rate in ranch context, mimicing suburban proximitty rates (events per day).
-#Infection probability calculation of aerosol transmission from humans-to-deer
-t_contact_deer_human_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") #Estimate duration 
-#derived ranch parameters
+#Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
+omega_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) 
+
+#Human-to-deer proximity rate in ranch context, mimicing suburban proximitty rates (events per day).
+omega_hc_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120 
+
+#Estimate duration of human-deer proximity event
+t_contact_deer_human_ranch <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") 
+
+#Estimate probability of infection from deer-deer proximity given that duration of proximity event.
 sigma_aero_deer_deer_ranch <- calc_sigma_aero(C_nu = C_nu_deer,
                                         t_contact = t_contact_deer_deer_null / 60,
-                                        r = r_deer, nsamples = nsamples) #...and estimate probability of infection given that duration of proximity event.
+                                        r = r_deer, nsamples = nsamples) 
 
+#Calculate infection probability given the duration of a human-deer proximity event.
 sigma_aero_deer_human_ranch <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_ranch / 60,
-                                        r = r_deer, nsamples = nsamples)#... and calculate infection probability given the duration of a human-deer proximity event.
+                                        r = r_deer, nsamples = nsamples)
 ```
 
-###Intensive facilities
+#### Captive deer in intensive facilities
+
 ```{r}
-#Intensive facility parameters
-omega_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)") #Deer-to-deer proximity rate in intensive context, mimicing wild proximity rates with the influence of baiting (events per day).
-omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Captive (per 120 days)") /120 #Human-to-deer proximity rate in intensive context, mimicing suburban proximitty rates (events per day).
-#Infection probability calculation of aerosol transmission from humans-to-deer
-t_contact_deer_human_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") #Estimate duration 
-#derived intensive parameters
+#Deer-to-deer proximity rate in intensive context (events per day).
+omega_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)") 
+
+#Human-to-deer proximity rate in intensive context (events per day).
+omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Captive (per 120 days)") /120 
+
+#Estimate duration of human-deer proximity event
+t_contact_deer_human_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)")
+
+#Estimate probability of infection from deer-deer proximity given that duration of proximity event.
 sigma_aero_deer_deer_intensive <- calc_sigma_aero(C_nu = C_nu_deer,
                                         t_contact = t_contact_deer_deer_null / 60,
-                                        r = r_deer, nsamples = nsamples, AER = rep(1, nsamples)) #...and estimate probability of infection given that duration of proximity event.
+                                        r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
 
+#Calculate infection probability given the duration of a human-deer proximity event.
 sigma_aero_deer_human_intensive <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_intensive / 60,
-                                        r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))#... and calculate infection probability given the duration of a human-deer proximity event.
+                                        r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
 ```
 
-###Fenceline proximity rate
-Captive and wild deer are separated by a single fence that allows proximity and direct contact through the fenceline.
-```{r}
-#Fenceline
-omega_cw <- 0.00072 / get_EE_param_vals(data = elicitation_data, my_param = "Direct Contact Probability") #Deer-to-deer proximity rate along fenceline (events per day).
-```
+#### Wild deer in a suburban setting
 
-###Suburban
 ```{r}
-#Wild, suburban parameters
+#Deer-to-deer proximity rate (events per day).
 omega_ww_suburban <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+
+#Human-to-deer proximity rate (events per day).
 omega_hw_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
 
+#Estimate duration of human-deer proximity event
 t_contact_deer_human_suburban <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Suburban (minutes)")
 
-#derived wild parameters
+#Estimate probability of infection from deer-deer proximity given that duration of proximity event.
 sigma_aero_deer_deer_suburban <- calc_sigma_aero(C_nu = C_nu_deer,
                                         t_contact = t_contact_deer_deer_null / 60,
                                         r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
 
+#Calculate infection probability given the duration of a human-deer proximity event.
 sigma_aero_deer_human_suburban <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_suburban / 60,
                                         r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
 ```
 
-###Rural
+#### Wild deer in a rural setting
+
 ```{r}
-#Wild, rural parameters
+#Deer-to-deer proximity rate (events per day).
 omega_ww_rural <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)*(get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17)
+
+#Human-to-deer proximity rate (events per day).
 omega_hw_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Rural (per 120 days)") /120
 
+#Estimate duration of human-deer proximity event
 t_contact_deer_human_rural <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Rural (minutes)")
 
-#derived wild parameters
+#Estimate probability of infection from deer-deer proximity given that duration of proximity event.
 sigma_aero_deer_deer_rural <- calc_sigma_aero(C_nu = C_nu_deer,
                                         t_contact = t_contact_deer_deer_null / 60,
                                         r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
 
+#Calculate infection probability given the duration of a human-deer proximity event.
 sigma_aero_deer_human_rural <- calc_sigma_aero(ER = 0.53, C_nu = C_nu_human, 
                                         t_contact = t_contact_deer_human_rural / 60,
                                         r = r_deer, nsamples = nsamples, AER = rep(4, nsamples))
 ```
 
-## Establish Systems and Test Alternatives
+## 3.Establish Systems and Test Alternatives
+
 Below we define a captive-wild system, simulate SARS-CoV-2 outbreaks with no interventions, and then apply the 12 candidate interventions by altering a relevant parameter. All 13 simulations (1 no action + 12 interventions) are combined into one data frame at the end of each code chunk.
 
 ### Combined system of outdoor ranch facilities and wild deer in a suburban setting
+
 ```{r}
 ranch_suburban.inits.fall <- initial_compartments(draws = nsamples)
 ranch_suburban.inits.steady <- initial_compartments(draws = nsamples, steady = TRUE)
@@ -287,7 +363,8 @@ proj_ranch_suburban_alt11 <- run(iter = nsamples, initial_compartments = ranch_s
 proj_ranch_suburban <- rbind(proj_ranch_suburban_null, proj_ranch_suburban_alt1, proj_ranch_suburban_alt2, proj_ranch_suburban_alt3, proj_ranch_suburban_alt4, proj_ranch_suburban_alt5, proj_ranch_suburban_alt6, proj_ranch_suburban_alt7, proj_ranch_suburban_alt8, proj_ranch_suburban_alt9, proj_ranch_suburban_alt10, proj_ranch_suburban_alt11)
 ```
 
-####Calcualte prevalence, cumulative infections, and persistence for interventions in the outdoor ranch : wild, suburban system
+#### Calcualte prevalence, cumulative infections, and persistence for interventions in the outdoor ranch : wild, suburban system
+
 ```{r, message=FALSE, warning=FALSE}
 persist.threshold <- 0.001
 
@@ -309,6 +386,12 @@ proj_ranch_suburban %>%
   summarize(meanWild = mean(I_wild), meanCaptive = mean(I_captive), 
             cumulativeWild = last(I_wild_cumulative), cumulativeCaptive = last(I_captive_cumulative)) %>% 
    merge(.,Persist_ranch_suburban_df, by = "run_id")-> alternatives_for_ranch_suburban_complex
+```
+
+We can see the result of this processing, is a dataframe listing outbreak metrics for all iterations of each management alternative (including the default baseline). We will repeat this for the other systems, and then use summary functions to compare the effect of each alternative to the baseline, for each system.
+
+```{r}
+head(alternatives_for_ranch_suburban_complex)
 ```
 
 ### Combined system of outdoor ranch facilities and wild deer in a rural setting
@@ -443,6 +526,7 @@ proj_ranch_rural <- rbind(proj_ranch_rural_null, proj_ranch_rural_alt1, proj_ran
 ```
 
 #### Calculate prevalence, cumulative infections, and persistence for interventions in the outdoor ranch : wild, rural system
+
 ```{r, warning=FALSE, message=FALSE}
 persist.threshold <- 0.001
 
@@ -635,6 +719,7 @@ proj_intensive_suburban %>%
 ```
 
 ### Combined system of intensive captive facilities and wild deer in a rural setting
+
 ```{r}
 intensive_rural.inits.fall <- initial_compartments(draws = nsamples)
 intensive_rural.inits.steady <- initial_compartments(draws = nsamples, steady = TRUE)
@@ -800,7 +885,7 @@ proj_intensive_rural %>%
   merge(.,Persist_intensive_rural_df, by = "run_id") -> alternatives_for_intensive_rural_complex
 ```
 
-### Combine and summarize results
+## 4.Combine and summarize results
 
 Below, we combine the results for all alternatives, for all combinations of captive and wild scenarios (systems). These results are saved in the package's data folder, and can be accessed through `whitetailedSIRS::alternatives_across_systems`.
 
@@ -813,7 +898,8 @@ alternatives_across_systems %>%
 
 ```
 
-##Test Impact of Cross-Sector Collaboration
+## 5.Impact of Cross-Sector Collaboration
+
 Finally, we simulated SARS-CoV-2 outbreaks in each system with multiple alternatives applied. Here, we implement the most effective alternative for each sector (agriculture, public health, and wildlife) in concert to understand the cumulative effects of coordinated actions across sectors. The results of this final simulation are stored in `whitetailedSIRS::cross_sector_results`.
 
 ```{r}
@@ -948,3 +1034,5 @@ cross_sector_results %>%
    summarize(., prevalenceWild = median(meanWild), prevalenceCaptive = median(meanCaptive), cumulativeWild = median(cumulativeWild), cumulativeCaptive = median(cumulativeCaptive), meanPersistWild = (sum(persistWild)/nsamples), meanPersistCaptive= (sum(persistCaptive)/nsamples))
 
 ```
+
+We can take these results and compare to baseline results, as well as single management alternatives.
