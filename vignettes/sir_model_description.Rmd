@@ -594,3 +594,6 @@ Cumulativeinfections_{C} = \sum^{120}_{t=1} s_{t-1}(\beta^{Aero}_{CC} i_{C,t-1} 
 With the overview of the SIRS ODE equations used to project SARS-CoV-2 outbreaks in white-tailed deer, and the various summary functions and metrics we use to characterize outbreaks, next we can [explore an example of the approach and function use to model an outbreak in a simulated population.](example_values.html)
 
 Click [here](Introduction.html) to return to the vignette introducing the whitetailedSIRS package.
+
+## Literature Cited
+* Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.

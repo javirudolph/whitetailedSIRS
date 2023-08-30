@@ -329,3 +329,6 @@ ggpubr::ggarrange(spillover_prev_plot, spillover_presist_plot, spillover_cumulat
 
 ## Next Steps
 This vignette detailed comparing outbreak dynamics from different captive and wild scenarios. The next vignette looks at [how to simulate outbreaks that could transmit between wild and captive scenarios via fence line interations](Connected_Systems.html).
+
+## Literature Cited
+* Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.

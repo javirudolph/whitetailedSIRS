@@ -69,7 +69,7 @@ Next, we draw an assortment of parameters to solve the SIRS ODE equations for a 
 elicitation_data <- whitetailedSIRS::draw_elicitation_samples(nsamples = nsamples)
 ```
 
-Following Rosenblatt et al. (2023), four contexts were defined, including outdoor captive ranch, intensive captive facility, wild deer in rural conditions, and wild deer in suburban conditions. In this RMD file, these scenarios will be simulated independently of each other.
+Following Rosenblatt et al. (In Prep.), four contexts were defined, including outdoor captive ranch, intensive captive facility, wild deer in rural conditions, and wild deer in suburban conditions. In this RMD file, these scenarios will be simulated independently of each other.
 
 ### Outdoor captive ranch
 #### Proximity Rates
@@ -283,11 +283,13 @@ We save these resulting summary data frame for future use.
 
 First, we record prevelence and incidence proportion:
 ```{r, Summarize prev and cumulative infections, echo=FALSE, message = FALSE}
-sirs_results_contexts %>%
+sirs_results_contexts.1in1000 <- rbind(proj.ranch.1in1000,proj.intensive.1in1000, proj.rural.1in1000, proj.suburban.1in1000)
+
+sirs_results_contexts.1in1000 %>%
   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
   pull(ode_df) %>%
   list_rbind(names_to = "run_id") %>% 
-  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[4],length(times)*nsamples))) %>% 
+  mutate(., Context = c(rep(unique(sirs_results_contexts.1in1000$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts.1in1000$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts.1in1000$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts.1in1000$Context)[4],length(times)*nsamples))) %>% 
   group_by(Context, run_id) %>% 
    summarize(Wild = mean(I_wild), Captive = mean(I_captive), Prevalence = Wild + Captive, Cumulative_wild_infections = last(I_wild_cumulative), Cumulative_captive_infections = last(I_captive_cumulative), Cumulative_infections = sum(Cumulative_wild_infections,Cumulative_captive_infections)) %>% 
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
@@ -302,12 +304,12 @@ sirs_results_contexts %>%
 
 persist.threshold <- 0.001
 
-sirs_results_contexts %>%
+sirs_results_contexts.1in1000 %>%
   mutate(steady_sir = map(steady_state, "y"),
          steady_sir = map(steady_sir, as_tibble_row)) %>%
   pull(steady_sir) %>%
   list_rbind(names_to = "run_id") %>%
-  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],nsamples),rep(unique(sirs_results_contexts$Context)[2],nsamples), rep(unique(sirs_results_contexts$Context)[3],nsamples),rep(unique(sirs_results_contexts$Context)[4],nsamples))) %>%
+  mutate(., Context = c(rep(unique(sirs_results_contexts.1in1000$Context)[1],nsamples),rep(unique(sirs_results_contexts.1in1000$Context)[2],nsamples), rep(unique(sirs_results_contexts.1in1000$Context)[3],nsamples),rep(unique(sirs_results_contexts.1in1000$Context)[4],nsamples))) %>%
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
   mutate(., Persist.I_wild = I_wild > persist.threshold, Persist.I_captive = I_captive > persist.threshold, Persist = as.logical(Persist.I_wild + Persist.I_captive)) %>%
   select(., run_id,Context, Persist) %>%
@@ -361,13 +363,13 @@ merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumula
 
 First, we record prevelence and incidence proportion:
 ```{r, Summarize prev and cumulative infections 1 in 1mil, echo=FALSE, warning=FALSE, message=FALSE}
-sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
+sirs_results_contexts.1in1mil <- rbind(proj.ranch.1in1mil,proj.intensive.1in1mil, proj.rural.1in1mil, proj.suburban.1in1mil)
 
-sirs_results_contexts %>%
+sirs_results_contexts.1in1mil %>%
   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
   pull(ode_df) %>%
   list_rbind(names_to = "run_id") %>% 
-  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[4],length(times)*nsamples))) %>% 
+  mutate(., Context = c(rep(unique(sirs_results_contexts.1in1mil$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts.1in1mil$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts.1in1mil$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts.1in1mil$Context)[4],length(times)*nsamples))) %>% 
   group_by(Context, run_id) %>% 
    summarize(Wild = mean(I_wild), Captive = mean(I_captive), Prevalence = Wild + Captive, Cumulative_wild_infections = last(I_wild_cumulative), Cumulative_captive_infections = last(I_captive_cumulative), Cumulative_infections = sum(Cumulative_wild_infections,Cumulative_captive_infections)) %>% 
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
@@ -382,12 +384,12 @@ sirs_results_contexts %>%
 
 persist.threshold <- 0.001
 
-sirs_results_contexts %>%
+sirs_results_contexts.1in1mil %>%
   mutate(steady_sir = map(steady_state, "y"),
          steady_sir = map(steady_sir, as_tibble_row)) %>%
   pull(steady_sir) %>%
   list_rbind(names_to = "run_id") %>%
-  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],nsamples),rep(unique(sirs_results_contexts$Context)[2],nsamples), rep(unique(sirs_results_contexts$Context)[3],nsamples),rep(unique(sirs_results_contexts$Context)[4],nsamples))) %>%
+  mutate(., Context = c(rep(unique(sirs_results_contexts.1in1mil$Context)[1],nsamples),rep(unique(sirs_results_contexts.1in1mil$Context)[2],nsamples), rep(unique(sirs_results_contexts.1in1mil$Context)[3],nsamples),rep(unique(sirs_results_contexts.1in1mil$Context)[4],nsamples))) %>%
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
   mutate(., Persist.I_wild = I_wild > persist.threshold, Persist.I_captive = I_captive > persist.threshold, Persist = as.logical(Persist.I_wild + Persist.I_captive)) %>%
   select(., run_id,Context, Persist) %>%
@@ -441,13 +443,13 @@ merge(r0,Prev_cumulative_persist_df[,c("run_id","Prevalence", "Persist", "Cumula
 
 First, we record prevelence and incidence proportion:
 ```{r, Summarize prev and cumulative infections 1 in 1bil, echo=FALSE, warning=FALSE, message=FALSE}
-sirs_results_contexts <- rbind(proj.ranch,proj.intensive, proj.rural, proj.suburban)
+sirs_results_contexts.1in1bil <- rbind(proj.ranch.1in1bil, proj.intensive.1in1bil, proj.rural.1in1bil, proj.suburban.1in1bil)
 
-sirs_results_contexts %>%
+sirs_results_contexts.1in1bil %>%
   mutate(ode_df = map(ode_proj, as.data.frame)) %>%
   pull(ode_df) %>%
   list_rbind(names_to = "run_id") %>% 
-  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts$Context)[4],length(times)*nsamples))) %>% 
+  mutate(., Context = c(rep(unique(sirs_results_contexts.1in1bil$Context)[1],length(times)*nsamples),rep(unique(sirs_results_contexts.1in1bil$Context)[2],length(times)*nsamples), rep(unique(sirs_results_contexts.1in1bil$Context)[3],length(times)*nsamples),rep(unique(sirs_results_contexts.1in1bil$Context)[4],length(times)*nsamples))) %>% 
   group_by(Context, run_id) %>% 
    summarize(Wild = mean(I_wild), Captive = mean(I_captive), Prevalence = Wild + Captive, Cumulative_wild_infections = last(I_wild_cumulative), Cumulative_captive_infections = last(I_captive_cumulative), Cumulative_infections = sum(Cumulative_wild_infections,Cumulative_captive_infections)) %>% 
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
@@ -462,19 +464,17 @@ sirs_results_contexts %>%
 
 persist.threshold <- 0.001
 
-sirs_results_contexts %>%
+sirs_results_contexts.1in1bil %>%
   mutate(steady_sir = map(steady_state, "y"),
          steady_sir = map(steady_sir, as_tibble_row)) %>%
   pull(steady_sir) %>%
   list_rbind(names_to = "run_id") %>%
-  mutate(., Context = c(rep(unique(sirs_results_contexts$Context)[1],nsamples),rep(unique(sirs_results_contexts$Context)[2],nsamples), rep(unique(sirs_results_contexts$Context)[3],nsamples),rep(unique(sirs_results_contexts$Context)[4],nsamples))) %>%
+  mutate(., Context = c(rep(unique(sirs_results_contexts.1in1bil$Context)[1],nsamples),rep(unique(sirs_results_contexts.1in1bil$Context)[2],nsamples), rep(unique(sirs_results_contexts.1in1bil$Context)[3],nsamples),rep(unique(sirs_results_contexts.1in1bil$Context)[4],nsamples))) %>%
   mutate(., Context = factor(Context, levels = c("Outdoor ranch", "Intensive facility", "Wild, rural","Wild, suburban"))) %>% 
   mutate(., Persist.I_wild = I_wild > persist.threshold, Persist.I_captive = I_captive > persist.threshold, Persist = as.logical(Persist.I_wild + Persist.I_captive)) %>%
   select(., run_id,Context, Persist) %>%
   arrange(., Context, run_id) %>% 
    merge(Prev_cumulative_df,.) -> Prev_cumulative_persist_df
-
-
 ```
 
 We then calculate $R_0$ and FOI for each scenario, and combine with outbreak dynamics above to create one object for export.
@@ -529,3 +529,7 @@ initial_infection_results_1_in_1bil <- df_initial_infections_1_in_1bil
 This vignette detailed the simulations run in Rosenblatt et al. (In Prep) to simulate outbreaks from an initial exposure event. The next vignette [produce the figures published in Rosenblatt et al. In Prep.](Visualize_by_context.html).
 
 Click [here](SIRS_analysis_by_contexts.html) to return to the vignette simulating outbreaks from continous exposure to infectious humans.
+
+## Literature Cited
+
+* Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.

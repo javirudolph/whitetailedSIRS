@@ -28,7 +28,7 @@
     
     <a class="navbar-brand me-2" href="index.html">whitetailedSIRS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,13 +43,14 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="articles/Introduction.html">Introduction</a>
+    <a class="dropdown-item" href="articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
+    <a class="dropdown-item" href="articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
+    <a class="dropdown-item" href="articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
+    <a class="dropdown-item" href="articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover</a>
     <a class="dropdown-item" href="articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
     <a class="dropdown-item" href="articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
-    <a class="dropdown-item" href="articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
-    <a class="dropdown-item" href="articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
-    <a class="dropdown-item" href="articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul>
@@ -78,8 +79,13 @@
 <h2 id="authors">Authors<a class="anchor" aria-label="anchor" href="#authors"></a>
 </h2>
 <p>Elias Rosenblatt (<a href="mailto:erosenbl@uvm.edu" class="email">erosenbl@uvm.edu</a>), Rubenstein School of Environment and Natural Resources, 81 Carrigan Drive, Burlington, VT, USA</p>
-<p>F. Javiera Rudolph, Department of Ecosystem Sciences and Management, Pennsylvania State University, University Park, PA, USA</p>
+<p>F. Javiera Rudolph, Department of Ecosystem Sciences and Management, Pennsylvania State University, University Park, PA, USA; U.S. Geological Survey, Eastern Ecological Science Center, Laurel, MD, USA</p>
 <p>Fernando Arce, Department of Environmental Conservation, University of Massachusetts, Amherst, MA, USA</p>
+<p>Jonathan D. Cook, U.S. Geological Survey, Eastern Ecological Science Center, Laurel, MD, USA</p>
+<p>Graziella V. DiRenzo, U. S. Geological Survey, Massachusetts Cooperative Fish and Wildlife Research Unit, University of Massachusetts, Amherst, MA, USA; Department of Environmental Conservation, University of Massachusetts, Amherst, MA, USA</p>
+<p>Evan H.C. Grant, U.S. Geological Survey, Eastern Ecological Science Center, Turner’s Falls, Massachusetts, USA</p>
+<p>Michael C. Runge, U.S. Geological Survey, Eastern Ecological Science Center, Laurel, MD, USA</p>
+<p>Brittany A. Mosher, Rubenstein School of Environment and Natural Resources, 81 Carrigan Drive, Burlington, VT, USA</p>
 <!-- badges: start -->
 <!-- badges: end -->
 </div>
@@ -96,12 +102,17 @@
 <div class="section level2">
 <h2 id="suggested-citation-for-software">Suggested Citation for Software<a class="anchor" aria-label="anchor" href="#suggested-citation-for-software"></a>
 </h2>
-<p>Rosenblatt, E, Rudolph, J.F., and Arce, F., 2023. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, <a href="https://doi.org/______/______" class="external-link uri">https://doi.org/______/______</a></p>
+<p>Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V., Grant, E.H.C., Runge, M.C., and Mosher, B.A.. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, <a href="https://doi.org/______/______" class="external-link uri">https://doi.org/______/______</a></p>
 </div>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
 <p>This software release contains several R scripts that generate epidemic projections of SARS-CoV-2 in white tailed deer populations using a <strong>S</strong>usceptible-<strong>I</strong>nfected-<strong>R</strong>ecovered-<strong>S</strong>usceptible (SIRS) modeling framework. We provide a workflow of vignettes used in Rosenblatt et al. In Prep and Cook et al. In Prep. Users are able to specify transmission parameters for human-deer and deer-deer transmission to quantify changes in outbreak dynamics. The outputs of this package are ggplot friendly, and for the most part, we use a list-column workflow when working with multiple simulations. Details on the model can be found in the vignettes.</p>
+</div>
+<div class="section level2">
+<h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
+</h2>
+<p>We thank Daniel Walsh, Susan Shriner, and Kim Pepin for their continued feedback as part of a broader decision analysis detailed in Cook et al. In Prep and Rosenblatt et al. In Prep. This work was supported by the Coronavirus Aid, Relief, and Economic Security Act (P.L. 116-136).</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -369,6 +380,11 @@
 <li>Elias Rosenblatt <br><small class="roles"> Author, maintainer </small>  </li>
 <li>Javi Rudolph <br><small class="roles"> Author, contributor </small>  </li>
 <li>Fer Arce <br><small class="roles"> Author, contributor </small>  </li>
+<li>Jonathan Cook <br><small class="roles"> Author, contributor </small>  </li>
+<li>Graziella DiRenzo <br><small class="roles"> Author, contributor </small>  </li>
+<li>Evan Grant <br><small class="roles"> Author, contributor </small>  </li>
+<li>Michael Runge <br><small class="roles"> Author, contributor </small>  </li>
+<li>Brittany Mosher <br><small class="roles"> Author, contributor </small>  </li>
 </ul>
 </div>
 
@@ -380,7 +396,7 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
+<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce, Jonathan Cook, Graziella DiRenzo, Evan Grant, Michael Runge, Brittany Mosher.</p>
 </div>
 
 <div class="pkgdown-footer-right">

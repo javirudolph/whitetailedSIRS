@@ -14,7 +14,7 @@ the SIR compartments at each of the specified time points."><!-- mathjax --><scr
     
     <a class="navbar-brand me-2" href="../index.html">whitetailedSIRS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,13 +28,14 @@ the SIR compartments at each of the specified time points."><!-- mathjax --><scr
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/Introduction.html">Introduction</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
+    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover</a>
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
     <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
-    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -85,8 +86,7 @@ I_captive, R_captive.</p></dd>
 <dt>parameters</dt>
 <dd><p>list of parameters to generate projection. The parameters
 should include transmission parameters, immunity and recovery rates, and
-proportion of infected humans.
-@details Use <code>simple_sirs</code> to calculate persistence (via <code>rootSolve::run_steady()</code>), along with how compartment sizes change through a projection. If cumulative infections are desired, use <code>simple_sir_with_cumulative</code> instead. The parameter <code>boost</code> is included in the ODE equations for captive deer to allow implementation of applying vaccine boosters to captive deer herds as a potential management alternative to influence outbreak dynamics. See the vignette <code>Management_Alternative_Systems.Rmd</code> to see an example of its use. In all other cases where boosters would not be applied, boost should be set to 0.</p></dd>
+proportion of infected humans.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -97,10 +97,23 @@ proportion of infected humans.
 dataframe with the proportion of individuals in each of the SIR
 compartments at each time point.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Use <code>simple_sirs</code> to calculate persistence
+(via <code>rootSolve::run_steady()</code>), along with how compartment sizes change
+through a projection. If cumulative infections are desired, use
+<code>simple_sir_with_cumulative</code> instead. The parameter <code>boost</code> is included in
+the ODE equations for captive deer to allow implementation of applying
+vaccine boosters to captive deer herds as a potential management alternative
+to influence outbreak dynamics. See the vignette
+<code>Management_Alternative_Systems.Rmd</code> to see an example of its use. In all
+other cases where boosters would not be applied, boost should be set to 0.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># prepare the input parameters:</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># prepare the input parameters:</span></span></span>
 <span class="r-in"><span><span class="va">example_inits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S_wild <span class="op">=</span> <span class="fl">1</span>, I_wild <span class="op">=</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>                   R_wild <span class="op">=</span> <span class="fl">0</span>, S_captive <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>                   I_captive <span class="op">=</span> <span class="fl">0</span>, R_captive <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
@@ -124,151 +137,9 @@ compartments at each time point.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># run the ode function:</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">deSolve</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits</span>, times <span class="op">=</span> <span class="va">example_times</span>, parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va">simple_sirs</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     time    S_wild       I_wild       R_wild S_captive  I_captive    R_captive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      0 1.0000000 0.0000000000 0.000000e+00 1.0000000 0.00000000 0.000000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      1 0.9993937 0.0006033453 2.972120e-06 0.9898960 0.01005447 4.952954e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      2 0.9985719 0.0014152679 1.282810e-05 0.9795861 0.02021672 1.971848e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      3 0.9975291 0.0024394532 3.143763e-05 0.9690747 0.03048420 4.411150e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      4 0.9962606 0.0036789666 6.042078e-05 0.9583659 0.04085440 7.797231e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      5 0.9947604 0.0051376972 1.019176e-04 0.9474655 0.05132361 1.210903e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7      6 0.9930238 0.0068185479 1.576558e-04 0.9363788 0.06188829 1.732952e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8      7 0.9910463 0.0087243155 2.294167e-04 0.9251115 0.07254442 2.344106e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9      8 0.9888235 0.0108575342 3.189569e-04 0.9136698 0.08328762 3.042611e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10     9 0.9863516 0.0132203970 4.280010e-04 0.9020602 0.09411306 3.826719e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11    10 0.9836270 0.0158147917 5.582446e-04 0.8902898 0.10501553 4.694687e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12    11 0.9806464 0.0186422575 7.113503e-04 0.8783658 0.11598946 5.644766e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13    12 0.9774071 0.0217039608 8.889445e-04 0.8662959 0.12702886 6.675204e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14    13 0.9739067 0.0250006762 1.092615e-03 0.8540884 0.13812738 7.784242e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15    14 0.9701433 0.0285327644 1.323910e-03 0.8417516 0.14927827 8.970104e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16    15 0.9661155 0.0323001547 1.584329e-03 0.8292946 0.16047443 1.023100e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17    16 0.9618223 0.0363023277 1.875330e-03 0.8167265 0.17170841 1.156513e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18    17 0.9572634 0.0405382982 2.198316e-03 0.8040569 0.18297243 1.297065e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19    18 0.9524388 0.0450066010 2.554638e-03 0.7912959 0.19425837 1.444571e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20    19 0.9473491 0.0497052787 2.945591e-03 0.7784537 0.20555783 1.598844e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21    20 0.9419957 0.0546318712 3.372409e-03 0.7655410 0.21686212 1.759692e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22    21 0.9363803 0.0597834082 3.836263e-03 0.7525685 0.22816231 1.926922e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23    22 0.9305053 0.0651564035 4.338258e-03 0.7395474 0.23944927 2.100335e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24    23 0.9243737 0.0707468522 4.879429e-03 0.7264890 0.25071363 2.279733e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25    24 0.9179890 0.0765502310 5.460738e-03 0.7134050 0.26194590 2.464910e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26    25 0.9113554 0.0825615008 6.083072e-03 0.7003070 0.27313645 2.655660e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27    26 0.9044776 0.0887751127 6.747240e-03 0.6872067 0.28427555 2.851773e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 28    27 0.8973610 0.0951850166 7.453969e-03 0.6741162 0.29535344 3.053033e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29    28 0.8900114 0.1017846729 8.203903e-03 0.6610474 0.30636033 3.259225e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30    29 0.8824353 0.1085670677 8.997600e-03 0.6480123 0.31728644 3.470126e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31    30 0.8746397 0.1155247296 9.835530e-03 0.6350228 0.32812207 3.685515e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32    31 0.8666322 0.1226497512 1.071807e-02 0.6220908 0.33885761 3.905164e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33    32 0.8584207 0.1299338118 1.164552e-02 0.6092280 0.34948358 4.128843e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34    33 0.8500137 0.1373682032 1.261807e-02 0.5964461 0.35999071 4.356323e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 35    34 0.8414203 0.1449438585 1.363582e-02 0.5837564 0.37036992 4.587367e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36    35 0.8326498 0.1526513823 1.469878e-02 0.5711702 0.38061237 4.821741e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37    36 0.8237120 0.1604810834 1.580688e-02 0.5586984 0.39070954 5.059208e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38    37 0.8146171 0.1684230094 1.695992e-02 0.5463515 0.40065322 5.299528e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 39    38 0.8053754 0.1764669821 1.815764e-02 0.5341398 0.41043553 5.542463e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40    39 0.7959977 0.1846026354 1.939966e-02 0.5220733 0.42004899 5.787772e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 41    40 0.7864950 0.1928194528 2.068554e-02 0.5101613 0.42948655 6.035215e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42    41 0.7768785 0.2011068067 2.201472e-02 0.4984129 0.43874156 6.284552e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 43    42 0.7671594 0.2094539972 2.338657e-02 0.4868367 0.44780783 6.535545e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 44    43 0.7573494 0.2178502916 2.480035e-02 0.4754408 0.45667967 6.787956e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 45    44 0.7474598 0.2262849633 2.625527e-02 0.4642327 0.46535184 7.041549e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 46    45 0.7375022 0.2347473302 2.775042e-02 0.4532195 0.47381964 7.296089e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 47    46 0.7274884 0.2432267924 2.928485e-02 0.4424077 0.48207886 7.551346e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 48    47 0.7174296 0.2517128691 3.085751e-02 0.4318033 0.49012582 7.807090e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 49    48 0.7073375 0.2601952334 3.246728e-02 0.4214117 0.49795734 8.063098e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 50    49 0.6972233 0.2686637464 3.411297e-02 0.4112378 0.50557078 8.319146e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 51    50 0.6870982 0.2771084887 3.579335e-02 0.4012858 0.51296403 8.575019e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 52    51 0.6769731 0.2855197912 3.750709e-02 0.3915595 0.52013547 8.830503e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 53    52 0.6668589 0.2938882623 3.925285e-02 0.3820621 0.52708398 9.085391e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 54    53 0.6567660 0.3022048140 4.102921e-02 0.3727962 0.53380898 9.339481e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 55    54 0.6467046 0.3104606848 4.283470e-02 0.3637639 0.54031032 9.592576e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 56    55 0.6366847 0.3186474614 4.466783e-02 0.3549668 0.54658834 9.844485e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 57    56 0.6267158 0.3267570966 4.652706e-02 0.3464059 0.55264384 1.009502e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 58    57 0.6168073 0.3347819252 4.841082e-02 0.3380818 0.55847803 1.034401e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 59    58 0.6069678 0.3427146779 5.031752e-02 0.3299946 0.56409255 1.059128e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 60    59 0.5972060 0.3505484922 5.224552e-02 0.3221439 0.56948942 1.083667e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 61    60 0.5875299 0.3582769207 5.419321e-02 0.3145289 0.57467103 1.108001e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 62    61 0.5779471 0.3658939373 5.615892e-02 0.3071483 0.57964012 1.132116e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 63    62 0.5684651 0.3733939416 5.814100e-02 0.3000005 0.58439974 1.155997e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 64    63 0.5590905 0.3807717599 6.013778e-02 0.2930836 0.58895325 1.179632e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 65    64 0.5498297 0.3880226453 6.214761e-02 0.2863951 0.59330427 1.203006e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 66    65 0.5406889 0.3951422751 6.416883e-02 0.2799325 0.59745667 1.226108e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 67    66 0.5316735 0.4021267465 6.619978e-02 0.2736927 0.60141456 1.248927e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 68    67 0.5227886 0.4089725708 6.823883e-02 0.2676726 0.60518223 1.271452e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 69    68 0.5140390 0.4156766659 7.028436e-02 0.2618685 0.60876416 1.293673e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 70    69 0.5054289 0.4222363471 7.233477e-02 0.2562769 0.61216496 1.315582e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 71    70 0.4969622 0.4286493172 7.438848e-02 0.2508937 0.61538940 1.337169e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 72    71 0.4886424 0.4349136551 7.644394e-02 0.2457150 0.61844234 1.358427e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 73    72 0.4804726 0.4410278030 7.849962e-02 0.2407363 0.62132874 1.379349e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 74    73 0.4724554 0.4469905538 8.055403e-02 0.2359534 0.62405362 1.399930e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 75    74 0.4645933 0.4528010368 8.260571e-02 0.2313617 0.62662205 1.420163e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 76    75 0.4568881 0.4584587030 8.465324e-02 0.2269566 0.62903913 1.440043e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 77    76 0.4493415 0.4639633108 8.669523e-02 0.2227334 0.63130998 1.459567e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 78    77 0.4419547 0.4693149099 8.873035e-02 0.2186873 0.63343973 1.478730e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 79    78 0.4347289 0.4745138262 9.075728e-02 0.2148135 0.63543347 1.497530e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 80    79 0.4276646 0.4795606459 9.277477e-02 0.2111073 0.63729628 1.515964e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 81    80 0.4207622 0.4844562000 9.478161e-02 0.2075637 0.63903319 1.534031e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 82    81 0.4140218 0.4892015482 9.677662e-02 0.2041780 0.64064917 1.551728e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 83    82 0.4074434 0.4937979639 9.875868e-02 0.2009452 0.64214914 1.569057e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 84    83 0.4010264 0.4982469185 1.007267e-01 0.1978606 0.64353795 1.586015e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 85    84 0.3947703 0.5025500663 1.026797e-01 0.1949193 0.64482035 1.602604e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 86    85 0.3886742 0.5067092301 1.046166e-01 0.1921167 0.64600102 1.618823e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 87    86 0.3827371 0.5107263866 1.065366e-01 0.1894480 0.64708452 1.634675e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 88    87 0.3769577 0.5146036523 1.084387e-01 0.1869087 0.64807534 1.650160e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 89    88 0.3713347 0.5183432703 1.103220e-01 0.1844941 0.64897783 1.665281e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 90    89 0.3658665 0.5219475973 1.121859e-01 0.1821998 0.64979627 1.680040e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 91    90 0.3605513 0.5254190909 1.140296e-01 0.1800213 0.65053478 1.694439e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 92    91 0.3553874 0.5287602977 1.158523e-01 0.1779545 0.65119739 1.708481e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 93    92 0.3503727 0.5319738418 1.176535e-01 0.1759949 0.65178802 1.722170e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 94    93 0.3455052 0.5350624143 1.194324e-01 0.1741386 0.65231045 1.735510e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 95    94 0.3407827 0.5380287623 1.211886e-01 0.1723813 0.65276833 1.748503e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 96    95 0.3362028 0.5408756796 1.229215e-01 0.1707193 0.65316522 1.761155e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 97    96 0.3317633 0.5436059976 1.246307e-01 0.1691486 0.65350452 1.773468e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 98    97 0.3274618 0.5462225761 1.263156e-01 0.1676655 0.65378955 1.785449e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 99    98 0.3232957 0.5487282953 1.279760e-01 0.1662664 0.65402347 1.797101e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 100   99 0.3192624 0.5511260487 1.296115e-01 0.1649477 0.65420934 1.808429e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 101  100 0.3153595 0.5534187353 1.312218e-01 0.1637060 0.65435010 1.819439e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 102  101 0.3115842 0.5556092533 1.328065e-01 0.1625380 0.65444856 1.830135e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 103  102 0.3079340 0.5577004941 1.343655e-01 0.1614403 0.65450743 1.840522e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 104  103 0.3044061 0.5596953363 1.358985e-01 0.1604100 0.65452931 1.850607e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 105  104 0.3009979 0.5615966410 1.374054e-01 0.1594440 0.65451667 1.860394e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 106  105 0.2977067 0.5634072464 1.388861e-01 0.1585393 0.65447188 1.869888e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 107  106 0.2945296 0.5651299640 1.403404e-01 0.1576931 0.65439721 1.879096e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 108  107 0.2914642 0.5667675744 1.417683e-01 0.1569028 0.65429483 1.888024e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 109  108 0.2885075 0.5683228237 1.431696e-01 0.1561656 0.65416678 1.896676e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 110  109 0.2856570 0.5697984204 1.445445e-01 0.1554791 0.65401504 1.905058e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 111  110 0.2829100 0.5711970324 1.458929e-01 0.1548408 0.65384148 1.913177e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 112  111 0.2802638 0.5725212844 1.472149e-01 0.1542483 0.65364787 1.921038e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 113  112 0.2777157 0.5737737559 1.485105e-01 0.1536994 0.65343590 1.928647e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 114  113 0.2752632 0.5749569789 1.497798e-01 0.1531920 0.65320717 1.936008e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 115  114 0.2729037 0.5760734363 1.510229e-01 0.1527239 0.65296321 1.943129e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 116  115 0.2706345 0.5771255608 1.522399e-01 0.1522930 0.65270544 1.950015e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 117  116 0.2684532 0.5781157329 1.534311e-01 0.1518976 0.65243524 1.956671e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 118  117 0.2663573 0.5790462808 1.545964e-01 0.1515357 0.65215389 1.963104e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 119  118 0.2643443 0.5799194788 1.557363e-01 0.1512056 0.65186260 1.969318e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 120  119 0.2624117 0.5807375474 1.568507e-01 0.1509056 0.65156252 1.975319e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 121  120 0.2605573 0.5815026521 1.579400e-01 0.1506340 0.65125473 1.981113e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 122  121 0.2587786 0.5822169037 1.590045e-01 0.1503892 0.65094026 1.986705e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 123  122 0.2570734 0.5828823582 1.600442e-01 0.1501699 0.65062005 1.992101e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 124  123 0.2554394 0.5835010163 1.610595e-01 0.1499745 0.65029501 1.997305e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 125  124 0.2538744 0.5840748239 1.620507e-01 0.1498017 0.64996599 2.002323e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 126  125 0.2523762 0.5846056723 1.630181e-01 0.1496502 0.64963376 2.007160e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 127  126 0.2509427 0.5850953985 1.639619e-01 0.1495187 0.64929908 2.011822e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 128  127 0.2495718 0.5855457857 1.648824e-01 0.1494061 0.64896263 2.016312e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 129  128 0.2482615 0.5859585635 1.657799e-01 0.1493112 0.64862506 2.020637e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 130  129 0.2470097 0.5863354092 1.666549e-01 0.1492329 0.64828697 2.024801e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 131  130 0.2458146 0.5866779477 1.675075e-01 0.1491703 0.64794893 2.028808e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 132  131 0.2446742 0.5869877526 1.683381e-01 0.1491222 0.64761145 2.032664e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 133  132 0.2435866 0.5872663472 1.691470e-01 0.1490878 0.64727501 2.036372e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 134  133 0.2425501 0.5875152046 1.699347e-01 0.1490662 0.64694006 2.039938e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 135  134 0.2415629 0.5877357495 1.707014e-01 0.1490565 0.64660702 2.043365e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 136  135 0.2406232 0.5879293584 1.714475e-01 0.1490579 0.64627626 2.046659e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 137  136 0.2397294 0.5880973608 1.721732e-01 0.1490696 0.64594814 2.049822e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 138  137 0.2388798 0.5882410400 1.728791e-01 0.1490910 0.64562297 2.052860e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 139  138 0.2380729 0.5883616346 1.735654e-01 0.1491213 0.64530104 2.055777e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 140  139 0.2373071 0.5884603386 1.742325e-01 0.1491598 0.64498263 2.058575e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 141  140 0.2365809 0.5885383032 1.748808e-01 0.1492060 0.64466798 2.061260e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 142  141 0.2358928 0.5885966376 1.755106e-01 0.1492592 0.64435730 2.063834e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [ reached 'max' / getOption("max.print") -- omitted 359 rows ]</span>
+<span class="r-in"><span><span class="fu">deSolve</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits</span>, times <span class="op">=</span> <span class="va">example_times</span>,</span></span>
+<span class="r-in"><span>parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va">simple_sirs</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
@@ -278,7 +149,7 @@ compartments at each time point.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
+  <p></p><p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce, Jonathan Cook, Graziella DiRenzo, Evan Grant, Michael Runge, Brittany Mosher.</p>
 </div>
 
 <div class="pkgdown-footer-right">

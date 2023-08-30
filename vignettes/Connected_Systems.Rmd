@@ -444,3 +444,6 @@ fence_effect %>%
 
 ## Next Steps
 This vignette detailed the simulations of connected wild and captive scenarios, refered to as systems. We compared outbreaks in these systems to outbreaks in discrete scenarios. By doing so, we better understand the role of fence line interactions between wild and captive deer populations in the spread and establishment of SARS-CoV-2 in white-tailed deer. The next vignette runs a similar process, but runs through multiple parameter sets that mimic a [range of management alternatives that could potentially mitigate the introduction, spread, and establishment of SARS-CoV-2 in deer](Management_Alternative_Systems.html).
+
+## Literature Cited
+* Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.

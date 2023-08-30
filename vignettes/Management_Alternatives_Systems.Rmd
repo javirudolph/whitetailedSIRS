@@ -1036,3 +1036,6 @@ cross_sector_results %>%
 ```
 
 We can take these results and compare to baseline results, as well as single management alternatives.
+
+## Literature Cited
+* Cook, J.D., E. Rosenblatt, G.V. Direnzo, E.H.C. Grant, B.A. Mosher, F. Arce, S. Christensen, R. Ghai, M.C. Runge. In Prep. Using decision science to evaluate the risk and management of SARS-CoV-2 zoonotic transmission between humans and white-tailed deer.

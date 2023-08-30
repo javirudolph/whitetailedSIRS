@@ -37,8 +37,9 @@ Only one parameter may be retrieved in a get_EE_param_vals() call.
 }
 \examples{
 \dontrun{
-draw_elicitation_samples(nsamples = 50)
-get_EE_param_vals(my_param = "Temporary Immunity")}
+sample <- draw_elicitation_samples(nsamples = 50)
+get_EE_param_vals(data = sample, my_param = "Temporary Immunity")
+}
 
 }
 \seealso{

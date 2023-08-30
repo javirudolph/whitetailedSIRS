@@ -427,3 +427,8 @@ sirs_results %>%
 This vignette showed an example of how we can use various whitetailedSIRS functions to project disease outbreaks in white-tailed deer, and summarize outbreak characteristics across simulations. With reading this vignette and previous vignettes, users are prepared to start exploring their own simulations using whitetailedSIRS. In the following vignettes, we will illustrate the use of whitetailedSIRS in analyses published in Rosenblatt et al. (In Prep) and Cook et al. (In Prep). We will start with running simulations for [Rosenblatt et al.'s (In Prep) analysis of outbreak dynamics given continuous spillover from humans in wild and captive settings.](SIRS_analysis_by_context.html)
 
 Click [here](sir_model_description.html) to return to the vignette detailing the SIRS ODE equations used in whitetailedSIRS.
+
+## Literature Cited
+* Cook, J.D., E. Rosenblatt, G.V. Direnzo, E.H.C. Grant, B.A. Mosher, F. Arce, S. Christensen, R. Ghai, M.C. Runge. In Prep. Using decision science to evaluate the risk and management of SARS-CoV-2 zoonotic transmission between humans and white-tailed deer.
+
+* Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.

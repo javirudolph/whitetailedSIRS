@@ -61,18 +61,9 @@ This software release contains several R scripts that generate epidemic projecti
 
 We thank Daniel Walsh, Susan Shriner, and Kim Pepin for their continued feedback as part of a broader decision analysis detailed in Cook et al. In Prep and Rosenblatt et al. In Prep. This work was supported by the Coronavirus Aid, Relief, and Economic Security Act (P.L. 116-136).
 
-## Installation
-
-You can install the development version of whitetailedSIRS from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("disease-decision-analysis-and-research/whitetailedSIRS")
-```
-
 ## Vignettes
 
-### Vignette 1: sir_model_description.Rmd
+### Vignette 1: Introduction.Rmd
 
 Data inputs: N/A
 
@@ -80,7 +71,15 @@ Details: A introductory vignette detailing the SIRS ODE equations and correspond
 
 Outputs: N/A
 
-### Vignette 2: example_values.Rmd
+### Vignette 2: sir_model_description.Rmd
+
+Data inputs: N/A
+
+Details: A vignette introducing and detailing the SIRS ODE equations and corresponding functions, used in Rosenblatt et al. In prep and Cook et al. In Prep.
+
+Outputs: N/A
+
+### Vignette 3: example_values.Rmd
 
 Data inputs: N/A
 
@@ -88,7 +87,7 @@ Details: A vignette stepping through the suggested work-flow when using the `whi
 
 Outputs: N/A
 
-### Vignette 3: SIRS_analysis_by_context.Rmd
+### Vignette 4: SIRS_analysis_by_context.Rmd
 
 Data inputs: N/A
 
@@ -96,7 +95,7 @@ Details: This vignette details the analysis used to study differences in outbrea
 
 Outputs: N/A
 
-### Vignette 4: SIRS_analysis_by_context_initialspill.Rmd
+### Vignette 5: SIRS_analysis_by_context_initialspill.Rmd
 
 Data inputs: N/A
 
@@ -104,7 +103,7 @@ Details: This vignette follows the same blueprint as `whitetailedSIRS::SIRS_anal
 
 Outputs: N/A
 
-### Vignette 5: Visualize_by_context.Rmd
+### Vignette 6: Visualize_by_context.Rmd
 
 Data inputs: data/scenario_results.rda; data/scenario_projections.rda
 
@@ -112,7 +111,7 @@ Details: This vignette demonstrates how to visualize the differences in various 
 
 Outputs: N/A
 
-### Vignette 6: Connected_Systems.Rmd
+### Vignette 7: Connected_Systems.Rmd
 
 Data inputs: data/scenario_results.rda
 
@@ -120,7 +119,7 @@ Details: This vignette tests how connected systems (wild and captive separated b
 
 Outputs: N/A
 
-### Vignette 7: Management_Alternatives_Systems.Rmd
+### Vignette 8: Management_Alternatives_Systems.Rmd
 
 Data inputs: N/A
 
@@ -209,113 +208,6 @@ Data inputs: Outputs from alternatives.R and initial_compartments.R.
 Details: Similar to `whitetailedSIRS::simple_sirs`, this R function  defines the ODE SIR equations to work alongside the `deSolve::ode()` function, and it will return an object with the proportion of individuals found in each of the SIR compartments at each of the specified time points. An added feature is that this function has ODE equations to calculate the cumulative infections from day 0 to day t. 
 
 Outputs: N/A
-
-## Example
-
-Below is a basic example to run a simple projection using basic functions and fake data. Functions in `whitetailedSIRS` allow more complex calculations, but the core concepts remain the same.
-
-
-```{r example}
-library(whitetailedSIRS)
-## basic example code
-```
-
-
-```{r set_parameters}
-example_inits <- c(S_wild = 1, 
-                   I_wild = 0, 
-                   R_wild = 0,
-                   I_wild_cumulative = 0,
-                   S_captive = 1,
-                   I_captive = 0,
-                   R_captive = 0,
-                   I_captive_cumulative = 0)
-
-example_inits_steady <- c(S_wild = 1, 
-                   I_wild = 0, 
-                   R_wild = 0,
-                   S_captive = 1,
-                   I_captive = 0,
-                   R_captive = 0)
-
-# length of time to run this for  
-example_times <-  seq(0, 500, by = 1)
-
-# The parameters we are using in the simulation
-example_params <- c(alpha_immunity = 0.03,
-                    beta_aero_ww = 0.01,
-                    beta_aero_cw = 0.01,
-                    beta_aero_cc = 0.02,
-                    beta_aero_hw = 0.01,
-                    beta_aero_hc = 0.2,
-                    beta_dc_ww = 0.01,
-                    beta_dc_cw = 0.01,
-                    beta_dc_cc = 0.01,
-                    phi_cw = 0,
-                    phi_wc = 0,
-                    gamma_recov = 0.01,
-                    I_human = 0.05,
-                    boost = 0)
-
-```
-
-```{r run_ode}
-library(deSolve)
-library(rootSolve)
-
-example_out <- ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs_with_cumulative)
-
-example_eq <- runsteady(y = example_inits_steady, parms = example_params, func = whitetailedSIRS::simple_sirs)
-```
-
-```{r viz_results, message=FALSE}
-library(tidyverse)
-example_out %>% 
-   as_tibble() %>% 
-   select(., -I_wild_cumulative, -I_captive_cumulative) %>% 
-   pivot_longer(-time, names_to = "compartment", values_to = "proportion") %>% 
-   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
-   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
-          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
-   ggplot(aes(x = time, y = proportion, color = sir_type, linetype = pop_type)) +
-   geom_line() +
-   labs(title = "SIR dynamics", y = "Proportion of population", x = "Time in days",
-        color = "SIR", linetype = "Population type") +
-   theme_bw()
-```
-```{r, cumulative_cases, message=FALSE}
-example_out %>% 
-   as_tibble() %>% 
-   select(., -S_wild, -I_wild, -R_wild, -S_captive, -I_captive, -R_captive) %>% 
-   rename(., Wild = I_wild_cumulative, Captive = I_captive_cumulative) %>% 
-   pivot_longer(-time, names_to = "population", values_to = "cumulative_proportion") %>% 
-   mutate(population = factor(population, levels = c("Wild", "Captive"))) %>% 
-   ggplot(aes(x = time, y = cumulative_proportion, linetype = population)) +
-   geom_line() +
-   labs(title = "Cumulative infections", y = "Proportion of population", x = "Time in days",
-        linetype = "Population type") +
-   theme_bw()
-
-```
-
-
-```{r warning=FALSE}
-example_eq$y %>% 
-   as_tibble_row() %>% 
-   pivot_longer(cols = everything(), names_to = "compartment", values_to = "proportion") %>% 
-   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
-   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
-          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
-   ggplot(aes(x = sir_type, 
-              alpha = pop_type,
-              y = proportion, fill = sir_type)) +
-   geom_col(position = "dodge") +
-   labs(title = "Equilibrium proportions", x = "Compartment", alpha = "Population type", fill = "SIR") +
-   scale_alpha_discrete(range = c(1, 0.4)) +
-   ylim(0, 1) +
-   theme_bw()
-   
-```
 
 ## References
 

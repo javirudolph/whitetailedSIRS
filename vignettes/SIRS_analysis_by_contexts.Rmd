@@ -69,7 +69,7 @@ Next, we draw an assortment of parameters to solve the SIRS ODE equations for a 
 elicitation_data <- whitetailedSIRS::draw_elicitation_samples(nsamples = nsamples)
 ```
 
-Following Rosenblatt et al. (2023), four contexts were defined, including outdoor captive ranch, intensive captive facility, wild deer in rural conditions, and wild deer in suburban conditions. In this RMD file, these scenarios will be simulated independently of each other.
+Following Rosenblatt et al. (In Prep), four contexts were defined, including outdoor captive ranch, intensive captive facility, wild deer in rural conditions, and wild deer in suburban conditions. In this RMD file, these scenarios will be simulated independently of each other.
 
 ### Outdoor captive ranch
 #### Proximity Rates
@@ -344,3 +344,7 @@ results %>%
 This vignette detailed the simulations of continuous exposure to humans infected with SARS-CoV-2. The next vignette runs a similar process, but simulates outbreaks caused by [initial infections in a deer population, rather than continual introduction from humans](SIRS_analysis_by_context_initialspill.html). Results from both this and the next vignette are collated into [another vignette to produce the figures similar to those in Rosenblatt et al. In Prep.](Visualize_by_context.html).
 
 Click [here](example_values.html) to return to the vignette demonstrating an example use of whitetailedSIRS.
+
+## Literature Cited
+
+* Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.
