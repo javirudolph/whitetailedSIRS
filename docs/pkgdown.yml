@@ -3,11 +3,12 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   Connected_Systems: Connected_Systems.html
+  Introduction: Introduction.html
   Management_Alternatives_Systems: Management_Alternatives_Systems.html
   SIRS_analysis_by_contexts: SIRS_analysis_by_contexts.html
   SIRS_analysis_by_contexts_initialspill: SIRS_analysis_by_contexts_initialspill.html
   Visualize_by_context: Visualize_by_context.html
   example_values: example_values.html
   sir_model_description: sir_model_description.html
-last_built: 2023-06-20T12:58Z
+last_built: 2023-08-29T21:41Z
 

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">whitetailedSIRS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,13 +24,14 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/Introduction.html">Introduction</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
+    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover</a>
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
     <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
-    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -75,112 +76,74 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>S_wild_prop</dt>
-<dd><p>Size of susceptible compartment in wild population (proportion)</p></dd>
+<dd><p>Size of susceptible compartment in wild population
+(proportion)</p></dd>
 
 
 <dt>I_wild_prop</dt>
-<dd><p>Size of infectious compartment in wild population (proportion)</p></dd>
+<dd><p>Size of infectious compartment in wild population
+(proportion)</p></dd>
 
 
 <dt>R_wild_prop</dt>
-<dd><p>Size of recovered compartment in wild population (proportion)</p></dd>
+<dd><p>Size of recovered compartment in wild population
+(proportion)</p></dd>
 
 
 <dt>S_captive_prop</dt>
-<dd><p>Size of susceptible compartment in captive population (proportion)</p></dd>
+<dd><p>Size of susceptible compartment in captive population
+(proportion)</p></dd>
 
 
 <dt>I_captive_prop</dt>
-<dd><p>Size of infectious compartment in captive population (proportion)</p></dd>
+<dd><p>Size of infectious compartment in captive population
+(proportion)</p></dd>
 
 
 <dt>R_captive_prop</dt>
-<dd><p>Size of recovered compartment in captive population (proportion)</p></dd>
+<dd><p>Size of recovered compartment in captive population
+(proportion)</p></dd>
 
 
 <dt>draws</dt>
-<dd><p>$Number of iterations of simulation</p></dd>
+<dd><p>Number of iterations of simulation</p></dd>
 
 
-<dt>I_wild_cumulative</dt>
-<dd><p>Cumulative infected in wild segment, starting always at 0</p></dd>
-
-
-<dt>I_captive_cumulative</dt>
-<dd><p>Cumulative infected in captive segment, starting always at 0</p></dd>
+<dt>steady</dt>
+<dd><p>Logical argument to state whether these initial compartments
+will be used to calculate compartment sizes as steady state equilibrium
+(steady = TRUE), or for a projection through a specified time period
+(steady = FALSE; default).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>List of six vectors, repeating starting conditions specified by user. Length of vectors are determined by draws argument.</p>
+<p>List of six vectors (steady == TRUE) or eight vectors (steady ==
+FALSE), repeating starting conditions specified by user. Length of vectors
+are determined by draws argument. When steady == FALSE, output will contain
+starting values for tracking cumulative infections (I_wild_cumulative and
+I_captive_cumulative), both set to zero.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Provides a vector of compartment sizes for wild and captive populations. This function pairs wild and captive deer populations so that transmission between populations can occur. Values (except for draws parameter) must be proportions, and must sum to one for each population.</p>
+    <p>Provides a vector of compartment sizes for wild and captive
+populations. This function pairs wild and captive deer populations so that
+transmission between populations can occur. Values (except for draws
+parameter) must be proportions, and must sum to one for each population.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">initial_compartments</span><span class="op">(</span>S_wild_prop <span class="op">=</span> <span class="fl">0</span>, draws <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co">#Starting conditions for a simulation focused only on captive deer</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $S_wild</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_wild</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $R_wild</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_wild_cumulative</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $S_captive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_captive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $R_captive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_captive_cumulative</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu">initial_compartments</span><span class="op">(</span>draws <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co">#Starting conditions for a simulation of introduction and spread in both wild and captive deer.</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $S_wild</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_wild</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $R_wild</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_wild_cumulative</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $S_captive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_captive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $R_captive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $I_captive_cumulative</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 0 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-</code></pre></div>
+    
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
+  <p></p><p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce, Jonathan Cook, Graziella DiRenzo, Evan Grant, Michael Runge, Brittany Mosher.</p>
 </div>
 
 <div class="pkgdown-footer-right">

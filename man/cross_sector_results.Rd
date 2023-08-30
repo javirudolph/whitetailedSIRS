@@ -6,15 +6,72 @@
 \title{cross_sector_results}
 \format{
 \code{cross_sector_results}
+A data frame with 9 columns and 800 rows storing the results of outbreak
+simulations given a combination of best management alternatives across
+OneHealth sectors (Alternative). Each row corresponds to an iteration of the
+simulation, with a specific complex, alternative implemented, and random draw
+of epidemiological parameters:
+\describe{
+\item{run_id}{Identifier of run iteration}
+\item{Complex}{Combination of wild and captive scenarios interacting along
+a fenceline}
+\item{Alternative}{Top OneHealth Management alternatives implemented}
+\item{meanWild}{Mean daily prevelance in wild deer in the complex}
+\item{meanCaptive}{Mean daily prevelance in captive deer in the complex}
+\item{cumulativeWild}{Incidence proportion in wild deer in the complex}
+\item{cumulativeCaptive}{Incidence proportion in captive deer in the
+complex}
+\item{persistWild}{Probability of persistence in wild deer in the complex}
+\item{persistCaptive}{Probability of persistence in captive deer in the
+complex}
+}
 }
 \source{
-Derived from \code{Management_Alternatives_Systems.Rmd}, and compared to single alternative impacts stored in \code{alternatives_across_systems.rda}
+Derived from \code{Management_Alternatives_Systems.Rmd}, and compared to
+single alternative impacts stored in \code{alternatives_across_systems.rda}
 }
 \usage{
 cross_sector_results
 }
 \description{
-A dataframe containing results used to compare cumulative influences of the top performing alternative action for each OneHealth sectors (public health, agriculture, and wildlife sectors) on the prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations. 1000 iterations (run_id) were run for captive and wild populations of white-tailed deer, separated by a single fenceline that allows proximity and direct contact between captive and wild deer (Complex), under the alternative identified for public health, agriculture, and wildlife (Alternative) that have the greatest reduction in prevalence, persistence, and cumulative infections. Complexes include captive deer in outdoor ranch facilities and wild deer in rural areas (Outdoor ranch and rural deer), captive deer in outdoor ranch facilities and wild deer in suburban areas (Outdoor ranch and suburban deer), captive deer in intensive facilities and wild deer in rural areas (Intensive facility and rural deer), and captive deer in intensive facilities and wild deer in suburban areas (Intensive facility and suburban deer). Cross-sector collaboration would vaccinate and boost captive deer (agriculture sector), require personal protective equipment for humans interacting with deer in wild and captive settings (public health sector), and eliminate baiting practices through legislation, enforcement, and education (wildlife sector).
-Wild and captive prevalence (meanWild and meanCaptive, respectively) are reported as the percent of a population infected, averaged over a simulated 120-day projection (run_id), for a particular alternative applied to a particular context. Cumulative infections reports the total proportion of the wild and captive populations infected over the course of the 120-fall projection (cumulativeWild and cumulativeCaptive, respectively), and can exceed 1, indicating that all individuals were infected at least once during the fall season, for a particular alternative applied to a particular context. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and \code{run_steady()} from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium for wild and captive deer (persistWild and persistCaptive, respectively), for a particular alternative applied to a particular context.
+A dataframe containing results used to compare cumulative influences of the
+top performing alternative action for each OneHealth sectors (public health,
+agriculture, and wildlife sectors) on the prevalence, persistence and
+cumulative infections of SARS-CoV-2 in simulated white-tailed deer
+populations. 1000 iterations (run_id) were run for captive and wild
+populations of white-tailed deer, separated by a single fenceline that allows
+proximity and direct contact between captive and wild deer (Complex), under
+the alternative identified for public health, agriculture, and wildlife
+(Alternative) that have the greatest reduction in prevalence, persistence,
+and cumulative infections. Complexes include captive deer in outdoor ranch
+facilities and wild deer in rural areas (Outdoor ranch and rural deer),
+captive deer in outdoor ranch facilities and wild deer in suburban areas
+(Outdoor ranch and suburban deer), captive deer in intensive facilities and
+wild deer in rural areas (Intensive facility and rural deer), and captive
+deer in intensive facilities and wild deer in suburban areas (Intensive
+facility and suburban deer). Cross-sector collaboration would vaccinate and
+boost captive deer (agriculture sector), require personal protective
+equipment for humans interacting with deer in wild and captive settings
+(public health sector), and eliminate baiting practices through legislation,
+enforcement, and education (wildlife sector).
+Wild and captive prevalence (meanWild and meanCaptive, respectively) are
+reported as the percent of a population infected, averaged over a simulated
+120-day projection (run_id), for a particular alternative applied to a
+particular context. Cumulative infections reports the total proportion of the
+wild and captive populations infected over the course of the 120-fall
+projection (cumulativeWild and cumulativeCaptive, respectively), and can
+exceed 1, indicating that all individuals were infected at least once during
+the fall season, for a particular alternative applied to a particular
+context. Persistence is a logical condition indicating if equilibrium
+determined by SIRS ODE equations and \code{run_steady()} from the rootSolve
+package predicts at least 1 in 1,000 deer infected at equilibrium for wild
+and captive deer (persistWild and persistCaptive, respectively), for a
+particular alternative applied to a particular context.
+}
+\examples{
+\dontrun{
+head(cross_sector_results)
+}
+
 }
 \keyword{datasets}

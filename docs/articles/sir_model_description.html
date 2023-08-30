@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">whitetailedSIRS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,13 +41,14 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/Introduction.html">Introduction</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
+    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover</a>
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
     <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
-    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul>
@@ -87,24 +88,47 @@ Rudolph, Elias Rosenblatt</h4>
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/disease-decision-analysis-and-research/whitetailedSIRS" class="external-link">whitetailedSIRS</a></span><span class="op">)</span></span></code></pre></div>
+<p><a href="Introduction.html">Previous page (Introduction)</a></p>
+<p><a href="example_values.html">Next page (Example Analysis)</a></p>
 <div class="section level2">
-<h2 id="sirs-ode-equations">1. SIRS ODE Equations<a class="anchor" aria-label="anchor" href="#sirs-ode-equations"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>The main function in the package is
-<code><a href="../reference/simple_sirs.html">whitetailedSIRS::simple_sirs()</a></code> and it is derived from
-equations 5-10 below.</p>
-<p>We explore two direct exposure pathways in a
+<p>This vignette discusses the series of equations that allow us to
+explore outbreak dynamics of SARS-CoV-2 in a simulated white-tailed deer
+population. Several functions are included to do these calculations for
+you, and are referenced in the text below.</p>
+</div>
+<div class="section level2">
+<h2 id="topics-covered-in-this-vignette">Topics covered in this vignette<a class="anchor" aria-label="anchor" href="#topics-covered-in-this-vignette"></a>
+</h2>
+<ul>
+<li><p>SIR ODE equation introduction</p></li>
+<li><p>SIR ODE equations for white-tailed deer in wild and captive
+settings</p></li>
+<li><p>Calculation of transmission risk through aerosols and
+fluids</p></li>
+<li><p>Tracking cumulative infections</p></li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="sirs-ode-equations">SIRS ODE equations<a class="anchor" aria-label="anchor" href="#sirs-ode-equations"></a>
+</h2>
+<p>In this package, we explore two direct exposure pathways in a
 Susceptible-Infected-Recovered-Susceptible model (SIRS) that simulates
-infection dynamics through time. See Rosenblatt et al. In Prep for a
-full description and parameter values used in projecting outbreaks of
-SARS-CoV-2.</p>
-<p><span class="math display">\[\begin{align}
+infection dynamics through time. The basic form of an SIRS model is in
+the following set of ordinary differential equations (ODE; eqn 1-3):</p>
+<div style="font-size: 85%;">
+<span class="math display">\[\begin{align}
+\tag{1}
 \tfrac{ds}{dt} &amp;= - \beta si + \alpha r \\
 
+\tag{2}
 \tfrac{di}{dt} &amp;= \beta si - \gamma i \\
 
+\tag{3}
 \tfrac{dr}{dt} &amp;= \gamma i - \alpha r \\
-\end{align}\]</span></p>
+\end{align}\]</span>
+</div>
 <p>where <span class="math inline">\(s\)</span> is the proportion of
 susceptible individuals, <span class="math inline">\(i\)</span> is the
 proportion of infected individuals with SARS-CoV-2, and <span class="math inline">\(r\)</span> is the proportion of recovered
@@ -114,19 +138,57 @@ individuals; thus, <span class="math inline">\(s+i+r = 1\)</span> .
 <span class="math inline">\(\alpha\)</span> is the immunity loss rate
 (inverse of time to loss of immunity; Figure 1). <span class="math inline">\(\beta\)</span> is the product of a contact rate
 (<span class="math inline">\(c\)</span>) and probability of infection
-(<span class="math inline">\(\nu\)</span>; Equation 4 below).</p>
-<p><span class="math display">\[\begin{align}
+(<span class="math inline">\(\nu\)</span>; eqn. 4).</p>
+<span class="math display">\[\begin{align}
+\tag{4}
 \beta = c \cdot \nu
-\end{align}\]</span></p>
-<p><strong>Wild deer SIRS ODE equations</strong></p>
+\end{align}\]</span>
+</div>
+<div class="section level2">
+<h2 id="sirs-ode-equations-for-wild-and-captive-white-tailed-deer">SIRS ODE equations for wild and captive white-tailed deer<a class="anchor" aria-label="anchor" href="#sirs-ode-equations-for-wild-and-captive-white-tailed-deer"></a>
+</h2>
+<p>We can take these basic SIRS ODE equations and modify them to
+describe more complex epidemiological processes. This package uses a
+general SIRS ODE equation set that calculates outbreak dynamics within
+and between wild and captive deer (Figure 1; Rosenblatt et al. In
+Prep.). In this system, the wild and captive populations have their own
+SIRS cycle. Introduction occurs through an initial exposure, or through
+continued exposure from infected humans (orange diamond and arrow). This
+design also can incorporate user-defined fence line transmission rates
+that allow SARS-CoV-2 to transfer between wild and captive deer (green
+box and arrows).</p>
+<div class="figure" style="text-align: center">
+<img src="../reference/figures/SIRS_system.png" alt="Figure 1: A conceptual illustration of the two seperate SIRS processes for wild and captive white-tailed deer, linked through fenceline interactions and exposed to infected humans." width="700px"><p class="caption">
+Figure 1: A conceptual illustration of the two seperate SIRS processes
+for wild and captive white-tailed deer, linked through fenceline
+interactions and exposed to infected humans.
+</p>
+</div>
+<p>The SIRS ODE equations for this design are stored in a primary
+function in the package, called
+<code><a href="../reference/simple_sirs.html">whitetailedSIRS::simple_sirs()</a></code>. The derivation is detailed
+below (eqn. 5-10). In these equations, transmission rates (<span class="math inline">\(\beta\)</span>) are denoted with subscripts that
+indicate the host-recipient relationship, including human-to-wild deer
+(HW), human-to-captive deer (HC), wild deer-to-wild deer (WW), captive
+deer-to-wild deer (CW, this parameter is bidirection), and captive
+deer-to-captive deer (CC). <span class="math inline">\(\beta\)</span>
+superscripts refer to the transmission route of the virus, including
+transmission via aerosols (Areo) and via fluid exchanged with physical
+contact (DC). As in equations 1-3 <span class="math inline">\(\gamma\)</span> is the recovery rate and <span class="math inline">\(\alpha\)</span> is the immunity loss rate. There
+are several assumptions behind these parameters discussed in Rosenblatt
+et al. In Prep..</p>
+<div class="section level3">
+<h3 id="wild-deer-sirs-ode-equations">Wild deer SIRS ODE equations<a class="anchor" aria-label="anchor" href="#wild-deer-sirs-ode-equations"></a>
+</h3>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{5}
 \frac{ds_W}{dt} =
                \alpha r_W -
                s_W (\beta_{WW}^{Aero} i_W + \beta_{WW}^{DC} i_W +
                \beta_{CW}^{Aero} i_C + \beta_{CW}^{DC} i_C +
 \beta_{HW}^{Aero} i_H)
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># equation 5 </span></span>
@@ -135,13 +197,17 @@ individuals; thus, <span class="math inline">\(s+i+r = 1\)</span> .
 <span>                       <span class="op">(</span><span class="va">beta_aero_cw</span> <span class="op">*</span> <span class="va">I_captive</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">beta_dc_cw</span> <span class="op">*</span> <span class="va">I_captive</span><span class="op">)</span> <span class="op">+</span></span>
 <span>                       <span class="op">(</span><span class="va">beta_aero_hw</span> <span class="op">*</span> <span class="va">I_human</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+
+\tag{6}
+
 \frac{di_W}{dt} =
                s_W (\beta_{WW}^{Aero} i_W + \beta_{WW}^{DC} i_W +
                \beta_{CW}^{Aero} i_C + \beta_{CW}^{DC} i_C +
 \beta_{HW}^{Aero} i_H)
-                - \gamma i_W \nonumber
-\end{align}\]</span></p>
+                - \gamma i_W
+                
+\end{align}\]</span>
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># equation 6 </span></span>
@@ -150,23 +216,28 @@ individuals; thus, <span class="math inline">\(s+i+r = 1\)</span> .
 <span>                               <span class="op">(</span><span class="va">beta_aero_hw</span> <span class="op">*</span> <span class="va">I_human</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="op">(</span><span class="va">gamma_recov</span> <span class="op">*</span> <span class="va">I_wild</span><span class="op">)</span></span></code></pre></div>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{7}
 \frac{dr_W}{dt} = \gamma i_W - \alpha r_W
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># equation 7 </span></span>
 <span><span class="va">dR_wild</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">gamma_recov</span> <span class="op">*</span> <span class="va">I_wild</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="op">(</span><span class="va">alpha_immunity</span> <span class="op">*</span> <span class="va">R_wild</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Captive deer SIRS ODE equations</strong></p>
+</div>
+<div class="section level3">
+<h3 id="captive-deer-sirs-ode-equations">Captive deer SIRS ODE equations<a class="anchor" aria-label="anchor" href="#captive-deer-sirs-ode-equations"></a>
+</h3>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{8}
 \frac{ds_C}{dt} =
                \alpha r_C -
                s_C (\beta_{CC}^{Aero} i_C + \beta_{CC}^{DC} i_C +
                \beta_{CW}^{Aero} i_W + \beta_{CW}^{DC} i_W +
 \beta_{HC}^{Aero} i_H)
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># equation 8 </span></span>
@@ -176,12 +247,13 @@ individuals; thus, <span class="math inline">\(s+i+r = 1\)</span> .
 <span>                          <span class="op">(</span><span class="va">beta_dc_hc</span> <span class="op">*</span> <span class="va">I_human</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>         </span></code></pre></div>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{9}
 \frac{di_C}{dt} =
                s_C (\beta_{CC}^{Aero} i_C + \beta_{CC}^{DC} i_C +
                \beta_{CW}^{Aero} i_W + \beta_{CW}^{DC} i_W +
 \beta_{HW}^{Aero} i_H)
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># equation 9 </span></span>
@@ -190,25 +262,20 @@ individuals; thus, <span class="math inline">\(s+i+r = 1\)</span> .
 <span>                                     <span class="op">(</span><span class="va">beta_dc_hc</span> <span class="op">*</span> <span class="va">I_human</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="op">(</span><span class="va">gamma_recov</span> <span class="op">*</span> <span class="va">I_captive</span><span class="op">)</span></span></code></pre></div>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{10}
 \frac{dr_C}{dt} = \gamma i_C - \alpha r_C
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># equation 10 </span></span>
 <span><span class="va">dR_captive</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">gamma_recov</span> <span class="op">*</span> <span class="va">I_captive</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="op">(</span><span class="va">alpha_immunity</span> <span class="op">*</span> <span class="va">R_captive</span><span class="op">)</span></span></code></pre></div>
-<p>One parameter present in <code><a href="../reference/simple_sirs.html">whitetailedSIRS::simple_sirs()</a></code>
-that is not listed here is a parameter called <code>boost</code>.
-<code>boost</code> mimics vaccine boosting in captive deer herds,
-transitioning captive deer from the Susceptible compartment to the
-Recovered compartment without infection. If vaccine boosting is not
-being evaluated, this parameter should be set to 0. See
-<code>whitetailedSIRS::Management_Alternatives_Systems</code> vignette
-for more details.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="beta-definitions">2 <span class="math inline">\(\beta\)</span> Definitions<a class="anchor" aria-label="anchor" href="#beta-definitions"></a>
+<h2 id="beta-definitions">
+<span class="math inline">\(\beta\)</span> Definitions<a class="anchor" aria-label="anchor" href="#beta-definitions"></a>
 </h2>
 <p>Several <span class="math inline">\(\beta\)</span> values are
 included in the model to incorporate various direct transmission
@@ -224,7 +291,7 @@ transmission between captive deer and wild deer (CW); transmission
 between captive deer (CC); transmission between human to wild deer (HW);
 and transmission between human to captive deer (HC).</p>
 <div class="section level3">
-<h3 id="aerosol-transmission">2.1 Aerosol Transmission<a class="anchor" aria-label="anchor" href="#aerosol-transmission"></a>
+<h3 id="aerosol-transmission">Aerosol Transmission<a class="anchor" aria-label="anchor" href="#aerosol-transmission"></a>
 </h3>
 <p>Aerosolized transmission rates (<span class="math inline">\(\beta^{Aero}\)</span>) are the product of the rate
 that a susceptible individual enters shared airspace with an infected
@@ -236,7 +303,7 @@ captivity, and across fence lines separating these settings (Section
 2.3.1.3). We then build transmission rates (<span class="math inline">\(\beta^{Aero}\)</span>) between deer and between
 humans and deer in various settings (Section 2.3.1.4).</p>
 <div class="section level4">
-<h4 id="deer-deer-proximity-rates">2.1.1 Deer-deer proximity rates<a class="anchor" aria-label="anchor" href="#deer-deer-proximity-rates"></a>
+<h4 id="deer-deer-proximity-rates">Deer-deer proximity rates<a class="anchor" aria-label="anchor" href="#deer-deer-proximity-rates"></a>
 </h4>
 <p><em>Wild deer</em> - We define proximity (<span class="math inline">\(\omega_{ij}\)</span>) as the frequency per day
 that host i and recipient j are within 1.5 m of each other. We estimate
@@ -249,10 +316,11 @@ attractants (e.g., bait, supplemental feed). We also apply this model
 for captive circumstances that mimic natural conditions. It is given
 by:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{11}
 \omega_{ij} = \kappa \bigg( \frac{N_{W}^{1-q}}{A_{W}} \bigg) \cdot
 \rho_{attractant}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <p>where <span class="math inline">\(\kappa\)</span> is a scaling
 constant; <span class="math inline">\(q\)</span> is a concavity scaling
@@ -287,7 +355,7 @@ rates along fence lines separating wild and captive deer herds using
 multiple estimates derived from the literature (<span class="math inline">\(\omega_{WC}\)</span>).</p>
 </div>
 <div class="section level4">
-<h4 id="human-deer-proximity-rates">2.1.2 Human-deer proximity rates<a class="anchor" aria-label="anchor" href="#human-deer-proximity-rates"></a>
+<h4 id="human-deer-proximity-rates">Human-deer proximity rates<a class="anchor" aria-label="anchor" href="#human-deer-proximity-rates"></a>
 </h4>
 <p><em>Human - wild deer proximity rates</em> – Human-deer interactions
 are understudied in the literature, so we instead use expert elicitation
@@ -305,7 +373,7 @@ estimate for this unstudied proximity rate (<span class="math inline">\(\omega_{
 this rate is likely enterprise- and facility-specific.</p>
 </div>
 <div class="section level4">
-<h4 id="infection-probability-given-proximity">2.1.3 Infection probability given proximity<a class="anchor" aria-label="anchor" href="#infection-probability-given-proximity"></a>
+<h4 id="infection-probability-given-proximity">Infection probability given proximity<a class="anchor" aria-label="anchor" href="#infection-probability-given-proximity"></a>
 </h4>
 <p>The probability of infection (<span class="math inline">\(\sigma^{Aero}\)</span>) given proximity is a
 function of the instantaneous dose received and a dose response
@@ -327,9 +395,10 @@ volume concentration (<span class="math inline">\(V_d\)</span>; ml
 exhaled droplets/<span class="math inline">\(m^3\)</span> exhaled;
 Mikszewski et al. 2021).</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{12}
 {ER}_q = C_{\nu} \cdot C_i \cdot {IR} \cdot V_d
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <p>We can then model the instantaneous concentration of SARS-CoV-2
 (<span class="math inline">\(C\)</span>; quanta/<span class="math inline">\(m^3\)</span>) well-mixed in the airspace around an
@@ -338,15 +407,17 @@ infected individual emitting SARS-CoV-2 (<span class="math inline">\({ER}_q\)</s
 (<span class="math inline">\({AER}\)</span>; <span class="math inline">\(hr^{-1}\)</span>), settling (<span class="math inline">\(s\)</span>; <span class="math inline">\(hr^{-1}\)</span>, and inactivation rates (<span class="math inline">\(\lambda\)</span>; <span class="math inline">\(hr^{-1}\)</span>; modified from Buonanno et
 al. 2020).</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{13}
 C = \frac{{ER}_q}{{IVRR} \cdot V}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <p>where</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{14}
 {IVRR} = {AER} + s + \lambda
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <p>When a susceptible individual enters the contaminated airspace
 surrounding an infected individual, the dose (<span class="math inline">\(Q_A\)</span>; quanta) is the product of the
@@ -357,9 +428,10 @@ time the susceptible individual stays within the contaminated airspace
 during a contact (<span class="math inline">\(t_{contact}\)</span>;
 hr).</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{15}
 Q = IR \cdot C \cdot t_{contact}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <p>The amount of SARS-CoV-2 inhaled by the susceptible deer (<span class="math inline">\(Q_A\)</span>) is converted into a probability of
 infection using the Wells-Riley infection model (Equation 8). Under this
@@ -371,9 +443,10 @@ probability of infection from 1 quantum (<span class="math inline">\(r\)</span>;
 susceptible individuals; HID63). We use expert elicitation to estimate
 dose response relationship for white-tailed deer (<span class="math inline">\(r_{deer}\)</span>).</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{16}
 \sigma^{Aero} = 1 - e^{-rQ}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <p>The dose received and probability of infection are calculated for
 deer-deer and human-deer proximity events based on species-specific
@@ -417,17 +490,18 @@ probability.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="aerosol-transmission-rates-betaaero">2.1.4 Aerosol transmission rates (<span class="math inline">\(\beta^{Aero}\)</span>)<a class="anchor" aria-label="anchor" href="#aerosol-transmission-rates-betaaero"></a>
+<h4 id="aerosol-transmission-rates-betaaero">Aerosol transmission rates (<span class="math inline">\(\beta^{Aero}\)</span>)<a class="anchor" aria-label="anchor" href="#aerosol-transmission-rates-betaaero"></a>
 </h4>
 <p>Below are the various aerosol transmission rates used in the SIRS
 model. Parameter values are listed in Table 1 of Rosenblatt et al. In
 Prep.</p>
 <p>Aerosol transmission between wild deer:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{17}
 \beta_{WW}^{Aero} = \kappa \bigg( \frac{N_{W}^{1-q}}{A_{W}} \bigg) \cdot
 \rho_{attractant} \cdot \sigma^{Aero}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -452,9 +526,10 @@ infection from aerosols (Section 2.1.3)</li>
 </ul>
 <p>Aerosol transmission between captive deer:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{18}
 \beta_{CC}^{Aero} = \omega_{CC} \cdot \sigma^{Aero}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -466,9 +541,10 @@ infection from aerosols (Section 2.1.3)</li>
 </ul>
 <p>Aerosol transmission between wild and captive deer across fence:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{19}
 \beta_{CW}^{Aero} = \omega_{WC} \cdot \sigma^{Aero}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -480,9 +556,10 @@ infection from aerosols (Section 2.1.3)</li>
 </ul>
 <p>Aerosol transmission between humans and wild deer:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{20}
 \beta_{HW}^{Aero} = \omega_{HW} \cdot \sigma^{Aero}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -494,9 +571,10 @@ infection from aerosols (Section 2.1.3)</li>
 </ul>
 <p>Aerosol transmission between humans and captive deer:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{21}
 \beta_{HC}^{Aero} = \omega_{HC} \cdot \sigma^{Aero}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -509,7 +587,7 @@ infection from aerosols (Section 2.1.3)</li>
 </div>
 </div>
 <div class="section level3">
-<h3 id="fluid-transmission">2.2 Fluid Transmission<a class="anchor" aria-label="anchor" href="#fluid-transmission"></a>
+<h3 id="fluid-transmission">Fluid Transmission<a class="anchor" aria-label="anchor" href="#fluid-transmission"></a>
 </h3>
 <p>The transmission rate of SARS-CoV-2 via fluid transfer on direct
 contact (<span class="math inline">\(\beta^{DC}\)</span>) is the product
@@ -526,7 +604,7 @@ build transmission rates (<span class="math inline">\(\beta^{DC}\)</span>) betwe
 We consider this transmission pathway between deer, but not between
 human and deer.</p>
 <div class="section level4">
-<h4 id="infection-probability-given-physical-contact">2.2.1 Infection probability given physical contact<a class="anchor" aria-label="anchor" href="#infection-probability-given-physical-contact"></a>
+<h4 id="infection-probability-given-physical-contact">Infection probability given physical contact<a class="anchor" aria-label="anchor" href="#infection-probability-given-physical-contact"></a>
 </h4>
 <p>We use a Wells-Riley dose response model that estimates infection
 probability as a log-logistic function of dose (<span class="math inline">\(d^{dc}\)</span>; plaque-forming units, PFU) and
@@ -539,9 +617,10 @@ individuals making contact. We will adjust this volume across
 simulations to identify a volume threshold that rapidly increases
 transmission risk.</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{22}
 \sigma^{DC} = 1 - e^{-((C_{v} \cdot V_{sputum} )/k)}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <p>In the <code>whitetailedSIRS package</code>, the function
 <code>calc_sigma_dc</code> will automate the calculation of infection
@@ -561,17 +640,18 @@ probability from the transmission of fluid.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="fluid-transmission-betadc">2.2.2 Fluid Transmission (<span class="math inline">\(\beta^{DC}\)</span>)<a class="anchor" aria-label="anchor" href="#fluid-transmission-betadc"></a>
+<h4 id="fluid-transmission-betadc">Fluid Transmission (<span class="math inline">\(\beta^{DC}\)</span>)<a class="anchor" aria-label="anchor" href="#fluid-transmission-betadc"></a>
 </h4>
 <p>Below are the various direct contact transmission rates used in the
 SIRS model. Parameter values are listed in Table 1 of Rosenblatt et
 al. In Prep.</p>
 <p><em>Direct contact transmission between wild deer:</em></p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{23}
 \beta_{WW}^{DC} = kappa \cdot \bigg( \frac{N_W^{(1-q)}}{A_W} \bigg)
 \cdot \epsilon^{DC} \cdot \sigma^{DC}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -595,9 +675,10 @@ infection from direct contact (Section 2.2.1)</li>
 </ul>
 <p>Direct contact transmission between captive deer:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{24}
 \beta_{CC}^{DC} = \omega_{CC} \cdot \epsilon^{DC} \cdot \sigma^{DC}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -613,9 +694,10 @@ infection from physical contact (Section 2.2.1)</li>
 <p>Direct contact transmission between wild and captive deer along fence
 line (assuming possible):</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{25}
 \beta_{CW}^{DC} = omega_{WC} \cdot \sigma^{DC} \cdot \nu^{DC}
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <ul>
 <li>
@@ -631,7 +713,7 @@ infection from physical contact (Section 2.2.1)</li>
 </div>
 </div>
 <div class="section level3">
-<h3 id="function-to-calculate-and-organize-betas-and-other-sir-parameters">2.3 Function to calculate and organize betas and other SIR
+<h3 id="function-to-calculate-and-organize-betas-and-other-sir-parameters">Function to calculate and organize betas and other SIR
 parameters<a class="anchor" aria-label="anchor" href="#function-to-calculate-and-organize-betas-and-other-sir-parameters"></a>
 </h3>
 <p>The function <code>whitetailedSIRS::alternatives()</code> is
@@ -656,14 +738,29 @@ available to do all of these calculations for the user.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="tracking-cumulative-infections">3. Tracking cumulative infections<a class="anchor" aria-label="anchor" href="#tracking-cumulative-infections"></a>
+<h2 id="outputs-reported-by-whitetailedsirs-solving-sirs-ode-equations">Outputs reported by whitetailedSIRS solving SIRS ODE equations<a class="anchor" aria-label="anchor" href="#outputs-reported-by-whitetailedsirs-solving-sirs-ode-equations"></a>
 </h2>
-<p>There is an option to track the cumulative infections in population
-over the course of a projection. The modified
+<p>Several epidemiological metrics can be calculated using outputs from
+solved SIRS ODE equations. These metrics will be shown in more detail in
+following vignettes, but include:</p>
+<ul>
+<li><p>Force-Of-Infection (FOI): The susceptible individuals infected
+per day</p></li>
+<li><p>Basic reproductive number (R_{0}): The number of secondary
+infections caused by an infected deer over the course of its
+infection</p></li>
+<li><p>Average daily prevalence in deer: The average proportion of deer
+infected during an outbreak</p></li>
+<li><p>Probability of persistence beyond projection at ODE equilibrium
+(a deterministic point when SIRS compartment sizes no longer
+change)</p></li>
+<li><p>Incidence proportion: The cumulative proportion of the population
+infected over the course of a projection. The modified
 <code><a href="../reference/simple_sirs_with_cumulative.html">whitetailedSIRS::simple_sirs_with_cumulative()</a></code> has added
 ODE equations to calculate this sum. While the majority of the function
 is identical to <code><a href="../reference/simple_sirs.html">whitetailedSIRS::simple_sirs()</a></code>, there are
-two added lines:</p>
+two added lines:</p></li>
+</ul>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cumulative_I_wild</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">S_wild</span> <span class="op">*</span> <span class="op">(</span><span class="op">(</span><span class="va">beta_aero_ww</span> <span class="op">*</span> <span class="va">I_wild</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">beta_dc_ww</span> <span class="op">*</span> <span class="va">I_wild</span><span class="op">)</span> <span class="op">+</span></span>
 <span>                                         <span class="op">(</span><span class="va">beta_aero_cw</span> <span class="op">*</span> <span class="va">I_captive</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">beta_dc_cw</span> <span class="op">*</span> <span class="va">I_captive</span><span class="op">)</span> <span class="op">+</span></span>
@@ -674,20 +771,42 @@ two added lines:</p>
 <span>                                               <span class="op">(</span><span class="va">beta_aero_hc</span> <span class="op">*</span> <span class="va">I_human</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>These added lines equate to the following calculations:</p>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
+<span class="math display">\[\begin{align}
+\tag{26}
 Cumulativeinfections_{W} =  \sum^{120}_{t=1} s_{t-1}(\beta^{Aero}_{WW}
 i_{W,t-1} + \beta^{DC}_{WW} i_{W,t-1} + \beta^{Aero}_{CW} i_{C,t-1} +
 \beta^{DC}_{CW} i_{C,t-1} + \beta^{Aero}_{HW} i_{H})
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
 <div style="font-size: 85%;">
-<p><span class="math display">\[\begin{align}
-
+<span class="math display">\[\begin{align}
+\tag{27}
 Cumulativeinfections_{C} = \sum^{120}_{t=1} s_{t-1}(\beta^{Aero}_{CC}
 i_{C,t-1} + \beta^{DC}_{CC} i_{C,t-1} + \beta^{Aero}_{CW} i_{W,t-1} +
 \beta^{DC}_{CW} i_{W,t-1} + \beta^{Aero}_{HC} i_{H})
-\end{align}\]</span></p>
+\end{align}\]</span>
 </div>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<p>With the overview of the SIRS ODE equations used to project
+SARS-CoV-2 outbreaks in white-tailed deer, and the various summary
+functions and metrics we use to characterize outbreaks, next we can <a href="example_values.html">explore an example of the approach and
+function use to model an outbreak in a simulated population.</a></p>
+<p>Click <a href="Introduction.html">here</a> to return to the vignette
+introducing the whitetailedSIRS package.</p>
+</div>
+<div class="section level2">
+<h2 id="literature-cited">Literature Cited<a class="anchor" aria-label="anchor" href="#literature-cited"></a>
+</h2>
+<ul>
+<li>Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K.
+Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In
+Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer
+(Odocoileus virginianus) reveals conditions for introduction and
+widespread transmission.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -697,7 +816,7 @@ i_{C,t-1} + \beta^{DC}_{CC} i_{C,t-1} + \beta^{Aero}_{CW} i_{W,t-1} +
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
+<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce, Jonathan Cook, Graziella DiRenzo, Evan Grant, Michael Runge, Brittany Mosher.</p>
 </div>
 
 <div class="pkgdown-footer-right">

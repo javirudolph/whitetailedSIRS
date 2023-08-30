@@ -6,6 +6,14 @@
 \title{Contact rate parameters}
 \format{
 \code{contact_rate_params}
+A data frame with 4 columns and 12 rows, each row corresponding to a
+combination of contact rate parameters from Habib et al. 2011:
+\describe{
+\item{forest_cover}{Percent wooded habitat}
+\item{f}{weighting factor for within-group contacts compared to }
+\item{c}{frequency contact rate}
+\item{q}{scaling factor for degree of density dependence}
+}
 }
 \source{
 https://doi.org/10.1016/j.ecolmodel.2011.05.007
@@ -28,5 +36,11 @@ their movements based on these observed data to estimate the total number of
 individuals in contact, which was the sum of contact rates within the same
 group and with different groups. They estimated the most likely
 parameters for the per-capita contact rate.
+}
+\examples{
+\dontrun{
+head(contact_rate_params)
+}
+
 }
 \keyword{datasets}

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">whitetailedSIRS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,13 +41,14 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/Introduction.html">Introduction</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
+    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover</a>
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
     <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
-    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul>
@@ -90,35 +91,65 @@ Rosenblatt</h4>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Now that we have a dataset from each scenario
-(whitetailedSIRS::SIRS_analysis_by_contexts), we can test how connected
-systems (wild and captive separated by a fence line) differ in outbreak
-characteristics, compared to isolated scenario. When these scenarios are
-connected, there may be differences in prevalence, cumulative cases, and
-persistence due to fence line interactions. This analysis corresponds
-with Objective 5 of <em>Rosenblatt et al. In Prep</em>.</p>
+<p>In the previous vignettes, we have focused on simulating outbreaks
+for a particular scenario focused on wild or captive deer populations.
+In this vignette, we can test how connected systems (wild and captive
+separated by a fence line) differ in outbreak characteristics, compared
+to isolated scenarios. When these scenarios are connected, there may be
+differences in prevalence, incidence proportion, and persistence due to
+fence line interactions. This analysis corresponds with Objective 5 of
+<em>Rosenblatt et al. In Prep</em>.</p>
+<p>The systems considered here are all combinations of wild and captive
+scenarios detailed in <a href="SIRS_analysis_by_contexts.html">the
+vignette simulating outbreaks</a>, including:</p>
+<ul>
+<li>Captive deer in outdoor ranch facilitates connected to wild deer in
+a rural setting;</li>
+<li>Captive deer in outdoor ranch facilitates connected to wild deer in
+a suburban setting;</li>
+<li>Captive deer in intensive, predominantly indoor facilitates
+connected to wild deer in a rural setting;</li>
+<li>Captive deer in intensive, predominantly indoor facilitates
+connected to wild deer in a suburban setting;</li>
+</ul>
+<p>To do this, we will use the same framework used in previous
+vignettes:</p>
+<ol style="list-style-type: decimal">
+<li><p>Set the number of simulations</p></li>
+<li><p>Draw a random sample of parameters used to estimate infection
+probabilities, contact rates, and other important parameters.</p></li>
+<li><p>Derive parameters used the SIRS ODE equation set</p></li>
+<li><p>Define initial SIR compartment sizes</p></li>
+<li><p>Solve the SIRS ODE equations and calculate daily compartment
+sizes</p></li>
+<li><p>Calculate average daily prevalence, probability of persistence,
+and incidence proportion.</p></li>
+</ol>
+<p>Note that we do not calculate FOI or <span class="math inline">\(R_0\)</span> in this vignette, as these metrics
+are specific to the scenarios, not the overall system.</p>
 </div>
 <div class="section level2">
-<h2 id="data-input-and-common-parameter-values">Data input and common parameter values<a class="anchor" aria-label="anchor" href="#data-input-and-common-parameter-values"></a>
+<h2 id="set-number-of-simulations-to-run-and-context-of-simulation">1. Set number of simulations to run and context of simulation<a class="anchor" aria-label="anchor" href="#set-number-of-simulations-to-run-and-context-of-simulation"></a>
 </h2>
-<p>Here, we load the dataset and remind R how many iterations were run
-in each context (nsamples). We set a seed for consistent results,
-identify human prevalence and duration of projection (days). We then set
-parameters that are used consistently across all simulations in the
-vignette.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">23</span><span class="op">)</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="../reference/scenario_results.html">scenario_results</a></span></span>
-<span><span class="va">nsamples</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
-<span></span>
-<span><span class="co">#Bring in estimates from expert elicitation</span></span>
-<span><span class="va">elicitation_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/draw_elicitation_samples.html">draw_elicitation_samples</a></span><span class="op">(</span>nsamples <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#Fixed parameters</span></span>
-<span><span class="va">I_human_null</span> <span class="op">&lt;-</span> <span class="fl">0.05</span></span>
-<span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">120</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#Parameters commonly used across projections</span></span>
+<span><span class="va">nsamples</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="sample-parameters-for-simulations">2. Sample parameters for simulations<a class="anchor" aria-label="anchor" href="#sample-parameters-for-simulations"></a>
+</h2>
+<p>We load the dataset and remind R how many iterations were run in each
+context (nsamples). We set a seed for consistent results, identify human
+prevalence and duration of projection (days). We then set parameters
+that are used consistently across all simulations in the vignette.</p>
+<p>We bring in expert-elicited parameters used in previous
+vignettes:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Bring in estimates from expert elicitation</span></span>
+<span><span class="va">elicitation_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/draw_elicitation_samples.html">draw_elicitation_samples</a></span><span class="op">(</span>nsamples <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span></span></code></pre></div>
+<p>We define common parameter values for all systems:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Parameters commonly used across projections</span></span>
 <span><span class="va">nWild</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="va">nsamples</span>,<span class="fl">1000</span><span class="op">)</span> <span class="co">#Abundance</span></span>
 <span><span class="va">A_w</span> <span class="op">&lt;-</span> <span class="fl">100</span> <span class="co">#Area</span></span>
 <span><span class="va">habitat</span> <span class="op">&lt;-</span> <span class="st">"med"</span> <span class="co">#Habitat classification</span></span>
@@ -132,137 +163,179 @@ vignette.</p>
 <span></span>
 <span><span class="va">sigma_dc_deer_deer_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_dc.html">calc_sigma_dc</a></span><span class="op">(</span>C_nu <span class="op">=</span> <span class="va">C_nu_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span> <span class="co">#Infection probability of 0.1 ml of saliva being transferred between deer on contact</span></span>
 <span></span>
-<span><span class="va">t_contact_deer_deer_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer Proximity Duration (minutes)"</span><span class="op">)</span> <span class="co">#Estimate duration of deer-deer proximity event...</span></span>
-<span></span>
-<span><span class="va">inits.fall</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initial_compartments.html">initial_compartments</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span> <span class="co">#Calculate initial distributions of animals across SIR compartments</span></span>
-<span><span class="va">inits.steady</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initial_compartments.html">initial_compartments</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">nsamples</span>, steady <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co">#Calculate initial distributions of animals across SIR compartments, excluding solving cumulative cases.</span></span>
-<span></span>
+<span><span class="va">t_contact_deer_deer_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer Proximity Duration (minutes)"</span><span class="op">)</span> <span class="co">#Estimate duration of deer-deer proximity event...</span></span></code></pre></div>
+<p>We also fix parameters key to the SIRS ODE, including recovery rate
+to infection, rate of immunity loss, and human prevalence.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Fixed parameters</span></span>
 <span><span class="va">gamma_recov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span>, <span class="va">nsamples</span><span class="op">)</span></span>
-<span><span class="va">alpha_immunity_null</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">'Temporary Immunity'</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="system-calculation">System calculation<a class="anchor" aria-label="anchor" href="#system-calculation"></a>
-</h2>
+<span><span class="va">alpha_immunity_null</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">'Temporary Immunity'</span><span class="op">)</span></span>
+<span><span class="va">I_human_null</span> <span class="op">&lt;-</span> <span class="fl">0.05</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="system-parameters">System parameters<a class="anchor" aria-label="anchor" href="#system-parameters"></a>
+</h3>
 <p>Below, we combine a wild scenario and a captive scenario, with a
 fence line separating these populations. For each combination, we define
 new parameters that have not been defined previously. As we work through
 these combinations, fewer parameters are added as they exist in earlier
 combinations.</p>
-<div class="section level3">
-<h3 id="captive-deer-in-outdoor-ranch-facilties-connected-to-wild-rural-deer">Captive deer in outdoor ranch facilties connected to wild, rural
+<div class="section level4">
+<h4 id="captive-deer-in-outdoor-ranch-facilties-connected-to-wild-rural-deer">Captive deer in outdoor ranch facilties connected to wild, rural
 deer<a class="anchor" aria-label="anchor" href="#captive-deer-in-outdoor-ranch-facilties-connected-to-wild-rural-deer"></a>
-</h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+</h4>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#Ranch side of the fence...</span></span>
-<span><span class="va">omega_cc_ranch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_contact_rate.html">calc_contact_rate</a></span><span class="op">(</span>nsamples <span class="op">=</span> <span class="va">nsamples</span>, type_contact <span class="op">=</span> <span class="va">habitat</span>, N_w <span class="op">=</span> <span class="va">nWild</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Proximity rate with baiting (17 events without baiting)"</span><span class="op">)</span><span class="op">/</span><span class="fl">17</span><span class="op">)</span> <span class="co">#Deer-to-deer proximity rate in ranch context, mimicking wild proximity rates with the influence of baiting (events per day).</span></span>
 <span></span>
+<span><span class="co">#Deer-to-deer proximity rate in ranch context, mimicking wild proximity rates with the influence of baiting (events per day).</span></span>
+<span><span class="va">omega_cc_ranch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_contact_rate.html">calc_contact_rate</a></span><span class="op">(</span>nsamples <span class="op">=</span> <span class="va">nsamples</span>, type_contact <span class="op">=</span> <span class="va">habitat</span>, N_w <span class="op">=</span> <span class="va">nWild</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Proximity rate with baiting (17 events without baiting)"</span><span class="op">)</span><span class="op">/</span><span class="fl">17</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co">#Probability of infection given that duration of proximity event.</span></span>
 <span><span class="va">sigma_aero_deer_deer_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>C_nu <span class="op">=</span> <span class="va">C_nu_deer</span>,</span>
 <span>                                        t_contact <span class="op">=</span> <span class="va">t_contact_deer_deer_null</span> <span class="op">/</span> <span class="fl">60</span>,</span>
-<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span> <span class="co">#...and estimate probability of infection given that duration of proximity event.</span></span>
+<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span> </span>
 <span></span>
-<span><span class="va">t_contact_deer_human_ranch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Captive (minutes)"</span><span class="op">)</span> <span class="co">#Estimate duration of human-deer proximity event in ranch facility context...</span></span>
+<span><span class="co">#Estimate duration of human-deer proximity event in ranch facility context.</span></span>
+<span><span class="va">t_contact_deer_human_ranch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Captive (minutes)"</span><span class="op">)</span> </span>
 <span></span>
-<span><span class="va">omega_hc_ranch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Suburban (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span> <span class="co">#Human-to-deer proximity rate in ranch context, mimicking suburban proximitty rates (events per day).</span></span>
+<span><span class="co">#Human-to-deer proximity rate in ranch context, mimicking suburban proximitty rates (events per day).</span></span>
+<span><span class="va">omega_hc_ranch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Suburban (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span> </span>
 <span></span>
+<span><span class="co">#Infection probability given the duration of a human-deer proximity event.</span></span>
 <span><span class="va">sigma_aero_deer_human_ranch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>ER <span class="op">=</span> <span class="fl">0.53</span>, C_nu <span class="op">=</span> <span class="va">C_nu_human</span>, </span>
 <span>                                        t_contact <span class="op">=</span> <span class="va">t_contact_deer_human_ranch</span> <span class="op">/</span> <span class="fl">60</span>,</span>
-<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span><span class="co">#... and calculate infection probability given the duration of a human-deer proximity event.</span></span>
+<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">#Fenceline interactions occure</span></span>
-<span><span class="va">omega_cw</span> <span class="op">&lt;-</span> <span class="fl">0.00072</span> <span class="op">/</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Direct Contact Probability"</span><span class="op">)</span> <span class="co">#Deer-to-deer proximity rate along fenceline (events per day).</span></span>
+<span><span class="co">#Deer-to-deer proximity rate along fenceline (events per day).</span></span>
+<span><span class="va">omega_cw</span> <span class="op">&lt;-</span> <span class="fl">0.00072</span> <span class="op">/</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Direct Contact Probability"</span><span class="op">)</span> </span>
 <span></span>
-<span><span class="co">#... and on the wild side of the fence:</span></span>
+<span><span class="co">#On the wild side of the fence</span></span>
+<span></span>
+<span><span class="co">#Deer-to-deer proximity rate</span></span>
 <span><span class="va">omega_ww</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_contact_rate.html">calc_contact_rate</a></span><span class="op">(</span>nsamples <span class="op">=</span> <span class="va">nsamples</span>, type_contact <span class="op">=</span> <span class="va">habitat</span>, N_w <span class="op">=</span> <span class="va">nWild</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co">#Duration of human-deer proximity event</span></span>
 <span><span class="va">t_contact_deer_human_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Rural (minutes)"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co">#Human-to-deer proximity rate</span></span>
 <span><span class="va">omega_hw_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Rural (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span></span>
 <span></span>
+<span><span class="co">#Infection probability given the duration of a human-deer proximity event.</span></span>
 <span><span class="va">sigma_aero_deer_human_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>ER <span class="op">=</span> <span class="fl">0.53</span>, C_nu <span class="op">=</span> <span class="va">C_nu_human</span>, </span>
 <span>                                        t_contact <span class="op">=</span> <span class="va">t_contact_deer_human_rural</span> <span class="op">/</span> <span class="fl">60</span>,</span>
-<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">4</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">ranch_rural.params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity_null</span>,</span>
-<span>                            omega_ww <span class="op">=</span> <span class="va">omega_ww</span>, omega_cw <span class="op">=</span> <span class="va">omega_cw</span>, omega_cc <span class="op">=</span> <span class="va">omega_cc_ranch</span>,</span>
-<span>                            omega_hw <span class="op">=</span> <span class="va">omega_hw_rural</span>, omega_hc <span class="op">=</span> <span class="va">omega_hc_ranch</span>,</span>
-<span>                            sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_rural</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_ranch</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer_null</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">I_human_null</span>, <span class="va">nsamples</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">proj_ranch_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">ranch_rural.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Outdoor ranch and rural system"</span><span class="op">)</span></span></code></pre></div>
+<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">4</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="captive-deer-in-outdoor-ranch-facilties-connected-to-wild-suburban-deer">Captive deer in outdoor ranch facilties connected to wild, suburban
+<div class="section level4">
+<h4 id="captive-deer-in-outdoor-ranch-facilties-connected-to-wild-suburban-deer">Captive deer in outdoor ranch facilties connected to wild, suburban
 deer<a class="anchor" aria-label="anchor" href="#captive-deer-in-outdoor-ranch-facilties-connected-to-wild-suburban-deer"></a>
-</h3>
+</h4>
 <p>Below we modify what’s happening on the wild side of the fence to a
 suburban context, and can keep the captive side parameterized to
 describe the outdoor ranch facility scenario.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">t_contact_deer_human_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Suburban (minutes)"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Duration of human-deer proximity event</span></span>
+<span><span class="va">t_contact_deer_human_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Suburban (minutes)"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co">#Human-to-deer proximity rate</span></span>
 <span><span class="va">omega_hw_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Suburban (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span></span>
 <span></span>
+<span><span class="co">#Infection probability given the duration of a human-deer proximity event.</span></span>
 <span><span class="va">sigma_aero_deer_human_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>ER <span class="op">=</span> <span class="fl">0.53</span>, C_nu <span class="op">=</span> <span class="va">C_nu_human</span>, </span>
 <span>                                        t_contact <span class="op">=</span> <span class="va">t_contact_deer_human_suburban</span> <span class="op">/</span> <span class="fl">60</span>,</span>
-<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">4</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
+<span>                                        r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">4</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="captive-deer-in-intensive-facilties-connected-to-wild-rural-deer">Captive deer in intensive facilties connected to wild, rural
+deer<a class="anchor" aria-label="anchor" href="#captive-deer-in-intensive-facilties-connected-to-wild-rural-deer"></a>
+</h4>
+<p>Since we have defined parameter sets for both wild scenarios, below
+we modify what’s happening on the captive side of the fence.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Deer-to-deer proximity rate in ranch context, mimicking wild proximity rates with the influence of baiting (events per day).</span></span>
+<span><span class="va">omega_cc_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Deer Proximity Rate, Captive (per day)"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#Probability of infection given that duration of proximity event.</span></span>
+<span><span class="va">sigma_aero_deer_deer_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>C_nu <span class="op">=</span> <span class="va">C_nu_deer</span>,</span>
+<span>                                            t_contact <span class="op">=</span> <span class="va">t_contact_deer_deer_null</span> <span class="op">/</span> <span class="fl">60</span>,</span>
+<span>                                            r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#Human-to-deer proximity rate in intensive facilities.</span></span>
+<span><span class="va">omega_hc_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Suburban (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span></span>
+<span></span>
+<span><span class="co">#Duration of human-deer proximity event</span></span>
+<span><span class="va">t_contact_deer_human_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Captive (minutes)"</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co">#Infection probability given the duration of a human-deer proximity event.</span></span>
+<span><span class="va">sigma_aero_deer_human_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>ER <span class="op">=</span> <span class="fl">0.53</span>, C_nu <span class="op">=</span> <span class="va">C_nu_human</span>, </span>
+<span>                                            t_contact <span class="op">=</span> <span class="va">t_contact_deer_human_intensive</span> <span class="op">/</span> <span class="fl">60</span>,</span>
+<span>                                            r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="captive-deer-in-intensive-facilties-connected-to-wild-suburban-deer">Captive deer in intensive facilties connected to wild, suburban
+deer<a class="anchor" aria-label="anchor" href="#captive-deer-in-intensive-facilties-connected-to-wild-suburban-deer"></a>
+</h3>
+<p>The final combination of intensive captive facilities and wild,
+suburban scenarios does not require any additional parameters, so we can
+go ahead and derive parameters for each system.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="derive-parameters-used-the-sirs-ode-equation-set">3. Derive parameters used the SIRS ODE equation set<a class="anchor" aria-label="anchor" href="#derive-parameters-used-the-sirs-ode-equation-set"></a>
+</h2>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ranch_rural.params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity_null</span>,</span>
+<span>                            omega_ww <span class="op">=</span> <span class="va">omega_ww</span>, omega_cw <span class="op">=</span> <span class="va">omega_cw</span>, omega_cc <span class="op">=</span> <span class="va">omega_cc_ranch</span>,</span>
+<span>                            omega_hw <span class="op">=</span> <span class="va">omega_hw_rural</span>, omega_hc <span class="op">=</span> <span class="va">omega_hc_ranch</span>,</span>
+<span>                            sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_rural</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_ranch</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer_null</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">I_human_null</span>, <span class="va">nsamples</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ranch_suburban.params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity_null</span>,</span>
 <span>                            omega_ww <span class="op">=</span> <span class="va">omega_ww</span>, omega_cw <span class="op">=</span> <span class="va">omega_cw</span>, omega_cc <span class="op">=</span> <span class="va">omega_cc_ranch</span>,</span>
 <span>                            omega_hw <span class="op">=</span> <span class="va">omega_hw_suburban</span>, omega_hc <span class="op">=</span> <span class="va">omega_hc_ranch</span>,</span>
 <span>                            sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_suburban</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_ranch</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer_null</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">I_human_null</span>, <span class="va">nsamples</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">proj_ranch_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">ranch_suburban.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Outdoor ranch and suburban system"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="captive-deer-in-intensive-facilties-connected-to-wild-rural-deer">Captive deer in intensive facilties connected to wild, rural
-deer<a class="anchor" aria-label="anchor" href="#captive-deer-in-intensive-facilties-connected-to-wild-rural-deer"></a>
-</h3>
-<p>Since we have defined parameter sets for both wild scenarios, below
-we modify what’s happening on the captive side of the fence.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">omega_cc_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Deer Proximity Rate, Captive (per day)"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">sigma_aero_deer_deer_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>C_nu <span class="op">=</span> <span class="va">C_nu_deer</span>,</span>
-<span>                                            t_contact <span class="op">=</span> <span class="va">t_contact_deer_deer_null</span> <span class="op">/</span> <span class="fl">60</span>,</span>
-<span>                                            r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">omega_hc_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Suburban (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span></span>
-<span></span>
-<span><span class="va">t_contact_deer_human_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Captive (minutes)"</span><span class="op">)</span> </span>
-<span></span>
-<span><span class="va">sigma_aero_deer_human_intensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>ER <span class="op">=</span> <span class="fl">0.53</span>, C_nu <span class="op">=</span> <span class="va">C_nu_human</span>, </span>
-<span>                                            t_contact <span class="op">=</span> <span class="va">t_contact_deer_human_intensive</span> <span class="op">/</span> <span class="fl">60</span>,</span>
-<span>                                            r <span class="op">=</span> <span class="va">r_deer</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>, AER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">intensive_rural.params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity_null</span>,</span>
 <span>                            omega_ww <span class="op">=</span> <span class="va">omega_ww</span>, omega_cw <span class="op">=</span> <span class="va">omega_cw</span>, omega_cc <span class="op">=</span> <span class="va">omega_cc_intensive</span>,</span>
 <span>                            omega_hw <span class="op">=</span> <span class="va">omega_hw_rural</span>, omega_hc <span class="op">=</span> <span class="va">omega_hc_intensive</span>,</span>
 <span>                            sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer_intensive</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_rural</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_intensive</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer_null</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">I_human_null</span>, <span class="va">nsamples</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">proj_intensive_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">intensive_rural.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Intensive facility and rural system"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="captive-deer-in-intensive-facilties-connected-to-wild-suburban-deer">Captive deer in intensive facilties connected to wild, suburban
-deer<a class="anchor" aria-label="anchor" href="#captive-deer-in-intensive-facilties-connected-to-wild-suburban-deer"></a>
-</h3>
-<p>Finally, the final combination of intensive captive facilities and
-wild, suburban deer.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">intensive_suburban.params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity_null</span>,</span>
+<span><span class="va">intensive_suburban.params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity_null</span>,</span>
 <span>                            omega_ww <span class="op">=</span> <span class="va">omega_ww</span>, omega_cw <span class="op">=</span> <span class="va">omega_cw</span>, omega_cc <span class="op">=</span> <span class="va">omega_cc_intensive</span>,</span>
 <span>                            omega_hw <span class="op">=</span> <span class="va">omega_hw_suburban</span>, omega_hc <span class="op">=</span> <span class="va">omega_hc_intensive</span>,</span>
-<span>                            sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer_intensive</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_suburban</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_intensive</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer_null</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">I_human_null</span>, <span class="va">nsamples</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">proj_intensive_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">intensive_suburban.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Intensive facility and suburban system"</span><span class="op">)</span></span></code></pre></div>
-</div>
+<span>                            sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer_null</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer_intensive</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_suburban</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_intensive</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer_null</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">I_human_null</span>, <span class="va">nsamples</span><span class="op">)</span>, boost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="summarize-prevalence-cumulative-infections-and-persistence-for-each-system">Summarize prevalence, cumulative infections, and persistence for
-each system<a class="anchor" aria-label="anchor" href="#summarize-prevalence-cumulative-infections-and-persistence-for-each-system"></a>
+<h2 id="define-initial-sir-compartment-sizes">4. Define initial SIR compartment sizes<a class="anchor" aria-label="anchor" href="#define-initial-sir-compartment-sizes"></a>
 </h2>
+<p>Next, we define initial compartment sizes that will be used in all
+systems.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">inits.fall</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initial_compartments.html">initial_compartments</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">nsamples</span><span class="op">)</span> <span class="co">#Calculate initial distributions of animals across SIR compartments</span></span>
+<span><span class="va">inits.steady</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initial_compartments.html">initial_compartments</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">nsamples</span>, steady <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co">#Calculate initial distributions of animals across SIR compartments, excluding solving cumulative cases.</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="solve-the-sirs-ode-equations-and-calculate-daily-compartment-sizes">5. Solve the SIRS ODE equations and calculate daily compartment
+sizes<a class="anchor" aria-label="anchor" href="#solve-the-sirs-ode-equations-and-calculate-daily-compartment-sizes"></a>
+</h2>
+<p>We now define the duration of the simulation, and solve the SIRS ODE
+equations based on our parameter estimates.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">120</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">proj_ranch_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">ranch_rural.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Outdoor ranch and rural system"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">proj_ranch_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">ranch_suburban.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Outdoor ranch and suburban system"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">proj_intensive_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">intensive_rural.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Intensive facility and rural system"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">proj_intensive_suburban</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">inits.fall</span>, initial_compartments_steady <span class="op">=</span> <span class="va">inits.steady</span>, params <span class="op">=</span> <span class="va">intensive_suburban.params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Intensive facility and suburban system"</span><span class="op">)</span></span></code></pre></div>
+<ol start="6" style="list-style-type: decimal">
+<li>Calculate average daily prevalence, probability of persistence, and
+incidence proportion.</li>
+</ol>
 <p>As we did in <code>whitetailedSIRS::SIRS_analysis_by_context</code>,
 we compute the average prevalence, cumulative infections, and
 persistence for each system (captive:wild scenario combination).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">persist.threshold</span> <span class="op">&lt;-</span> <span class="fl">0.001</span> <span class="co">#Set prevalence threshold</span></span>
 <span></span>
 <span><span class="co">#Ranch and rural system</span></span>
@@ -366,22 +439,28 @@ persistence for each system (captive:wild scenario combination).</p>
 <span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">run_id</span><span class="op">)</span><span class="op">-&gt;</span> <span class="va">Prev_cumulative_persist_intensive_suburban_system_df</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="compare-outbreak-metrics-to-simulations-with-isolated-scenarios">Compare outbreak metrics to simulations with isolated scenarios<a class="anchor" aria-label="anchor" href="#compare-outbreak-metrics-to-simulations-with-isolated-scenarios"></a>
+<h2 id="compare-outbreak-metrics-to-simulations-with-isolated-scenarios">7. Compare outbreak metrics to simulations with isolated
+scenarios<a class="anchor" aria-label="anchor" href="#compare-outbreak-metrics-to-simulations-with-isolated-scenarios"></a>
 </h2>
 <p>Below, we take the results from
 <code>whitetailedSIRS::SIRS_analysis_by_contexts</code> and calculate
 differences in prevalence, cumulative infections, and persistence when
-fenceline interactions can occur.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#Calculate change in prevalence and persistence</span></span>
-<span><span class="co">#step 1: prep single context run_ids to correspond to systems</span></span>
+fence line interactions can occur. First, we read in the scenario
+results and format to match the combined systems.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Read in scenario results for comparison with system results</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="../reference/scenario_results.html">scenario_results</a></span></span>
+<span></span>
 <span><span class="va">df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">.</span>, run_id <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span><span class="va">Context</span> <span class="op">==</span> <span class="st">"Outdoor ranch"</span> <span class="op">~</span> <span class="va">run_id</span><span class="op">-</span><span class="fl">0</span>,</span>
-<span>      <span class="va">Context</span> <span class="op">==</span> <span class="st">"Intensive facility"</span> <span class="op">~</span> <span class="va">run_id</span><span class="op">-</span><span class="fl">200</span>,</span>
-<span>      <span class="va">Context</span> <span class="op">==</span> <span class="st">"Wild, rural"</span> <span class="op">~</span> <span class="va">run_id</span><span class="op">-</span><span class="fl">400</span>,</span>
-<span>      <span class="va">Context</span> <span class="op">==</span> <span class="st">"Wild, suburban"</span> <span class="op">~</span> <span class="va">run_id</span><span class="op">-</span><span class="fl">600</span>,<span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">df_to_match</span></span>
-<span></span>
-<span><span class="co">#Ranch, rural</span></span>
+<span>      <span class="va">Context</span> <span class="op">==</span> <span class="st">"Intensive facility"</span> <span class="op">~</span> <span class="va">run_id</span><span class="op">-</span><span class="op">(</span><span class="va">nsamples</span><span class="op">*</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>      <span class="va">Context</span> <span class="op">==</span> <span class="st">"Wild, rural"</span> <span class="op">~</span> <span class="va">run_id</span><span class="op">-</span><span class="op">(</span><span class="va">nsamples</span><span class="op">*</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>      <span class="va">Context</span> <span class="op">==</span> <span class="st">"Wild, suburban"</span> <span class="op">~</span> <span class="va">run_id</span><span class="op">-</span><span class="op">(</span><span class="va">nsamples</span><span class="op">*</span><span class="fl">3</span><span class="op">)</span>,<span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">df_to_match</span></span></code></pre></div>
+<p>Next, we calculate differences in prevalence, persistence, and
+incidence proportions between scenarios and broader systems. Below, we
+go system by system:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Ranch, rural</span></span>
 <span><span class="va">Prev_cumulative_persist_ranch_rural_system_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">df_to_match</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">df_to_match</span><span class="op">$</span><span class="va">Context</span><span class="op">==</span> <span class="st">"Outdoor ranch"</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"run_id"</span>,<span class="st">"Prevalence"</span>, <span class="st">"Persist"</span>, <span class="st">"Cumulative_infections"</span><span class="op">)</span><span class="op">]</span>, by <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">.</span>, <span class="st">"System_wild_prevalence"</span> <span class="op">=</span> <span class="st">"Wild"</span>, <span class="st">"System_captive_prevalence"</span> <span class="op">=</span> <span class="st">"Captive"</span>, <span class="st">"System_wild_cumulative"</span> <span class="op">=</span> <span class="st">"Cumulative_wild_infections"</span>, <span class="st">"System_captive_cumulative"</span> <span class="op">=</span> <span class="st">"Cumulative_captive_infections"</span>,<span class="st">"System_wild_persistence"</span> <span class="op">=</span> <span class="st">"Persist_wild"</span>, <span class="st">"System_captive_persistence"</span> <span class="op">=</span> <span class="st">"Persist_captive"</span>, <span class="st">"Context_captive_prevalence"</span> <span class="op">=</span> <span class="st">"Prevalence"</span>, <span class="st">"Context_captive_persistence"</span> <span class="op">=</span> <span class="st">"Persist"</span>, <span class="st">"Context_captive_cumulative"</span> <span class="op">=</span> <span class="st">"Cumulative_infections"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -449,17 +528,17 @@ fenceline interactions can occur.</p>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">Context</span>, <span class="va">Change_Prev_Wild</span>, <span class="va">Change_Prev_Captive</span>, <span class="va">Proportional_Change_Prev_Wild</span>, <span class="va">Proportional_Change_Prev_Captive</span>, <span class="va">Change_Cumulative_Wild</span>, <span class="va">Change_Cumulative_Captive</span>, <span class="va">Change_Persist_Wild</span>, <span class="va">Change_Persist_Captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">.</span>, System <span class="op">=</span> <span class="va">Context</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">intensive_suburban_results</span></span></code></pre></div>
 <p>We can then combine and summarize the differences in outbreak
-metrics. The resulting table is presented in <em>Rosenblatt et al. In
-Prep</em> as Table 2.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+metrics. The resulting table follows the format of table 2 in
+<em>Rosenblatt et al. In Prep</em>.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sirs_results_systems</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">ranch_suburban_results</span>,<span class="va">intensive_suburban_results</span>,<span class="va">ranch_rural_results</span>,<span class="va">intensive_rural_results</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sirs_results_systems</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">System</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span><span class="va">.</span>, Wild_Prevalence_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Change_Prev_Wild</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Prev_Wild</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Prev_Wild</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>, Captive_Prevalence_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Change_Prev_Captive</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Prev_Captive</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Prev_Captive</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>, </span>
 <span>             Wild_Prevalence_Proportional_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Proportional_Change_Prev_Wild</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Proportional_Change_Prev_Wild</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Proportional_Change_Prev_Wild</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>, Proportional_Captive_Prevalence_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Proportional_Change_Prev_Captive</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Proportional_Change_Prev_Captive</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Proportional_Change_Prev_Captive</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>,</span>
-<span>             Wild_Cumulative_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Change_Cumulative_Wild</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Wild</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Wild</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>, Captive_Cumulative_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Change_Cumulative_Captive</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Captive</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Captive</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>, </span>
-<span>             Wild_Persist_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">binom.confint</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Change_Persist_Wild</span><span class="op">)</span>,<span class="va">nsamples</span>,methods <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span><span class="op">$</span><span class="va">mean</span>,<span class="fl">2</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">binom.confint</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Change_Persist_Wild</span><span class="op">)</span>,<span class="va">nsamples</span>,methods <span class="op">=</span> <span class="st">"exact"</span>, conf.level <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span><span class="op">$</span><span class="va">lower</span>,<span class="fl">2</span><span class="op">)</span>, <span class="st">"-"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">binom.confint</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Change_Persist_Wild</span><span class="op">)</span>,<span class="va">nsamples</span>,methods <span class="op">=</span> <span class="st">"exact"</span>, conf.level <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span><span class="op">$</span><span class="va">upper</span>,<span class="fl">2</span><span class="op">)</span>, <span class="st">")"</span><span class="op">)</span>,</span>
+<span>             Wild_Incidence_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Change_Cumulative_Wild</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Wild</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Wild</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>, Captive_Incidence_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Change_Cumulative_Captive</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Captive</span>,probs <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">Change_Cumulative_Captive</span>,probs <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">")"</span><span class="op">)</span>, </span>
+<span>             Wild_Persist_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/binom/man/binom.confint.html" class="external-link">binom.confint</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Change_Persist_Wild</span><span class="op">)</span>,<span class="va">nsamples</span>,methods <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span><span class="op">$</span><span class="va">mean</span>,<span class="fl">2</span><span class="op">)</span>, <span class="st">" ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/binom/man/binom.confint.html" class="external-link">binom.confint</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Change_Persist_Wild</span><span class="op">)</span>,<span class="va">nsamples</span>,methods <span class="op">=</span> <span class="st">"exact"</span>, conf.level <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span><span class="op">$</span><span class="va">lower</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">"-"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/binom/man/binom.confint.html" class="external-link">binom.confint</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Change_Persist_Wild</span><span class="op">)</span>,<span class="va">nsamples</span>,methods <span class="op">=</span> <span class="st">"exact"</span>, conf.level <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span><span class="op">$</span><span class="va">upper</span>,<span class="fl">4</span><span class="op">)</span>, <span class="st">")"</span><span class="op">)</span>,</span>
 <span>             Captive_Persist_Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Change_Persist_Captive</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span><span class="va">fence_effect</span></span>
 <span></span>
 <span><span class="va">fence_effect</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -483,10 +562,10 @@ Wild_Prevalence_Proportional_Change
 Proportional_Captive_Prevalence_Change
 </th>
 <th style="text-align:left;">
-Wild_Cumulative_Change
+Wild_Incidence_Change
 </th>
 <th style="text-align:left;">
-Captive_Cumulative_Change
+Captive_Incidence_Change
 </th>
 <th style="text-align:left;">
 Wild_Persist_Change
@@ -501,25 +580,25 @@ Captive_Persist_Change
 Outdoor ranch and suburban system
 </td>
 <td style="text-align:left;">
-0.0026 (0-0.1431)
+0.0022 (0-0.1499)
 </td>
 <td style="text-align:left;">
-0 (0-0.0012)
+0 (0-8e-04)
 </td>
 <td style="text-align:left;">
-0.7703 (0.0153-77.1785)
+0.4618 (0.0143-103.8241)
 </td>
 <td style="text-align:left;">
-0.0026 (3e-04-0.0296)
+0.0028 (3e-04-0.0294)
 </td>
 <td style="text-align:left;">
-0.0547 (0-2.6482)
+0.0441 (0-3.2064)
 </td>
 <td style="text-align:left;">
-6e-04 (0-0.0252)
+5e-04 (0-0.0163)
 </td>
 <td style="text-align:left;">
-0 (0-0.02)
+0 (1e-04-0.0039)
 </td>
 <td style="text-align:right;">
 0
@@ -530,25 +609,25 @@ Outdoor ranch and suburban system
 Intensive facility and suburban system
 </td>
 <td style="text-align:left;">
-0.0088 (0-0.5002)
+0.0107 (0-0.5219)
 </td>
 <td style="text-align:left;">
 0 (0-1e-04)
 </td>
 <td style="text-align:left;">
-13.5837 (0.0961-371.7967)
+11.2484 (0.1707-539.1921)
 </td>
 <td style="text-align:left;">
-1e-04 (0-0.0032)
+1e-04 (0-0.0025)
 </td>
 <td style="text-align:left;">
-0.1883 (1e-04-10.1727)
+0.2065 (2e-04-10.6701)
 </td>
 <td style="text-align:left;">
-0 (0-0.0019)
+0 (0-0.0017)
 </td>
 <td style="text-align:left;">
-0 (0-0.02)
+0.01 (0.0032-0.0105)
 </td>
 <td style="text-align:right;">
 0
@@ -559,25 +638,25 @@ Intensive facility and suburban system
 Outdoor ranch and rural system
 </td>
 <td style="text-align:left;">
-0.0043 (0-0.3796)
+0.0037 (0-0.5565)
 </td>
 <td style="text-align:left;">
-0 (0-0.0013)
+0 (0-8e-04)
 </td>
 <td style="text-align:left;">
-4.8687 (0.1736-5407.0222)
+4.4704 (0.0849-3094.426)
 </td>
 <td style="text-align:left;">
-7e-04 (0-0.0258)
+9e-04 (0-0.019)
 </td>
 <td style="text-align:left;">
-0.0857 (0-7.6283)
+0.0813 (0-10.954)
 </td>
 <td style="text-align:left;">
-1e-04 (0-0.0231)
+1e-04 (0-0.0163)
 </td>
 <td style="text-align:left;">
-0 (0-0.01)
+0.01 (0.0103-0.0212)
 </td>
 <td style="text-align:right;">
 0
@@ -588,25 +667,25 @@ Outdoor ranch and rural system
 Intensive facility and rural system
 </td>
 <td style="text-align:left;">
-0.0117 (0-0.7974)
+0.0141 (0-1.0539)
 </td>
 <td style="text-align:left;">
 0 (0-1e-04)
 </td>
 <td style="text-align:left;">
-112.7485 (0.7248-17306.6739)
-</td>
-<td style="text-align:left;">
-0 (0-9e-04)
-</td>
-<td style="text-align:left;">
-0.2407 (1e-04-16.1685)
+122.2533 (0.7449-19925.6897)
 </td>
 <td style="text-align:left;">
 0 (0-0.0013)
 </td>
 <td style="text-align:left;">
-0 (0-0.01)
+0.2784 (2e-04-20.4194)
+</td>
+<td style="text-align:left;">
+0 (0-0.0014)
+</td>
+<td style="text-align:left;">
+0.02 (0.0137-0.0258)
 </td>
 <td style="text-align:right;">
 0
@@ -614,6 +693,30 @@ Intensive facility and rural system
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<p>This vignette detailed the simulations of connected wild and captive
+scenarios, refered to as systems. We compared outbreaks in these systems
+to outbreaks in discrete scenarios. By doing so, we better understand
+the role of fence line interactions between wild and captive deer
+populations in the spread and establishment of SARS-CoV-2 in
+white-tailed deer. The next vignette runs a similar process, but runs
+through multiple parameter sets that mimic a <a href="Management_Alternative_Systems.html">range of management
+alternatives that could potentially mitigate the introduction, spread,
+and establishment of SARS-CoV-2 in deer</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="literature-cited">Literature Cited<a class="anchor" aria-label="anchor" href="#literature-cited"></a>
+</h2>
+<ul>
+<li>Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K.
+Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In
+Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer
+(Odocoileus virginianus) reveals conditions for introduction and
+widespread transmission.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -623,7 +726,7 @@ Intensive facility and rural system
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
+<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce, Jonathan Cook, Graziella DiRenzo, Evan Grant, Michael Runge, Brittany Mosher.</p>
 </div>
 
 <div class="pkgdown-footer-right">

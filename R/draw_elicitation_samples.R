@@ -13,16 +13,30 @@
 #'   otherwise specified in the `return_df` argument.
 #' @export
 #'
+#' @importFrom stats rlnorm
+#' @importFrom purrr pmap
+#' @importFrom greybox rlogitnorm
+#' @importFrom tidyr unnest
+#' @importFrom dplyr mutate
+#' @importFrom magrittr %>%
+#'
 #' @examples
-#' draw_elicitation_samples() # this will return the default elicitation_data with an additional column for a random sample of 1 for each parameter.
-#' draw_elicitation_samples(return_df = TRUE) # will return the same as above but expanded as a dataframe instead of a tibble with a list column
-draw_elicitation_samples <- function(elicitation_data = NULL, nsamples = NULL, seed = NULL, return_df = FALSE){
+#' \dontrun{
+#' draw_elicitation_samples() # this will return the default elicitation_data
+#' with an additional column for a random sample of 1 for each parameter.
+#' draw_elicitation_samples(return_df = TRUE) # will return the same as above
+#' but expanded as a dataframe instead of a tibble with a list column}
+#'
+draw_elicitation_samples <- function(elicitation_data = NULL, nsamples = NULL,
+                                     seed = NULL, return_df = FALSE){
 
    if(!is.null(seed)) set.seed(seed)
    if(is.null(nsamples)) nsamples = 1
 
    # we use the default elicitation data unless otherwise specified
    if(is.null(elicitation_data)) elicitation_data <- whitetailedSIRS::elicitation_data
+   # introduce derived object names
+   family <- mu <- sd <- my_sample <- NULL
    elicitation_data |>
       # create a random sample using the parameters depending on the specified distribution
       dplyr::mutate(my_sample = ifelse(family == "log-normal",

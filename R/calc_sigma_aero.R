@@ -1,13 +1,15 @@
 #' @title Calculate probability of infection via aerosol \eqn{\sigma^{AERO}}
 #'
-#' @description `calc_sigma_aero` will calculate one value for probability of infection using
+#' @description `calc_sigma_aero` will calculate one value for probability of
+#' infection using
 #' defaults if no arguments are provided. Defaults are described in the
 #' sir_model_description document and are sourced from the literature or expert
 #' elicitation.
 #'
 #' @param AER air exchange rate \eqn{hr^{-1}}. Default is set to \eqn{4 hr^{-1}}
 #' @param s settling rate; \eqn{hr^{-1}} Default is set to \eqn{0.24 hr^{-1}}
-#' @param lambda inactivation rates \eqn{hr^{-1}}. Default is set to \eqn{0.63 hr^{-1}}
+#' @param lambda inactivation rates \eqn{hr^{-1}}. Default is set to \eqn{0.63
+#' hr^{-1}}
 #' @param C_nu viral load in sputum; RNA copies/ml. Default samples from expert
 #'   elicited distribution of parameter 'Viral Load'
 #' @param C_i conversion factor for quanta/RNA copy. Default set to 0.0014
@@ -15,7 +17,8 @@
 #' @param ER exhalation rate; \eqn{m^3/hr}. Default IR = ER
 #' @param V_d exhaled droplet volume concentration; ml exhaled droplets/
 #'   \eqn{m^3}. Default to 0.009
-#' @param V_air fixed volume; \eqn{m^3}. Default to \eqn{7.07m^3}, corresponding to a half-sphere with a 1.5m radius
+#' @param V_air fixed volume; \eqn{m^3}. Default to \eqn{7.07m^3}, corresponding
+#' to a half-sphere with a 1.5m radius
 #' @param t_contact time of contact with contaminated airspace (hr).
 #' @param r species-specific probability of infection from 1 quantum. Default is
 #'   for r_deer with expert elicited values.
@@ -42,9 +45,13 @@
 #' @return a numeric vector of length equal to nsamples for values of sigma_aero
 #' @export
 #'
+#' @importFrom stats rlnorm
+#'
 #' @examples
+#' \dontrun{
 #' calc_sigma_aero() # will return a single value using defaults
-#' calc_sigma_aero(nsamples = 10)
+#' calc_sigma_aero(nsamples = 10)}
+#'
 calc_sigma_aero <- function(AER = NULL,
                          s = NULL,
                          lambda = NULL,

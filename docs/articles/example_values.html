@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">whitetailedSIRS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,13 +41,14 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/Introduction.html">Introduction</a>
+    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
+    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
+    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
+    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an initial spillover</a>
     <a class="dropdown-item" href="../articles/Connected_Systems.html">SARS-CoV-2 introduction and spread in connected systems</a>
     <a class="dropdown-item" href="../articles/Management_Alternatives_Systems.html">Evaluation of management alternatives across systems</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts.html">SARS-CoV-2 outbreak characteristics across wild and captive settings</a>
-    <a class="dropdown-item" href="../articles/SIRS_analysis_by_contexts_initialspill.html">SARS-CoV-2 outbreak characteristics across wild and captive settings, with an intial spillover</a>
-    <a class="dropdown-item" href="../articles/Visualize_by_context.html">Summarize introduction, spread, prevalence, and persistence</a>
-    <a class="dropdown-item" href="../articles/example_values.html">Introduction to a simple projection using whitetailedSIRS</a>
-    <a class="dropdown-item" href="../articles/sir_model_description.html">Epidemiological model overview for SARS-CoV-2 in white-tailed deer</a>
   </div>
 </li>
       </ul>
@@ -85,27 +86,201 @@ Rudolph, Elias Rosenblatt</h4>
 
     
     
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>In this vignette, we explore how to use the functions in the
+whitetailedSIRS package to project SARS-CoV-2 outbreaks in white tailed
+deer. We will use data from a variety of sorces to parameterize the SIRS
+ODE equations explored in the <a href="sir_model_description.html">sir_model_description vignette</a>. We
+will also demonstrate how to display outputs for interpretation.</p>
+<p>The general approach with simulating SARS-CoV-2 outbreaks here is
+to:</p>
+<ol style="list-style-type: decimal">
+<li><p>Set the number of simulations</p></li>
+<li><p>Draw a random sample of parameters used to estimate infection
+probabilities, contact rates, and other important parameters.</p></li>
+<li><p>Derive parameters used the SIRS ODE equation set</p></li>
+<li><p>Define initial SIR compartment sizes</p></li>
+<li><p>Solve the SIRS ODE equations and calculate daily compartment
+sizes</p></li>
+<li><p>Calculate risk of introduction and magnitude of spread given
+parameters</p></li>
+<li><p>Calculate average daily prevalence, probability of persistence,
+and incidence proportion.</p></li>
+</ol>
+</div>
+<div class="section level2">
+<h2 id="set-number-of-simulations-to-run-and-context-of-simulation">1. Set number of simulations to run and context of simulation<a class="anchor" aria-label="anchor" href="#set-number-of-simulations-to-run-and-context-of-simulation"></a>
+</h2>
+<p><strong>Scenario</strong>: For this example, we will have fully
+susceptible wild and captive deer populations that are able to interact
+along a single fence line. Wild deer are in a rural setting with low
+human density. Captive deer are in a intensive captive facility, such as
+a facility focused on captive breeding. Both populations are interacting
+humans in their environments, with different rates and duration of
+proximity. SARS-CoV-2 prevalence in humans is a constant 5% of the
+population.</p>
+<p>We set a seed so the results here are repeatable, and set the number
+of samples to the desired amount (nsamples). For this example, we will
+run 50 simulations.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/disease-decision-analysis-and-research/whitetailedSIRS" class="external-link">whitetailedSIRS</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://desolve.r-forge.r-project.org/" class="external-link">deSolve</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">rootSolve</span><span class="op">)</span></span></code></pre></div>
-<p>As a first example, we will use the defaults for all the values, and
-run one projection of the SIRS model. These defaults are produced as
-random draws from the expert elicitation data.</p>
-<p>First, load the data, and generate a random sample for each of the
-parameters using the <code>draw_elicitation_samples.R</code> function
-from the whitetailedSIRS package:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">23</span><span class="op">)</span></span>
-<span><span class="va">nsamples</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
-<span></span>
-<span><span class="va">EE_data</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="../reference/elicitation_data.html">elicitation_data</a></span></span>
+<span><span class="va">nsamples</span> <span class="op">&lt;-</span> <span class="fl">50</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="sample-parameters-for-simulations">2. Sample parameters for simulations<a class="anchor" aria-label="anchor" href="#sample-parameters-for-simulations"></a>
+</h2>
+<p>Next, we need to draw random samples of various parameters that will
+lead the derivation of transmission risk parameters used in the SIRS ODE
+equations. Parameters available in the literature can be used, as well
+as those estimated using expert elicitation.</p>
+<p>Several parameters necessary for deriving various transmission risks
+may not exist in the literature. To overcome the lack of empirical
+estimates, this package draws certain parameter estimates from an
+expert-elicitation process, detailed in Rosenblatt et al. In Prep. In
+the table below, elicited parameters , mean (mu) and standard deviations
+(sd), and error distributions (family) are specified. The code below and
+in following vignettes will draw values from these distributions for
+outbreak simulations.</p>
+<p>For our purposes, we will use the following parameters from the table
+above:</p>
+<ul>
+<li>Temporary immunity: Days until aquired immunity to SARS-CoV-2 is
+lost</li>
+<li>Viral load: Concentration of SARS-CoV-2 in deer sputum (RNA
+copies/ml; relative to human sputum concentration 5.6 log10)</li>
+<li>Dose-response: Quanta SARS-CoV-2 dose-response in deer (1/quanta
+required for ID63)</li>
+<li>Deer proximity duration: Duration of proximity event between deer
+(all proximity types; minutes)</li>
+<li>Direct contact probability: Probability of deer making direct
+contact</li>
+<li>Deer-human proximity rate: Human-deer proximity rate in wild, rural,
+wild suburban, and captive scenarios(events/120 days)</li>
+<li>Deer-human proximity duration: Human-deer proximity duration in
+wild, rural, wild suburban, and captive scenarios(minutes)</li>
+<li>Deer-deer proximity rate, captive: Deer-deer proximity rate in
+captive facilities (events/day)</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="62%">
+<col width="12%">
+<col width="11%">
+<col width="14%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">parameter</th>
+<th align="right">mu</th>
+<th align="right">sd</th>
+<th align="left">family</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Temporary Immunity</td>
+<td align="right">4.7242475</td>
+<td align="right">0.6263917</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="even">
+<td align="left">Wastewater Infections</td>
+<td align="right">-1.3514319</td>
+<td align="right">1.4859109</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="odd">
+<td align="left">Fomite Infections</td>
+<td align="right">-0.0414216</td>
+<td align="right">1.0317979</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="even">
+<td align="left">Viral Load</td>
+<td align="right">0.2164608</td>
+<td align="right">0.3441431</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="odd">
+<td align="left">Dose-Response</td>
+<td align="right">0.2774736</td>
+<td align="right">0.2715960</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="even">
+<td align="left">Deer Proximity Duration (minutes)</td>
+<td align="right">1.5525548</td>
+<td align="right">1.2720245</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="odd">
+<td align="left">Direct Contact Probability</td>
+<td align="right">-1.4569674</td>
+<td align="right">0.7076163</td>
+<td align="left">logit-normal</td>
+</tr>
+<tr class="even">
+<td align="left">Proximity rate with baiting (17 events without
+baiting)</td>
+<td align="right">3.4725955</td>
+<td align="right">0.2257397</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="odd">
+<td align="left">Deer-Human Proximity Rate, Rural (per 120 days)</td>
+<td align="right">-1.5894802</td>
+<td align="right">1.6995012</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="even">
+<td align="left">Deer-Human Proximity Duration, Rural (minutes)</td>
+<td align="right">-0.3551466</td>
+<td align="right">0.9790162</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="odd">
+<td align="left">Deer-Human Proximity Rate, Suburban (per 120 days)</td>
+<td align="right">0.5726988</td>
+<td align="right">0.9511352</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="even">
+<td align="left">Deer-Human Proximity Duration, Suburban (minutes)</td>
+<td align="right">0.4323951</td>
+<td align="right">0.9286978</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="odd">
+<td align="left">Deer-Human Proximity Rate, Captive (per 120 days)</td>
+<td align="right">2.5212570</td>
+<td align="right">1.1318730</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="even">
+<td align="left">Deer-Human Proximity Duration, Captive (minutes)</td>
+<td align="right">1.7875291</td>
+<td align="right">1.1521344</td>
+<td align="left">log-normal</td>
+</tr>
+<tr class="odd">
+<td align="left">Deer-Deer Proximity Rate, Captive (per day)</td>
+<td align="right">3.4703201</td>
+<td align="right">0.9131761</td>
+<td align="left">log-normal</td>
+</tr>
+</tbody>
+</table>
+<p>Using these elicited estimates, we draw a random sample for all
+parameters listed above using the
+<code>draw_elicitation_samples.R</code> function from the
+whitetailedSIRS package:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">EE_data</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="../reference/elicitation_data.html">elicitation_data</a></span></span>
 <span><span class="co"># bind samples to the elicitation df</span></span>
 <span></span>
 <span><span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/draw_elicitation_samples.html">draw_elicitation_samples</a></span><span class="op">(</span>elicitation_data <span class="op">=</span> <span class="va">EE_data</span>, nsamples <span class="op">=</span> <span class="va">nsamples</span>,seed <span class="op">=</span> <span class="fl">23</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">elicitation_data</span></span></code></pre></div>
-<p>With the previous code we generated a sample of 50 values for each of
-the parameters elicited, using the appropriate distribution. We will use
+<p>With the this code we generated a sample of 50 values for each of the
+parameters elicited, using the appropriate distribution. We will use
 some of those parameters now to calculate our transmission terms and
 other parameters that go into the SIRS model. The
 <code>elicitation_data</code> object is a tibble, and the sample of
@@ -125,70 +300,140 @@ tibble for the <code>my_sample</code> column:</p>
 vectors in the <code>my_sample</code> column, so these can be assigned
 to the different parameters. This function
 <code>get_EE_param_vals.R</code> is available for use from the
-whitetailedSIRS package.</p>
+whitetailedSIRS package. Below, we show random draws for the duration of
+temporary immunity following SARS-CoV-2 infection in deer:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">get_EE_param_vals</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">my_param</span><span class="op">)</span><span class="op">{</span></span>
-<span>   <span class="va">elicitation_data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">parameter</span> <span class="op">==</span> <span class="va">my_param</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">my_sample</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">my_sample</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Temporary Immunity"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] 127.13812  85.79547 199.59902 346.40581 210.29529 225.42113  94.63776</span></span>
+<span><span class="co">#&gt;  [8] 213.29355 115.89782 302.26460 129.15091  58.48126  94.01133 152.30523</span></span>
+<span><span class="co">#&gt; [15]  52.57913 136.62800  81.32163  85.38631  77.38886 253.44842 190.09608</span></span>
+<span><span class="co">#&gt; [22]  79.01995 184.58440  54.26715  80.78136 112.57102  81.71051 245.37052</span></span>
+<span><span class="co">#&gt; [29]  74.47503 125.03823  79.65655 119.79087  54.92593  51.48566  99.25044</span></span>
+<span><span class="co">#&gt; [36] 125.89298 255.53182  48.57184 193.18007 130.33635 216.39570 258.98849</span></span>
+<span><span class="co">#&gt; [43] 203.72840  60.75563  52.59592  40.59831 119.35158 111.09585 155.38187</span></span>
+<span><span class="co">#&gt; [50]  97.55897</span></span></code></pre></div>
 <p>We set up all the parameters that were generated from the expert
-elicitation distributions:</p>
+elicitation distributions. Any values used for conversions are discussed
+and referenced in Rosenblatt et al. In Prep:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># The immunity parameter that goes into the SIR is the reciprocal to what was elicited</span></span>
-<span><span class="va">alpha_immunity</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">'Temporary Immunity'</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Immunity loss rate, the inverse of the duration of temporary immunity.</span></span>
+<span><span class="va">alpha_immunity</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">/</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Temporary Immunity"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Calculate contact rate between wild deer using the contact_rate fx using defaults (see ?calc_contact_rate for details):</span></span>
+<span><span class="co"># Proximity rate between wild deer using the contact_rate fx using defaults (see ?calc_contact_rate for details):</span></span>
 <span><span class="va">omega_ww</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_contact_rate.html">calc_contact_rate</a></span><span class="op">(</span>nsamples <span class="op">=</span> <span class="va">nsamples</span>, type_contact <span class="op">=</span> <span class="st">"low"</span><span class="op">)</span></span>
-<span><span class="co"># The rest of the contact rates were elicited and then modified</span></span>
-<span><span class="va">omega_cw</span> <span class="op">&lt;-</span> <span class="fl">0.00072</span> <span class="op">/</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Direct Contact Probability"</span><span class="op">)</span></span>
-<span><span class="va">omega_cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Deer-Deer Proximity Rate, Captive (per day)"</span><span class="op">)</span></span>
-<span><span class="va">omega_hw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Deer-Human Proximity Rate, Rural (per 120 days)"</span><span class="op">)</span> <span class="op">/</span> <span class="fl">120</span></span>
-<span><span class="va">omega_hc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Deer-Human Proximity Rate, Captive (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span></span>
 <span></span>
-<span><span class="co"># time or duration of these contacts was also expert elicited:</span></span>
-<span><span class="va">t_contact_deer_deer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Deer Proximity Duration (minutes)"</span><span class="op">)</span></span>
-<span><span class="va">t_contact_deer_human_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Deer-Human Proximity Duration, Rural (minutes)"</span><span class="op">)</span></span>
-<span><span class="va">t_contact_deer_human_capt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Deer-Human Proximity Duration, Captive (minutes)"</span><span class="op">)</span></span>
+<span><span class="co"># Proximity rate across fence lines (numerator drawn from literature)</span></span>
+<span><span class="va">omega_cw</span> <span class="op">&lt;-</span> <span class="fl">0.00072</span> <span class="op">/</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Direct Contact Probability"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Viral load proportional to human value:</span></span>
-<span><span class="va">C_nu</span> <span class="op">&lt;-</span> <span class="fl">10</span><span class="op">^</span><span class="fl">5.6</span> <span class="op">*</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Viral Load"</span><span class="op">)</span></span>
+<span><span class="co"># Proximity rate between captive deer</span></span>
+<span><span class="va">omega_cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Deer Proximity Rate, Captive (per day)"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Dose response</span></span>
-<span><span class="va">r_deer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Dose-Response"</span><span class="op">)</span></span>
+<span><span class="co"># Proximity rate between humans and deer in rural, wild settings</span></span>
+<span><span class="va">omega_hw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Rural (per 120 days)"</span><span class="op">)</span> <span class="op">/</span> <span class="fl">120</span></span>
+<span></span>
+<span><span class="co"># Proximity rate between humans and deer in captive settings</span></span>
+<span><span class="va">omega_hc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Rate, Captive (per 120 days)"</span><span class="op">)</span> <span class="op">/</span><span class="fl">120</span></span>
+<span></span>
+<span><span class="co"># Duration of proximity between deer in all scenarios</span></span>
+<span><span class="va">t_contact_deer_deer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>,my_param <span class="op">=</span> <span class="st">"Deer Proximity Duration (minutes)"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Duration of proximity between humans and deer in rural, wild settings</span></span>
+<span><span class="va">t_contact_deer_human_rural</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Rural (minutes)"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Duration of proximity between humans and deer in captive settings</span></span>
+<span><span class="va">t_contact_deer_human_capt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>,my_param <span class="op">=</span> <span class="st">"Deer-Human Proximity Duration, Captive (minutes)"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Viral load proportional to human value (multiplier drawn from the literature):</span></span>
+<span><span class="va">C_nu</span> <span class="op">&lt;-</span> <span class="fl">10</span><span class="op">^</span><span class="fl">5.6</span> <span class="op">*</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Viral Load"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Deer dose-response response for SARS-CoV-2 in aerosols</span></span>
+<span><span class="va">r_deer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Dose-Response"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Direct contact probability (same for all deer):</span></span>
-<span><span class="va">epsilon_dc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span><span class="st">"Direct Contact Probability"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">epsilon_dc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_EE_param_vals.html">get_EE_param_vals</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">elicitation_data</span>, my_param <span class="op">=</span> <span class="st">"Direct Contact Probability"</span><span class="op">)</span></span></code></pre></div>
 <p>Using the sets of parameters from expert elicitation we calculate
 probability of infection via aerosol and direct contact. These
-calculations are also informed by parameters from the literature, and
-details on this can be found in the <code>sir_model_description</code>
-document/article. The calc_sigma_aero and calc_sigma_dc functions listed
-below are included in the <code>whitetailedSIRS</code> package.</p>
+calculations are also informed by parameters from the literature (see
+Rosenblatt et al. In Prep.), and formulations can be found in the
+<code>sir_model_description</code> article. The calc_sigma_aero and
+calc_sigma_dc functions listed below are included in the
+<code>whitetailedSIRS</code> package, and estimate probabilties of
+infection from SARS-CoV-2 transmitted by aerosols (aero) and by fluid
+exchanged on direct contact (DC).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># aerosol transmission between deer, using deer exhalation/inhalation rates (default)</span></span>
 <span><span class="va">sigma_aero_deer_deer</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>C_nu <span class="op">=</span> <span class="va">C_nu</span>,</span>
 <span>                                  t_contact <span class="op">=</span> <span class="va">t_contact_deer_deer</span> <span class="op">/</span> <span class="fl">60</span>,</span>
 <span>                                  r <span class="op">=</span> <span class="va">r_deer</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># aerosol transmission from humans to deer, modifying exhalation rates to that of a human</span></span>
+<span><span class="co"># aerosol transmission from humans to deer in a rural, wild scenario, modifying exhalation rates to that of a human</span></span>
 <span><span class="va">sigma_aero_deer_human_rural</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>ER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.53</span>, <span class="va">nsamples</span><span class="op">)</span>, C_nu <span class="op">=</span> <span class="va">C_nu</span>, t_contact <span class="op">=</span> <span class="va">t_contact_deer_human_rural</span><span class="op">/</span><span class="fl">60</span>, r <span class="op">=</span> <span class="va">r_deer</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#aerosol transmission from humans to deer in a captive scenario, modifying exhalation rates to that of a human</span></span>
 <span><span class="va">sigma_aero_deer_human_capt</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_sigma_aero.html">calc_sigma_aero</a></span><span class="op">(</span>ER <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.53</span>, <span class="va">nsamples</span><span class="op">)</span>, C_nu <span class="op">=</span> <span class="va">C_nu</span>, t_contact <span class="op">=</span> <span class="va">t_contact_deer_human_capt</span><span class="op">/</span><span class="fl">60</span>, r <span class="op">=</span> <span class="va">r_deer</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># direct contact fluid transmission between deer</span></span>
-<span><span class="va">sigma_dc_deer_deer</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_sigma_dc.html">calc_sigma_dc</a></span><span class="op">(</span>C_nu <span class="op">=</span> <span class="va">C_nu</span><span class="op">)</span></span>
+<span><span class="va">sigma_dc_deer_deer</span> <span class="op">&lt;-</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="fu"><a href="../reference/calc_sigma_dc.html">calc_sigma_dc</a></span><span class="op">(</span>C_nu <span class="op">=</span> <span class="va">C_nu</span><span class="op">)</span></span></code></pre></div>
+<p>Additionally, we include important parameters as constant values,
+including how long it takes for an individual deer to recover from an
+infection (gamma_recov) and human prevalence (I_human). We also need to
+define the role of vaccine boosters, and for now we set booster rates to
+zero. Implementation of vaccine boosters are a potential action that
+could be taken to influence outbreak severity. This and other
+interventions are discussed further in the
+Management_Alternatives_Systems vignette.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Inverse of a 6 day recovery period from infection</span></span>
+<span><span class="va">gamma_recov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span>, <span class="va">nsamples</span><span class="op">)</span> </span>
 <span></span>
-<span><span class="co"># Some additional parameters:</span></span>
-<span><span class="va">gamma_recov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span>, <span class="va">nsamples</span><span class="op">)</span> <span class="co">#Inverse of 6 day recovery period from infection</span></span>
-<span><span class="va">I_human</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="va">nsamples</span><span class="op">)</span> <span class="co">#Fixed human prevalence level (5%)</span></span>
-<span><span class="va">boost</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span> <span class="co">#No vaccine boosters administered to captive populations</span></span></code></pre></div>
-<p>Now that we have all the parameters we need, we can set up the inputs
-for the <code><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode()</a></code> function. First, we list the initial
+<span><span class="co">#Fixed human prevalence level (5%)</span></span>
+<span><span class="va">I_human</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="va">nsamples</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co">#No vaccine boosters administered to captive populations</span></span>
+<span><span class="va">boost</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span> </span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="derive-parameters-used-the-sirs-ode-equation-set">3. Derive parameters used the SIRS ODE equation set<a class="anchor" aria-label="anchor" href="#derive-parameters-used-the-sirs-ode-equation-set"></a>
+</h2>
+<p>Next, we use all of the parameters we just defined to calculate the
+derived parameters necessary for use with the SIRS ODE equation sets.
+This can be done using the <code><a href="../reference/alternative.html">alternative()</a></code> function from the
+whitetailedSIRS package:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">list_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity</span>, omega_ww <span class="op">=</span> <span class="va">omega_ww</span>, omega_cw <span class="op">=</span> <span class="va">omega_cw</span>, omega_cc <span class="op">=</span> <span class="va">omega_cc</span>, omega_hw <span class="op">=</span> <span class="va">omega_hw</span>, omega_hc <span class="op">=</span> <span class="va">omega_hc</span>, sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_rural</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_capt</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="va">I_human</span>, boost <span class="op">=</span> <span class="va">boost</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">list_params</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 12</span></span>
+<span><span class="co">#&gt;  $ alpha_immunity: num [1:50] 0.00787 0.01166 0.00501 0.00289 0.00476 ...</span></span>
+<span><span class="co">#&gt;  $ beta_aero_ww  : num [1:50] 0.2532 0.0115 0.2061 0.0234 0.0725 ...</span></span>
+<span><span class="co">#&gt;  $ beta_aero_cw  : num [1:50] 4.22e-04 1.49e-05 2.16e-04 1.74e-05 3.38e-05 ...</span></span>
+<span><span class="co">#&gt;  $ beta_aero_cc  : num [1:50] 1.5444 0.072 1.5437 0.0414 1.4717 ...</span></span>
+<span><span class="co">#&gt;  $ beta_aero_hw  : num [1:50] 1.14e-06 1.81e-05 4.31e-08 2.97e-06 4.18e-07 ...</span></span>
+<span><span class="co">#&gt;  $ beta_aero_hc  : num [1:50] 0.024714 0.000191 0.004173 0.002105 0.001069 ...</span></span>
+<span><span class="co">#&gt;  $ beta_dc_ww    : num [1:50] 0.000508 0.000218 0.000394 0.000715 0.001884 ...</span></span>
+<span><span class="co">#&gt;  $ beta_dc_cw    : num [1:50] 8.48e-07 2.84e-07 4.13e-07 5.31e-07 8.79e-07 ...</span></span>
+<span><span class="co">#&gt;  $ beta_dc_cc    : num [1:50] 0.0031 0.00137 0.00295 0.00126 0.03824 ...</span></span>
+<span><span class="co">#&gt;  $ gamma_recov   : num [1:50] 0.167 0.167 0.167 0.167 0.167 ...</span></span>
+<span><span class="co">#&gt;  $ I_human       : num [1:50] 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 ...</span></span>
+<span><span class="co">#&gt;  $ boost         : num [1:50] 0 0 0 0 0 0 0 0 0 0 ...</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="define-initial-sir-compartment-sizes">4. Define initial SIR compartment sizes<a class="anchor" aria-label="anchor" href="#define-initial-sir-compartment-sizes"></a>
+</h2>
+<p>Now that we have all the parameters we need, we can list the initial
 compartment sizes to calculate how these compartments change through an
 outbreak, and calculate the steady state equilibrium size of the
-infected compartments:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+infected compartments. We have to set two sets of initial compartment
+sizes. The first detailed below is a compartment list that will be used
+to estimate daily compartment sizes and calculate the growing proportion
+of individuals infected over the course of the simulation (list_inits).
+The second detailed below is a similar list, but for calculation of the
+steady state of the SIRS ODE equation, which is used to designate if
+SARS-CoV-2 persists in a simulation (list_inits_steady). These lists
+will have the same value for S, I, and R compartments, and only differ
+with the inclusion of I_wild_cumulative and I_captive_cumulative
+arguments in list_inits (start at 0):</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#Compartment sizes formatted to calculate daily prevalence and cumulative infections:</span></span>
 <span><span class="va">list_inits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>   S_wild <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">nsamples</span><span class="op">)</span>,</span>
@@ -209,156 +454,342 @@ infected compartments:</p>
 <span>   S_captive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">nsamples</span><span class="op">)</span>,</span>
 <span>   I_captive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span>,</span>
 <span>   R_captive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nsamples</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#Calculate the derived parameters necessary for use with simple_sirs.R and simple_sirs_with_cumulative.R. This can be done either as a list by hand...:</span></span>
-<span><span class="va">list_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>   alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity</span>,</span>
-<span>   beta_aero_ww <span class="op">=</span> <span class="va">omega_ww</span> <span class="op">*</span> <span class="va">sigma_aero_deer_deer</span>,</span>
-<span>   beta_aero_cw <span class="op">=</span> <span class="va">omega_cw</span> <span class="op">*</span> <span class="va">sigma_aero_deer_deer</span>,</span>
-<span>   beta_aero_cc <span class="op">=</span> <span class="va">omega_cc</span> <span class="op">*</span> <span class="va">sigma_aero_deer_deer</span>,</span>
-<span>   beta_aero_hw <span class="op">=</span> <span class="va">omega_hw</span> <span class="op">*</span> <span class="va">sigma_aero_deer_human_rural</span>,</span>
-<span>   beta_aero_hc <span class="op">=</span> <span class="va">omega_hc</span> <span class="op">*</span> <span class="va">sigma_aero_deer_human_capt</span>,</span>
-<span>   beta_dc_ww <span class="op">=</span> <span class="va">omega_ww</span> <span class="op">*</span> <span class="va">epsilon_dc</span> <span class="op">*</span> <span class="va">sigma_dc_deer_deer</span>,</span>
-<span>   beta_dc_cw <span class="op">=</span> <span class="va">omega_cw</span> <span class="op">*</span> <span class="va">epsilon_dc</span> <span class="op">*</span> <span class="va">sigma_dc_deer_deer</span>,</span>
-<span>   beta_dc_cc <span class="op">=</span> <span class="va">omega_cc</span> <span class="op">*</span> <span class="va">epsilon_dc</span> <span class="op">*</span> <span class="va">sigma_dc_deer_deer</span>,</span>
-<span>   gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>,</span>
-<span>   I_human <span class="op">=</span> <span class="va">I_human</span>,</span>
-<span>   boost <span class="op">=</span> <span class="va">boost</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#... or using the alternative.R function from the whitetailedSIRS package:</span></span>
-<span><span class="va">list_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alternative.html">alternative</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="va">alpha_immunity</span>, omega_ww <span class="op">=</span> <span class="va">omega_ww</span>, omega_cw <span class="op">=</span> <span class="va">omega_cw</span>, omega_cc <span class="op">=</span> <span class="va">omega_cc</span>, omega_hw <span class="op">=</span> <span class="va">omega_hw</span>, omega_hc <span class="op">=</span> <span class="va">omega_hc</span>, sigma_aero_deer_deer_wild <span class="op">=</span> <span class="va">sigma_aero_deer_deer</span>, sigma_aero_deer_deer_captive <span class="op">=</span> <span class="va">sigma_aero_deer_deer</span>, sigma_aero_deer_human_wild <span class="op">=</span> <span class="va">sigma_aero_deer_human_rural</span>, sigma_aero_deer_human_capt <span class="op">=</span> <span class="va">sigma_aero_deer_human_capt</span>, epsilon_dc <span class="op">=</span> <span class="va">epsilon_dc</span>, sigma_dc_deer_deer <span class="op">=</span> <span class="va">sigma_dc_deer_deer</span>, gamma_recov <span class="op">=</span> <span class="va">gamma_recov</span>, I_human <span class="op">=</span> <span class="va">I_human</span>, boost <span class="op">=</span> <span class="va">boost</span><span class="op">)</span></span>
-<span></span>
-<span></span>
-<span><span class="co">#Set a sequence of days to model outbreaks</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="solve-the-sirs-ode-equations-and-calculate-daily-compartment-sizes">5. Solve the SIRS ODE equations and calculate daily compartment
+sizes<a class="anchor" aria-label="anchor" href="#solve-the-sirs-ode-equations-and-calculate-daily-compartment-sizes"></a>
+</h2>
+<p>First, we set the duration of the simulation.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#Set a sequence of days to model outbreaks</span></span>
 <span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">120</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>We continue to work with list columns here so we can keep track of
-the sets of parameters associated to each of the projections:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># create list column to store inits and params</span></span>
-<span><span class="va">mytibble</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>run_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">nsamples</span>,</span>
-<span>                   inits.outbreak <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">run_id</span>, <span class="op">~</span> <span class="va">list_inits</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">.x</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                   inits.steady <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">run_id</span>, <span class="op">~</span> <span class="va">list_inits_steady</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">.x</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                   params <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">run_id</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">list_params</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># create a new column that stores the results from the ode() projection using the simple_sirs_with_cumulative SIRS ODE equations to calculate daily compartment sizes and cumulative infections,...</span></span>
-<span><span class="va">mytibble</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ode_proj <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/pmap.html" class="external-link">pmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">inits.outbreak</span>, parms <span class="op">=</span> <span class="va">params</span><span class="op">)</span>, <span class="va">ode</span>, times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">120</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, func <span class="op">=</span> <span class="va">simple_sirs_with_cumulative</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="co"># ..., and create another column that stores the equilibrium for these:</span></span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>steady_state <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/pmap.html" class="external-link">pmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">inits.steady</span>, parms <span class="op">=</span> <span class="va">params</span><span class="op">)</span>, <span class="va">runsteady</span>, func <span class="op">=</span> <span class="va">simple_sirs</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">sirs_results</span> <span class="co"># save as new object</span></span>
-<span></span>
-<span><span class="co">#This can also be done using the run() function from the whitetailedSIRS package:</span></span>
-<span><span class="va">sirs_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">list_inits</span>, initial_compartments_steady <span class="op">=</span> <span class="va">list_inits_steady</span>, params <span class="op">=</span> <span class="va">list_params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Example Values"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span><span class="va">sirs_results</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<p>We can then solve the SIRS ode equations using the
+<code>sirs_results()</code> function. This function requires a number of
+simulations to run (iter), the initial compartment sizes
+(initial_compartments), the initial compartment sizes calculating steady
+state comnpartment sizes (initial_compartments_steady), the parameter
+sets used for the simulation (params), and the duration of the
+simulation (times). We finally add a name to this dataset, which will be
+useful when running multiple parameter sets under different management
+schemes or epidemiological conditions.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sirs_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="va">nsamples</span>, initial_compartments <span class="op">=</span> <span class="va">list_inits</span>, initial_compartments_steady <span class="op">=</span> <span class="va">list_inits_steady</span>, params <span class="op">=</span> <span class="va">list_params</span>, times <span class="op">=</span> <span class="va">times</span>, name <span class="op">=</span> <span class="st">"Example Values"</span><span class="op">)</span></span></code></pre></div>
+<p>If we look at the sirs_results object, we can see a tibble of list
+objects, arranged by each simulation (run_id).</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span><span class="va">sirs_results</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 7</span></span></span>
 <span><span class="co">#&gt;   run_id inits.fall inits.steady params     ode_proj     steady_state Context   </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 <span style="color: #949494;">&lt;dbl [8]&gt;</span>  <span style="color: #949494;">&lt;dbl [6]&gt;</span>    <span style="color: #949494;">&lt;dbl [12]&gt;</span> &lt;deSolve[…]&gt; &lt;named list&gt; Example V…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 <span style="color: #949494;">&lt;dbl [8]&gt;</span>  <span style="color: #949494;">&lt;dbl [6]&gt;</span>    <span style="color: #949494;">&lt;dbl [12]&gt;</span> &lt;deSolve[…]&gt; &lt;named list&gt; Example V…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 <span style="color: #949494;">&lt;dbl [8]&gt;</span>  <span style="color: #949494;">&lt;dbl [6]&gt;</span>    <span style="color: #949494;">&lt;dbl [12]&gt;</span> &lt;deSolve[…]&gt; &lt;named list&gt; Example V…</span></span></code></pre></div>
-<p>From our results we can visualize the proportion of infected
-individuals over time for each of the runs:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 <span style="color: #949494;">&lt;dbl [8]&gt;</span>  <span style="color: #949494;">&lt;dbl [6]&gt;</span>    <span style="color: #949494;">&lt;dbl [12]&gt;</span> <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list&gt;</span> Example V…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 <span style="color: #949494;">&lt;dbl [8]&gt;</span>  <span style="color: #949494;">&lt;dbl [6]&gt;</span>    <span style="color: #949494;">&lt;dbl [12]&gt;</span> <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list&gt;</span> Example V…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 <span style="color: #949494;">&lt;dbl [8]&gt;</span>  <span style="color: #949494;">&lt;dbl [6]&gt;</span>    <span style="color: #949494;">&lt;dbl [12]&gt;</span> <span style="color: #949494;">&lt;deSolve[…]&gt;</span> <span style="color: #949494;">&lt;named list&gt;</span> Example V…</span></span></code></pre></div>
+<p>We can see the initial compartment sizes for projecting the outbreak
+(inits.fall) and for calculating the steady state infected compartment
+size (inits.steady). Note that the original application of the
+whitetailedSIRS package is projecting an outbreak during the fall season
+in North America (September-December). This explains references to
+“fall.” Here are the initial compartments for the first iteration of the
+simulation.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sirs_results</span><span class="op">$</span><span class="va">inits.fall</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt;               S_wild               I_wild               R_wild </span></span>
+<span><span class="co">#&gt;                    1                    0                    0 </span></span>
+<span><span class="co">#&gt;    I_wild_cumulative            S_captive            I_captive </span></span>
+<span><span class="co">#&gt;                    0                    1                    0 </span></span>
+<span><span class="co">#&gt;            R_captive I_captive_cumulative </span></span>
+<span><span class="co">#&gt;                    0                    0</span></span>
+<span><span class="va">sirs_results</span><span class="op">$</span><span class="va">inits.steady</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt;    S_wild    I_wild    R_wild S_captive I_captive R_captive </span></span>
+<span><span class="co">#&gt;         1         0         0         1         0         0</span></span></code></pre></div>
+<p>We can also look at the parameters that were randomly drawn for the
+first iteration of the simulation.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sirs_results</span><span class="op">$</span><span class="va">params</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; alpha_immunity   beta_aero_ww   beta_aero_cw   beta_aero_cc   beta_aero_hw </span></span>
+<span><span class="co">#&gt;   7.865461e-03   2.531817e-01   4.224768e-04   1.544409e+00   1.136479e-06 </span></span>
+<span><span class="co">#&gt;   beta_aero_hc     beta_dc_ww     beta_dc_cw     beta_dc_cc    gamma_recov </span></span>
+<span><span class="co">#&gt;   2.471407e-02   5.079619e-04   8.476212e-07   3.098569e-03   1.666667e-01 </span></span>
+<span><span class="co">#&gt;        I_human          boost </span></span>
+<span><span class="co">#&gt;   5.000000e-02   0.000000e+00</span></span></code></pre></div>
+<p>The remaining columns for the sirs_results tibble include the daily
+sizes of each compartment, and the compartment sizes at steady state
+equilibrium. We will look at those results below in Section 7, but we
+can briefly plot the size of the <strong>S</strong>usceptible,
+<strong>I</strong>nfectious, and <strong>R</strong>ecovered compartments
+in both populations.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># get results in proper format:</span></span>
 <span><span class="va">sirs_results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ode_df <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">ode_proj</span>, <span class="va">as.data.frame</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">ode_df</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">ode_df</span></span>
-<span></span>
-<span><span class="va">ode_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">I_wild</span>, group <span class="op">=</span> <span class="va">run_id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time in days"</span>, y <span class="op">=</span> <span class="st">"Proportion of infected, wild individuals"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="example_values_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
-<p>We can calculate the cumulative proportion of the population that is
-infected over the course of the projection:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># get results in proper format:</span></span>
-<span><span class="va">sirs_results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ode_df <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">ode_proj</span>, <span class="va">as.data.frame</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">ode_df</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">ode_df</span></span>
-<span></span>
-<span><span class="va">ode_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">I_wild_cumulative</span>, group <span class="op">=</span> <span class="va">run_id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time in days"</span>, y <span class="op">=</span> <span class="st">"Proportion of I_w individuals"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="example_values_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
-<p>We can also take a look at how all compartments change over time
-(excluding the cumulative infection calculations):</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">ode_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="op">-</span><span class="va">I_wild_cumulative</span>, <span class="op">-</span><span class="va">I_captive_cumulative</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">run_id</span>, <span class="va">time</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"compartment"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Context <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">compartment</span>,<span class="st">"wild"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Wild"</span>,</span>
+<span>                              <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">compartment</span>,<span class="st">"captive"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Captive"</span>,<span class="op">)</span>,</span>
+<span>          Compartment <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">compartment</span>,<span class="st">"S"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Susceptible"</span>,</span>
+<span>                                  <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">compartment</span>,<span class="st">"I"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Infected"</span>,</span>
+<span>                                  <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">compartment</span>,<span class="st">"R"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Recovered"</span>,<span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Compartment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">Compartment</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Susceptible"</span>, <span class="st">"Infected"</span>, <span class="st">"Recovered"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">run_id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">compartment</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time in days"</span>, y <span class="op">=</span> <span class="st">"Proportion of population"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="example_values_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
-<p>And check the steady state, or equilibrium, for all of these
-runs:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sirs_results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>steady_sir <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">steady_state</span>, <span class="st">"y"</span><span class="op">)</span>,</span>
-<span>          steady_sir <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">steady_sir</span>, <span class="va">as_tibble_row</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">steady_sir</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">steady_sir</span></span>
-<span></span>
-<span><span class="va">steady_sir</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">run_id</span>, names_to <span class="op">=</span> <span class="st">"compartment"</span>, values_to <span class="op">=</span> <span class="st">"proportion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/separate.html" class="external-link">separate</a></span><span class="op">(</span><span class="va">compartment</span>, sep <span class="op">=</span> <span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sir_type"</span>, <span class="st">"pop_type"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sir_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sir_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="st">"I"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>          pop_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pop_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wild"</span>, <span class="st">"captive"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">proportion</span>, color <span class="op">=</span> <span class="va">pop_type</span>, x <span class="op">=</span> <span class="va">sir_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, color <span class="op">=</span> <span class="st">"Population Type"</span>, y <span class="op">=</span> <span class="st">"Proportion at equilibrium"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="example_values_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
-<p>We can also calculate some metrics such as R0 and force of infection
-(FOI):</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">r0_deer_wild</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="op">(</span><span class="va">omega_ww</span> <span class="op">*</span> <span class="va">sigma_aero_deer_deer</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">omega_ww</span> <span class="op">*</span> <span class="va">sigma_dc_deer_deer</span> <span class="op">*</span> <span class="va">epsilon_dc</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span><span class="op">/</span><span class="va">gamma_recov</span></span>
-<span><span class="va">r0_deer_captive</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="op">(</span><span class="va">omega_cc</span> <span class="op">*</span> <span class="va">sigma_aero_deer_deer</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">omega_cc</span> <span class="op">*</span> <span class="va">sigma_dc_deer_deer</span> <span class="op">*</span> <span class="va">epsilon_dc</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span><span class="op">/</span><span class="va">gamma_recov</span></span>
-<span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>r0_deer_wild <span class="op">=</span> <span class="va">r0_deer_wild</span>, r0_deer_captive <span class="op">=</span> <span class="va">r0_deer_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">1</span>, color <span class="op">=</span> <span class="st">"red"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="example_values_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="va">Context</span><span class="op">~</span><span class="va">Compartment</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time (days)"</span>, y <span class="op">=</span> <span class="st">"Proportion of population"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>, axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>, strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example_values_files/figure-html/unnamed-chunk-17-1.png" width="700px" style="display: block; margin: auto;">
+We can see that outbreaks were far more common in captive settings,
+compared to wild deer in a rural area. The same number of simulations
+were run for each scenario.</p>
+</div>
+<div class="section level2">
+<h2 id="calculate-risk-of-introduction-and-magnitude-of-spread-given-parameters">6. Calculate risk of introduction and magnitude of spread given
+parameters<a class="anchor" aria-label="anchor" href="#calculate-risk-of-introduction-and-magnitude-of-spread-given-parameters"></a>
+</h2>
+<p>Here we demonstrate the calculation of epidemiological metrics to
+describe the rate of introduction of SARS-CoV-2 from humans to deer, the
+number of secondary infections resulting from an infectious deer. We use
+derived transmission parameters that are defined in depth in the <a href="sir_model_description.html">sir_model_description
+vignette</a>.</p>
+<div class="section level3">
+<h3 id="force-of-infection">Force-Of-Infection<a class="anchor" aria-label="anchor" href="#force-of-infection"></a>
+</h3>
+<p>The first metric, termed the Force-Of-Infection (FOI), is the
+proportion of susceptible deer infected per day, in our case, by humans.
+The calculation is the product of the proximity rate between humans and
+deer, the probability of infection through aerosol transmission given
+the event, and the prevalence in the human population .</p>
+<span class="math display">\[\begin{align}
+\tag{1}
+FOI_{wild,rural} = \beta_{HW}^{Aero} i_H\\
+
+\tag{2}
+FOI_{captive} = \beta_{HC}^{Aero} i_H\\
+
+\end{align}\]</span>
+<p>Below we provide the calculation and a plot comparing FOI in rural,
+wild deer and captive deer. Note that the y-axis is on the log-10
+scaled:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#FOI</span></span>
 <span><span class="va">foi_wild</span> <span class="op">&lt;-</span> <span class="va">omega_hw</span> <span class="op">*</span> <span class="va">sigma_aero_deer_human_rural</span> <span class="op">*</span> <span class="va">I_human</span></span>
 <span><span class="va">foi_captive</span> <span class="op">&lt;-</span> <span class="va">omega_hc</span> <span class="op">*</span> <span class="va">sigma_aero_deer_human_capt</span> <span class="op">*</span> <span class="va">I_human</span></span>
 <span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>foi_wild <span class="op">=</span> <span class="va">foi_wild</span>,foi_captive <span class="op">=</span> <span class="va">foi_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="st">"Wild, rural deer"</span> <span class="op">=</span> <span class="va">foi_wild</span>, <span class="st">"Captive deer"</span> <span class="op">=</span> <span class="va">foi_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">name</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log10</a></span><span class="op">(</span><span class="va">value</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Percent susceptible deer infected\nby humans per day (FOI; log-10 scale)"</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>, legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>, axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example_values_files/figure-html/unnamed-chunk-18-1.png" width="500px" style="display: block; margin: auto;"></p>
+</div>
+<div class="section level3">
+<h3 id="probability-of-at-least-one-infection-per-1000-deer">Probability of at least one infection per 1000 deer<a class="anchor" aria-label="anchor" href="#probability-of-at-least-one-infection-per-1000-deer"></a>
+</h3>
+<p>FOI is sometimes hard to conceptualize, especially for the small
+values we estimate for wild deer in a rural setting. A useful conversion
+is the calculation of the probability of at least one deer becoming
+infected out of 1000 over the 120 days simulated here. We can do that
+using a constant hazard model (eqn. 3), where we take the FOI calculated
+above, consider a time period <em>t</em> of 120 days, for 1000
+individuals (<em>N</em>):</p>
+<span class="math display">\[\begin{align}
+\tag{3}
+p(HtD|FOI,N,t) = 1 - (e^{-FOI_{HD}t})^N
+\end{align}\]</span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#pHtD</span></span>
+<span><span class="va">pHtD_wild</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">last</a></span><span class="op">(</span><span class="va">times</span><span class="op">)</span><span class="op">*</span><span class="va">foi_wild</span><span class="op">)</span><span class="op">^</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">pHtD_captive</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">last</a></span><span class="op">(</span><span class="va">times</span><span class="op">)</span><span class="op">*</span><span class="va">foi_captive</span><span class="op">)</span><span class="op">^</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="st">"Wild, rural deer"</span> <span class="op">=</span> <span class="va">pHtD_wild</span>, <span class="st">"Captive deer"</span> <span class="op">=</span> <span class="va">pHtD_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">name</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span><span class="st">"Probability of at least 1 HtD transmission\nper 1000 deer during 120-day projection"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>, legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>, axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example_values_files/figure-html/unnamed-chunk-19-1.png" width="500px" style="display: block; margin: auto;">
+According to the pHtD plot above, there is a high change of at least one
+infection in captive facilities during the 120-day fall simulation. For
+wild deer in a rural setting, the chances of at least one infection are
+very low.</p>
+</div>
+<div class="section level3">
+<h3 id="basic-reproductive-number-r_0">Basic reproductive number (<span class="math inline">\(R_0\)</span>)<a class="anchor" aria-label="anchor" href="#basic-reproductive-number-r_0"></a>
+</h3>
+<p>Finally, we can calculate the number of secondary infection caused by
+an infectious deer. This calculation is the sum of transmission risks
+between deer, from aerosols (<span class="math inline">\(\beta_{WW}^{Aero}\)</span> , <span class="math inline">\(\beta_{CC}^{Aero}\)</span>)and from fluid
+exchanged on direct contact (<span class="math inline">\(\beta_{WW}^{DC}\)</span> , <span class="math inline">\(\beta_{CC}^{DC}\)</span>), divided by the recovery
+rate from infection (<span class="math inline">\(\gamma\)</span>; eqn 4
+&amp; 5).</p>
+<span class="math display">\[\begin{align}
+\tag{4}
+R_{0,wild, rural} = \tfrac{\beta_{WW}^{Aero} +
+\beta_{WW}^{DC}}{\gamma}\\
+
+\tag{5}
+R_{0,captive} = \tfrac{\beta_{CC}^{Aero} + \beta_{CC}^{DC}}{\gamma},\\
+\end{align}\]</span>
+<p>Below we calculate and plot the range of <span class="math inline">\(R_0\)</span> for captive deer and wild deer in a
+rural setting.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">r0_deer_wild</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="op">(</span><span class="va">omega_ww</span> <span class="op">*</span> <span class="va">sigma_aero_deer_deer</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">omega_ww</span> <span class="op">*</span> <span class="va">sigma_dc_deer_deer</span> <span class="op">*</span> <span class="va">epsilon_dc</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span><span class="op">/</span><span class="va">gamma_recov</span></span>
+<span><span class="va">r0_deer_captive</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="op">(</span><span class="va">omega_cc</span> <span class="op">*</span> <span class="va">sigma_aero_deer_deer</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">omega_cc</span> <span class="op">*</span> <span class="va">sigma_dc_deer_deer</span> <span class="op">*</span> <span class="va">epsilon_dc</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span><span class="op">/</span><span class="va">gamma_recov</span></span>
+<span></span>
+<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="st">"Wild, rural deer"</span> <span class="op">=</span> <span class="va">r0_deer_wild</span>, <span class="st">"Captive deer"</span> <span class="op">=</span> <span class="va">r0_deer_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">name</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="example_values_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
-  </main>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">1</span>, color <span class="op">=</span> <span class="st">"red"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Basic reproductive number (R0)"</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>, legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>, axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example_values_files/figure-html/unnamed-chunk-20-1.png" width="500px" style="display: block; margin: auto;">
+Captive deer clearly have higher <span class="math inline">\(R_0\)</span> values compared to wild deer in rural
+settings, as well as greater variation. Median <span class="math inline">\(R_0\)</span> in captivity is much greater than the
+threshold (<span class="math inline">\(R_0\)</span> == 1; red dashed
+line) for sustained spread of infections in a population.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="calculate-average-daily-prevalence-probability-of-persistence-and-incidence-proportion-">7. Calculate average daily prevalence, probability of persistence,
+and incidence proportion.<a class="anchor" aria-label="anchor" href="#calculate-average-daily-prevalence-probability-of-persistence-and-incidence-proportion-"></a>
+</h2>
+<p>Finally, we can characterize outbreaks of SARS-CoV-2 in our
+simulations using three metrics that describe the severity and extent of
+infections. These metrics include prevalence, persistence, and incidence
+proportion.</p>
+<div class="section level3">
+<h3 id="prevalence">Prevalence<a class="anchor" aria-label="anchor" href="#prevalence"></a>
+</h3>
+<p>Below we calculate the average daily prevalence of SARS-CoV-2 in
+captive and wild white-tailed deer. We simply average the daily infected
+compartment size across the 120-day simulation for each simulation, and
+compare median values across contexts.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sirs_results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ode_df <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">ode_proj</span>, <span class="va">as.data.frame</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">ode_df</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">run_id</span>, <span class="va">I_wild</span>, <span class="va">I_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">.</span>, Wild <span class="op">=</span> <span class="va">I_wild</span>,</span>
+<span>          Captive <span class="op">=</span> <span class="va">I_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/gather.html" class="external-link">gather</a></span><span class="op">(</span><span class="st">"Compartment"</span>, <span class="st">"prevalence"</span>, <span class="op">-</span><span class="va">run_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">run_id</span>, <span class="va">Compartment</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>Prevalence <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">prevalence</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Compartment</span>, y <span class="op">=</span> <span class="va">Prevalence</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span><span class="st">"Average prevalence (%)"</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>, legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>, axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `summarise()` has grouped output by 'run_id'. You can override using the</span></span>
+<span><span class="co">#&gt; `.groups` argument.</span></span></code></pre></div>
+<p><img src="example_values_files/figure-html/unnamed-chunk-21-1.png" width="500px" style="display: block; margin: auto;"></p>
+<p>The simulations of deer in a captive setting had a much higher median
+prevalence, compared to the simulations in a wild setting.</p>
+</div>
+<div class="section level3">
+<h3 id="persistence">Persistence<a class="anchor" aria-label="anchor" href="#persistence"></a>
+</h3>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">persist.threshold</span> <span class="op">&lt;-</span> <span class="fl">0.001</span></span>
+<span></span>
+<span><span class="va">sirs_results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>steady_sir <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">steady_state</span>, <span class="st">"y"</span><span class="op">)</span>,</span>
+<span>         steady_sir <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">steady_sir</span>, <span class="va">as_tibble_row</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">steady_sir</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">.</span>, Wild <span class="op">=</span> <span class="va">I_wild</span> <span class="op">&gt;</span> <span class="va">persist.threshold</span>, Captive <span class="op">=</span> <span class="va">I_captive</span> <span class="op">&gt;</span> <span class="va">persist.threshold</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">run_id</span>, <span class="va">Captive</span>, <span class="va">Wild</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/gather.html" class="external-link">gather</a></span><span class="op">(</span><span class="st">"Compartment"</span>, <span class="st">"Persist"</span>, <span class="op">-</span><span class="va">run_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Compartment</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span><span class="va">.</span>, Persistence <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Persist</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>LCL <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/binom/man/binom.confint.html" class="external-link">binom.confint</a></span><span class="op">(</span><span class="va">Persistence</span>, n <span class="op">=</span> <span class="va">nsamples</span>, methods <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span><span class="op">$</span><span class="va">lower</span>, pred <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/binom/man/binom.confint.html" class="external-link">binom.confint</a></span><span class="op">(</span><span class="va">Persistence</span>, n <span class="op">=</span> <span class="va">nsamples</span>, methods <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span><span class="op">$</span><span class="va">mean</span> ,UCL <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/binom/man/binom.confint.html" class="external-link">binom.confint</a></span><span class="op">(</span><span class="va">Persistence</span>, n <span class="op">=</span> <span class="va">nsamples</span>, methods <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span><span class="op">$</span><span class="va">upper</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Compartment</span>, y <span class="op">=</span> <span class="va">pred</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_errorbar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">LCL</span>, ymax <span class="op">=</span> <span class="va">UCL</span><span class="op">)</span>, width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_grey.html" class="external-link">scale_fill_grey</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span><span class="st">"Probability of persistence"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>, legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>, axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example_values_files/figure-html/unnamed-chunk-22-1.png" width="500px" style="display: block; margin: auto;"></p>
+<p>For this example, we can see that the median probability of
+SARS-CoV-2 persisting is approximately 75%, whereas median persistence
+in the simulated wild deer population is approximiately 20%.</p>
+</div>
+<div class="section level3">
+<h3 id="incidence-proportion">Incidence proportion<a class="anchor" aria-label="anchor" href="#incidence-proportion"></a>
+</h3>
+<p>Finally, we can calculate the cumulative proportion of the population
+that is infected over the course of the projection. This metric
+summarizes the extent of the infection in a population.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sirs_results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ode_df <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">ode_proj</span>, <span class="va">as.data.frame</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">ode_df</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"run_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">run_id</span>, <span class="va">I_wild_cumulative</span>, <span class="va">I_captive_cumulative</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">.</span>, Wild <span class="op">=</span> <span class="va">I_wild_cumulative</span>,</span>
+<span>          Captive <span class="op">=</span> <span class="va">I_captive_cumulative</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/gather.html" class="external-link">gather</a></span><span class="op">(</span><span class="st">"Compartment"</span>, <span class="st">"Incidence_Proportion"</span>, <span class="op">-</span><span class="va">run_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">run_id</span>, <span class="va">Compartment</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>Incidence_Proportion <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">last</a></span><span class="op">(</span><span class="va">Incidence_Proportion</span><span class="op">)</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Compartment</span>, y <span class="op">=</span> <span class="va">Incidence_Proportion</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span><span class="st">"Incidence proportion (%)"</span><span class="op">)</span><span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>, legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>, axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `summarise()` has grouped output by 'run_id'. You can override using the</span></span>
+<span><span class="co">#&gt; `.groups` argument.</span></span></code></pre></div>
+<p><img src="example_values_files/figure-html/unnamed-chunk-23-1.png" width="500px" style="display: block; margin: auto;"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<p>This vignette showed an example of how we can use various
+whitetailedSIRS functions to project disease outbreaks in white-tailed
+deer, and summarize outbreak characteristics across simulations. With
+reading this vignette and previous vignettes, users are prepared to
+start exploring their own simulations using whitetailedSIRS. In the
+following vignettes, we will illustrate the use of whitetailedSIRS in
+analyses published in Rosenblatt et al. (In Prep) and Cook et al. (In
+Prep). We will start with running simulations for <a href="SIRS_analysis_by_context.html">Rosenblatt et al.’s (In Prep)
+analysis of outbreak dynamics given continuous spillover from humans in
+wild and captive settings.</a></p>
+<p>Click <a href="sir_model_description.html">here</a> to return to the
+vignette detailing the SIRS ODE equations used in whitetailedSIRS.</p>
+</div>
+<div class="section level2">
+<h2 id="literature-cited">Literature Cited<a class="anchor" aria-label="anchor" href="#literature-cited"></a>
+</h2>
+<ul>
+<li><p>Cook, J.D., E. Rosenblatt, G.V. Direnzo, E.H.C. Grant, B.A.
+Mosher, F. Arce, S. Christensen, R. Ghai, M.C. Runge. In Prep. Using
+decision science to evaluate the risk and management of SARS-CoV-2
+zoonotic transmission between humans and white-tailed deer.</p></li>
+<li><p>Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce,
+K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher.
+In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer
+(Odocoileus virginianus) reveals conditions for introduction and
+widespread transmission.</p></li>
+</ul>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce.</p>
+<p>Developed by Elias Rosenblatt, Javi Rudolph, Fer Arce, Jonathan Cook, Graziella DiRenzo, Evan Grant, Michael Runge, Brittany Mosher.</p>
 </div>
 
 <div class="pkgdown-footer-right">

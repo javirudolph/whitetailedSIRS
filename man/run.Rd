@@ -14,25 +14,33 @@ run(
 )
 }
 \arguments{
-\item{iter}{Number of iterations, often referred to as 'nsamples' in package examples}
+\item{iter}{Number of iterations, often referred to as 'nsamples' in package
+examples}
 
-\item{initial_compartments}{Initial compartment sizes, including  (proportions, stored as list)}
+\item{initial_compartments}{Initial compartment sizes, including
+(proportions, stored as list)}
 
-\item{initial_compartments_steady}{Initial compartment sizes for steady state calculation (proportions, stored as list)}
+\item{initial_compartments_steady}{Initial compartment sizes for steady state
+calculation (proportions, stored as list)}
+
+\item{params}{SIRS parameters, stored as a list}
 
 \item{times}{Length of projection (days)}
 
 \item{name}{Name of context being simulated}
-
-\item{parameters}{SIRS parameters, stored as a list}
 }
 \value{
-#List containing iteration details, including initial compartment sizes for ODE solver and steady state calculation, parameters, context name, and daily, proportional sizes of each SIRS compartment and cumulative infections during the 120 day projection, and whether the SARS-CoV-2 persists at equilibrium.
+List containing iteration details, including initial compartment
+sizes for ODE solver and steady state calculation, parameters, context name,
+and daily, proportional sizes of each SIRS compartment and cumulative
+infections during the 120 day projection, and whether the SARS-CoV-2
+persists at equilibrium.
 }
 \description{
 Run ODE Solver for SIRS model
 }
 \examples{
+\dontrun{
 nsamples = 10
 
 example_inits <- c(S_wild = 1, I_wild = 0,
@@ -61,5 +69,11 @@ example_params <- c(alpha_immunity = 0.03,
                     I_human = 0.05,
                     boost = 0)
 
-run(iter = nsamples, initial_compartments = example_inits, initial_compartments_steady = example_inits_steady, params = example_params, times = example_times, name = Test)
+run(iter = nsamples,
+initial_compartments = example_inits,
+initial_compartments_steady = example_inits_steady,
+params = example_params,
+times = example_times,
+name = Test)}
+
 }

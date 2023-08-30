@@ -6,14 +6,57 @@
 \title{initial_infection_results_1_in_1mil}
 \format{
 \code{initial_infection_results_1_in_1mil}
+A data frame with 7 columns and 4000 rows storing the results of outbreak
+simulations given an initial infection of 0.0001\% of deer. Each row
+corresponds to an iteration of the simulation, with a specific Context and
+random draw of epidemiological parameters:
+\describe{
+\item{run_id}{Identifier of run iteration}
+\item{Context}{Scenario of focus for iteration}
+\item{Setting}{Iteration is taking place with wild or captive deer}
+\item{r0}{Basic reproductive number of iteration}
+\item{Prevalence}{Average daily proportion of deer population that is
+infected}
+\item{Persist}{Logical value for an outbreak persisting in a population at
+equilibrium}
+\item{Cumulative_infections}{Total proportion of deer infected over the
+course of the 120-day fall simulation}
+}
 }
 \source{
-Derived from \code{SIRS_analysis_by_contexts_initialspill.Rmd}, to be compared with continual introduction results from \code{SIRS_analysis_by_contexts.Rmd}
+Derived from \code{SIRS_analysis_by_contexts_initialspill.Rmd}, to be
+compared with continual introduction results from
+\code{SIRS_analysis_by_contexts.Rmd}
 }
 \usage{
 initial_infection_results_1_in_1mil
 }
 \description{
-A dataframe containing results used to compare degrees of introduction, spread, prevalence, persistence and cumulative infections of SARS-CoV-2 in simulated white-tailed deer populations with an initial infection of 1 in 1 million deer on day 0. These results do not include continuous human introduction during the 120-day fall simulation, and thus represent the risk of single introductions to spawn persisting infections in white-tailed deer. 1000 iterations (run_id) were run for each scenario (Context). Scenarios included captive deer in outdoor ranch facilities, captive deer in intensive facilities, wild deer in rural areas, and wild deer in suburban areas. Setting indicates whether deer were captive or wild. r0, or basic reproductive number, indicates the number of secondary infections caused by a single infectious deer over the course of it's infection. Prevalence is the percent of a population infected, averaged over a simulated 120-day projection. Persistence is a logical condition indicating if equilibrium determined by SIRS ODE equations and \code{run_steady()} from the rootSolve package predicts at least 1 in 1,000 deer infected at equilibrium. Cumulative infections reports the total proportion of the population infected over the course of the 120-fall projection, and can exceed 1, indicating that all individuals were infected at least once during the fall season.
+A dataframe containing results used to compare degrees of introduction,
+spread, prevalence, persistence and cumulative infections of SARS-CoV-2 in
+simulated white-tailed deer populations with an initial infection of 1 in 1
+million deer on day 0. These results do not include continuous human
+introduction during the 120-day fall simulation, and thus represent the risk
+of single introductions to spawn persisting infections in white-tailed deer.
+1000 iterations (run_id) were run for each scenario (Context). Scenarios
+included captive deer in outdoor ranch facilities, captive deer in intensive
+facilities, wild deer in rural areas, and wild deer in suburban areas.
+Setting indicates whether deer were captive or wild. r0, or basic
+reproductive number, indicates the number of secondary infections caused by a
+single infectious deer over the course of it's infection. Prevalence is the
+percent of a population infected, averaged over a simulated 120-day
+projection. Persistence is a logical condition indicating if equilibrium
+determined by SIRS ODE equations and \code{run_steady()} from the rootSolve
+package predicts at least 1 in 1,000 deer infected at equilibrium.
+Cumulative infections reports the total proportion of the population
+infected over the course of the 120-fall projection, and can exceed 1,
+indicating that all individuals were infected at least once during the fall
+season.
+}
+\examples{
+\dontrun{
+head(initial_infection_results_1_in_1mil)
+}
+
 }
 \keyword{datasets}
