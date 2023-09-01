@@ -45,9 +45,9 @@ Year of Version: 2023
 
 Version: 1.0.0
 
-Digital Object Identifier (DOI): \_\_\_\_\_\_
+Digital Object Identifier (DOI): <https://doi.org/10.5066/P9TZK938>
 
-USGS Information Product Data System (IPDS) no.: IP-\_\_\_\_\_\_\_
+USGS Information Product Data System (IPDS) no.: IP-155118
 
 ## Suggested Citation for Software
 
@@ -55,7 +55,7 @@ Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V.,
 Grant, E.H.C., Runge, M.C., and Mosher, B.A.. whitetailedSIRS: A package
 to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version
 1.0.0: U.S. Geological Survey software release,
-<https://doi.org/______/______>
+<https://doi.org/10.5066/P9TZK938>
 
 ## Abstract
 
@@ -77,19 +77,9 @@ feedback as part of a broader decision analysis detailed in Cook et
 al. In Prep and Rosenblatt et al. In Prep. This work was supported by
 the Coronavirus Aid, Relief, and Economic Security Act (P.L. 116-136).
 
-## Installation
-
-You can install the development version of whitetailedSIRS from
-[GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("disease-decision-analysis-and-research/whitetailedSIRS")
-```
-
 ## Vignettes
 
-### Vignette 1: sir_model_description.Rmd
+### Vignette 1: Introduction.Rmd
 
 Data inputs: N/A
 
@@ -99,7 +89,17 @@ al. In Prep.
 
 Outputs: N/A
 
-### Vignette 2: example_values.Rmd
+### Vignette 2: sir_model_description.Rmd
+
+Data inputs: N/A
+
+Details: A vignette introducing and detailing the SIRS ODE equations and
+corresponding functions, used in Rosenblatt et al. In prep and Cook et
+al. In Prep.
+
+Outputs: N/A
+
+### Vignette 3: example_values.Rmd
 
 Data inputs: N/A
 
@@ -110,7 +110,7 @@ or modify the analysis presented.
 
 Outputs: N/A
 
-### Vignette 3: SIRS_analysis_by_context.Rmd
+### Vignette 4: SIRS_analysis_by_context.Rmd
 
 Data inputs: N/A
 
@@ -123,7 +123,7 @@ Objectives 1-3 of *Rosenblatt et al. In Prep*.
 
 Outputs: N/A
 
-### Vignette 4: SIRS_analysis_by_context_initialspill.Rmd
+### Vignette 5: SIRS_analysis_by_context_initialspill.Rmd
 
 Data inputs: N/A
 
@@ -141,7 +141,7 @@ viewed in the .Rmd file. This analysis corresponds with Objective 4 of
 
 Outputs: N/A
 
-### Vignette 5: Visualize_by_context.Rmd
+### Vignette 6: Visualize_by_context.Rmd
 
 Data inputs: data/scenario_results.rda; data/scenario_projections.rda
 
@@ -151,7 +151,7 @@ are used in the results published in *Rosenblatt et al. In Prep.*.
 
 Outputs: N/A
 
-### Vignette 6: Connected_Systems.Rmd
+### Vignette 7: Connected_Systems.Rmd
 
 Data inputs: data/scenario_results.rda
 
@@ -164,7 +164,7 @@ fence line interactions. This analysis corresponds with Objective 5 of
 
 Outputs: N/A
 
-### Vignette 7: Management_Alternatives_Systems.Rmd
+### Vignette 8: Management_Alternatives_Systems.Rmd
 
 Data inputs: N/A
 
@@ -324,116 +324,6 @@ equations to calculate the cumulative infections from day 0 to day t.
 
 Outputs: N/A
 
-## Example
-
-Below is a basic example to run a simple projection using basic
-functions and fake data. Functions in `whitetailedSIRS` allow more
-complex calculations, but the core concepts remain the same.
-
-``` r
-library(whitetailedSIRS)
-## basic example code
-```
-
-``` r
-example_inits <- c(S_wild = 1, 
-                   I_wild = 0, 
-                   R_wild = 0,
-                   I_wild_cumulative = 0,
-                   S_captive = 1,
-                   I_captive = 0,
-                   R_captive = 0,
-                   I_captive_cumulative = 0)
-
-example_inits_steady <- c(S_wild = 1, 
-                   I_wild = 0, 
-                   R_wild = 0,
-                   S_captive = 1,
-                   I_captive = 0,
-                   R_captive = 0)
-
-# length of time to run this for  
-example_times <-  seq(0, 500, by = 1)
-
-# The parameters we are using in the simulation
-example_params <- c(alpha_immunity = 0.03,
-                    beta_aero_ww = 0.01,
-                    beta_aero_cw = 0.01,
-                    beta_aero_cc = 0.02,
-                    beta_aero_hw = 0.01,
-                    beta_aero_hc = 0.2,
-                    beta_dc_ww = 0.01,
-                    beta_dc_cw = 0.01,
-                    beta_dc_cc = 0.01,
-                    phi_cw = 0,
-                    phi_wc = 0,
-                    gamma_recov = 0.01,
-                    I_human = 0.05,
-                    boost = 0)
-```
-
-``` r
-library(deSolve)
-library(rootSolve)
-
-example_out <- ode(y = example_inits, times = example_times, parms = example_params, func = whitetailedSIRS::simple_sirs_with_cumulative)
-
-example_eq <- runsteady(y = example_inits_steady, parms = example_params, func = whitetailedSIRS::simple_sirs)
-```
-
-``` r
-library(tidyverse)
-example_out %>% 
-   as_tibble() %>% 
-   select(., -I_wild_cumulative, -I_captive_cumulative) %>% 
-   pivot_longer(-time, names_to = "compartment", values_to = "proportion") %>% 
-   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
-   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
-          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
-   ggplot(aes(x = time, y = proportion, color = sir_type, linetype = pop_type)) +
-   geom_line() +
-   labs(title = "SIR dynamics", y = "Proportion of population", x = "Time in days",
-        color = "SIR", linetype = "Population type") +
-   theme_bw()
-```
-
-<img src="man/figures/README-viz_results-1.png" width="100%" />
-
-``` r
-example_out %>% 
-   as_tibble() %>% 
-   select(., -S_wild, -I_wild, -R_wild, -S_captive, -I_captive, -R_captive) %>% 
-   rename(., Wild = I_wild_cumulative, Captive = I_captive_cumulative) %>% 
-   pivot_longer(-time, names_to = "population", values_to = "cumulative_proportion") %>% 
-   mutate(population = factor(population, levels = c("Wild", "Captive"))) %>% 
-   ggplot(aes(x = time, y = cumulative_proportion, linetype = population)) +
-   geom_line() +
-   labs(title = "Cumulative infections", y = "Proportion of population", x = "Time in days",
-        linetype = "Population type") +
-   theme_bw()
-```
-
-<img src="man/figures/README-cumulative_cases-1.png" width="100%" />
-
-``` r
-example_eq$y %>% 
-   as_tibble_row() %>% 
-   pivot_longer(cols = everything(), names_to = "compartment", values_to = "proportion") %>% 
-   separate(compartment, sep = "_", c("sir_type", "pop_type")) %>% 
-   mutate(sir_type = factor(sir_type, levels = c("S", "I", "R")),
-          pop_type = factor(pop_type, levels = c("wild", "captive"))) %>% 
-   ggplot(aes(x = sir_type, 
-              alpha = pop_type,
-              y = proportion, fill = sir_type)) +
-   geom_col(position = "dodge") +
-   labs(title = "Equilibrium proportions", x = "Compartment", alpha = "Population type", fill = "SIR") +
-   scale_alpha_discrete(range = c(1, 0.4)) +
-   ylim(0, 1) +
-   theme_bw()
-```
-
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
-
 ## References
 
 Cook, J.D., E. Rosenblatt, G.V. Direnzo, E.H.C. Grant, B.A. Mosher, F.
@@ -441,8 +331,14 @@ Arce, S. Christensen, R. Ghai, M.C. Runge. In Prep. Using decision
 science to evaluate the risk and management of SARS-CoV-2 zoonotic
 transmission between humans and white-tailed deer.
 
-Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K.
-Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In
-Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer
-(Odocoileus virginianus) reveals conditions for introduction and
-widespread transmission.
+Habib, T.J., Merrill, E.H., Pybus, M.J. and Coltman, D.W., 2011.
+Modelling landscape effects on density–contact rate relationships of
+deer in eastern Alberta: implications for chronic wasting disease.
+Ecological Modelling, 222(15), pp.2722-2732.
+
+Rosenblatt, E.G., Cook, J.D., DiRenzo, G.V., Grant, E.H.C., Arce, F.,
+Pepin K.M., Rudolph, F.J., Runge, M.C., Shriner, S., Walsh, D.P., and
+Mosher B.A. (2023). Epidemiological modeling of SARS-CoV-2 in
+white-tailed deer (Odocoileus virginianus) reveals conditions for
+introduction and widespread transmission. bioRxiv 2023.08.30.555493;
+doi: <https://doi.org/10.1101/2023.08.30.555493>.

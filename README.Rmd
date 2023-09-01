@@ -215,4 +215,4 @@ Cook, J.D., E. Rosenblatt, G.V. Direnzo, E.H.C. Grant, B.A. Mosher, F. Arce, S. 
 
 Habib, T.J., Merrill, E.H., Pybus, M.J. and Coltman, D.W., 2011. Modelling landscape effects on density–contact rate relationships of deer in eastern Alberta: implications for chronic wasting disease. Ecological Modelling, 222(15), pp.2722-2732.
 
-Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.
+Rosenblatt, E.G., Cook, J.D., DiRenzo, G.V., Grant, E.H.C., Arce, F., Pepin K.M., Rudolph, F.J., Runge, M.C., Shriner, S., Walsh, D.P., and Mosher B.A. (2023). Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission. bioRxiv 2023.08.30.555493; doi: https://doi.org/10.1101/2023.08.30.555493.
