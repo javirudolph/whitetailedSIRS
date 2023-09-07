@@ -51,7 +51,19 @@ Digital Object Identifier (DOI): https://doi.org/10.5066/P9TZK938
 USGS Information Product Data System (IPDS) no.: IP-155118
 
 ## Suggested Citation for Software
+
 Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V., Grant, E.H.C., Runge, M.C., and Mosher, B.A.. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, https://doi.org/10.5066/P9TZK938
+
+## Download package
+
+You can download the `whitetailedSIRS` package directly by using the following code:
+
+```{r}
+#Install githubinstall and devtools packages if not installed already
+install.packages("githubinstall")
+install.packages("devtools")
+devtools::install_github("disease-decision-analysis-and-research/whitetailedSIRS")
+```
 
 ## Abstract
 
