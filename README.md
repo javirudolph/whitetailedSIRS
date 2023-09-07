@@ -57,6 +57,18 @@ to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version
 1.0.0: U.S. Geological Survey software release,
 <https://doi.org/10.5066/P9TZK938>
 
+## Download package
+
+You can download the `whitetailedSIRS` package directly by using the
+following code:
+
+``` r
+#Install githubinstall and devtools packages if not installed already
+install.packages("githubinstall")
+install.packages("devtools")
+devtools::install_github("disease-decision-analysis-and-research/whitetailedSIRS")
+```
+
 ## Abstract
 
 This software release contains several R scripts that generate epidemic

@@ -58,7 +58,7 @@ Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V., Grant, E
 
 You can download the `whitetailedSIRS` package directly by using the following code:
 
-```{r}
+```{r, eval = FALSE}
 #Install githubinstall and devtools packages if not installed already
 install.packages("githubinstall")
 install.packages("devtools")
