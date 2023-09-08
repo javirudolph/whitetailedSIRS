@@ -63,9 +63,15 @@ You can download the `whitetailedSIRS` package directly by using the
 following code:
 
 ``` r
-#Install githubinstall and devtools packages if not installed already
+# Install githubinstall and devtools packages if not installed already
 install.packages("githubinstall")
 install.packages("devtools")
+
+# Load the packages
+library(githubinstall)
+library(devtools)
+
+# Function to download the package
 devtools::install_github("disease-decision-analysis-and-research/whitetailedSIRS")
 ```
 
