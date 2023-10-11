@@ -10,6 +10,9 @@
     <loc>/articles/Connected_Systems.html</loc>
   </url>
   <url>
+    <loc>/articles/Introduction.html</loc>
+  </url>
+  <url>
     <loc>/articles/Management_Alternatives_Systems.html</loc>
   </url>
   <url>
@@ -95,5 +98,8 @@
   </url>
   <url>
     <loc>/reference/simple_sirs_with_cumulative.html</loc>
+  </url>
+  <url>
+    <loc>/reference/whitetailedSIRS.html</loc>
   </url>
 </urlset>
