@@ -96,13 +96,29 @@
 <p>Year of Origin: 2023</p>
 <p>Year of Version: 2023</p>
 <p>Version: 1.0.0</p>
-<p>Digital Object Identifier (DOI): ______</p>
-<p>USGS Information Product Data System (IPDS) no.: IP-_______</p>
+<p>Digital Object Identifier (DOI): <a href="https://doi.org/10.5066/P9TZK938" class="external-link uri">https://doi.org/10.5066/P9TZK938</a></p>
+<p>USGS Information Product Data System (IPDS) no.: IP-155118</p>
 </div>
 <div class="section level2">
 <h2 id="suggested-citation-for-software">Suggested Citation for Software<a class="anchor" aria-label="anchor" href="#suggested-citation-for-software"></a>
 </h2>
-<p>Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V., Grant, E.H.C., Runge, M.C., and Mosher, B.A.. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, <a href="https://doi.org/______/______" class="external-link uri">https://doi.org/______/______</a></p>
+<p>Rosenblatt, E, Rudolph, J.F., and Arce, F., Cook, J. D., DiRenzo, G.V., Grant, E.H.C., Runge, M.C., and Mosher, B.A.. whitetailedSIRS: A package to project SARS-CoV-2 outbreak dynamics in white-tailed deer. Version 1.0.0: U.S. Geological Survey software release, <a href="https://doi.org/10.5066/P9TZK938" class="external-link uri">https://doi.org/10.5066/P9TZK938</a></p>
+</div>
+<div class="section level2">
+<h2 id="download-package">Download package<a class="anchor" aria-label="anchor" href="#download-package"></a>
+</h2>
+<p>You can download the <code>whitetailedSIRS</code> package directly by using the following code:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install githubinstall and devtools packages if not installed already</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"githubinstall"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load the packages</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hoxo-m/githubinstall" class="external-link">githubinstall</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Function to download the package</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"disease-decision-analysis-and-research/whitetailedSIRS"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
@@ -115,60 +131,59 @@
 <p>We thank Daniel Walsh, Susan Shriner, and Kim Pepin for their continued feedback as part of a broader decision analysis detailed in Cook et al. In Prep and Rosenblatt et al. In Prep. This work was supported by the Coronavirus Aid, Relief, and Economic Security Act (P.L. 116-136).</p>
 </div>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h2>
-<p>You can install the development version of whitetailedSIRS from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"disease-decision-analysis-and-research/whitetailedSIRS"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
 </h2>
 <div class="section level3">
-<h3 id="vignette-1-sir_model_descriptionrmd">Vignette 1: sir_model_description.Rmd<a class="anchor" aria-label="anchor" href="#vignette-1-sir_model_descriptionrmd"></a>
+<h3 id="vignette-1-introductionrmd">Vignette 1: Introduction.Rmd<a class="anchor" aria-label="anchor" href="#vignette-1-introductionrmd"></a>
 </h3>
 <p>Data inputs: N/A</p>
 <p>Details: A introductory vignette detailing the SIRS ODE equations and corresponding functions, used in Rosenblatt et al. In prep and Cook et al. In Prep.</p>
 <p>Outputs: N/A</p>
 </div>
 <div class="section level3">
-<h3 id="vignette-2-example_valuesrmd">Vignette 2: example_values.Rmd<a class="anchor" aria-label="anchor" href="#vignette-2-example_valuesrmd"></a>
+<h3 id="vignette-2-sir_model_descriptionrmd">Vignette 2: sir_model_description.Rmd<a class="anchor" aria-label="anchor" href="#vignette-2-sir_model_descriptionrmd"></a>
+</h3>
+<p>Data inputs: N/A</p>
+<p>Details: A vignette introducing and detailing the SIRS ODE equations and corresponding functions, used in Rosenblatt et al. In prep and Cook et al. In Prep.</p>
+<p>Outputs: N/A</p>
+</div>
+<div class="section level3">
+<h3 id="vignette-3-example_valuesrmd">Vignette 3: example_values.Rmd<a class="anchor" aria-label="anchor" href="#vignette-3-example_valuesrmd"></a>
 </h3>
 <p>Data inputs: N/A</p>
 <p>Details: A vignette stepping through the suggested work-flow when using the <code>whitetailedSIRS</code> package. Other vignettes use the same work-flow, so this vignette is useful for new users to understand how to replicate or modify the analysis presented.</p>
 <p>Outputs: N/A</p>
 </div>
 <div class="section level3">
-<h3 id="vignette-3-sirs_analysis_by_contextrmd">Vignette 3: SIRS_analysis_by_context.Rmd<a class="anchor" aria-label="anchor" href="#vignette-3-sirs_analysis_by_contextrmd"></a>
+<h3 id="vignette-4-sirs_analysis_by_contextrmd">Vignette 4: SIRS_analysis_by_context.Rmd<a class="anchor" aria-label="anchor" href="#vignette-4-sirs_analysis_by_contextrmd"></a>
 </h3>
 <p>Data inputs: N/A</p>
 <p>Details: This vignette details the analysis used to study differences in outbreak dynamics in four scenarios of SARS-CoV-2 transmission to and among white-tailed deer populations. The output of this vignette is used to visualize differences in the vignette <code>whitetailedSIRS::Visualize_by_context</code>. This analysis corresponds with Objectives 1-3 of <em>Rosenblatt et al. In Prep</em>.</p>
 <p>Outputs: N/A</p>
 </div>
 <div class="section level3">
-<h3 id="vignette-4-sirs_analysis_by_context_initialspillrmd">Vignette 4: SIRS_analysis_by_context_initialspill.Rmd<a class="anchor" aria-label="anchor" href="#vignette-4-sirs_analysis_by_context_initialspillrmd"></a>
+<h3 id="vignette-5-sirs_analysis_by_context_initialspillrmd">Vignette 5: SIRS_analysis_by_context_initialspill.Rmd<a class="anchor" aria-label="anchor" href="#vignette-5-sirs_analysis_by_context_initialspillrmd"></a>
 </h3>
 <p>Data inputs: N/A</p>
 <p>Details: This vignette follows the same blueprint as <code>whitetailedSIRS::SIRS_analysis_by_context</code>. The primary difference here is that initial infected compartment sizes are set non-zero values and human prevalence is set to zero. This mimics an initial spillover event of a given magnitude, to test how outbreak dynamics differ from continuous spillover detailed in <code>whitetailedSIRS::SIRS_analysis_by_context</code>. These differences are visualized in the vignette <code>whitetailedSIRS::Visualize_by_context</code>. Most of the simulation code is suppresed in the rendered vignette, but can be viewed in the .Rmd file. This analysis corresponds with Objective 4 of <em>Rosenblatt et al. In Prep</em>.</p>
 <p>Outputs: N/A</p>
 </div>
 <div class="section level3">
-<h3 id="vignette-5-visualize_by_contextrmd">Vignette 5: Visualize_by_context.Rmd<a class="anchor" aria-label="anchor" href="#vignette-5-visualize_by_contextrmd"></a>
+<h3 id="vignette-6-visualize_by_contextrmd">Vignette 6: Visualize_by_context.Rmd<a class="anchor" aria-label="anchor" href="#vignette-6-visualize_by_contextrmd"></a>
 </h3>
 <p>Data inputs: data/scenario_results.rda; data/scenario_projections.rda</p>
 <p>Details: This vignette demonstrates how to visualize the differences in various characteristics of outbreaks between scenarios. These figures are used in the results published in <em>Rosenblatt et al. In Prep.</em>.</p>
 <p>Outputs: N/A</p>
 </div>
 <div class="section level3">
-<h3 id="vignette-6-connected_systemsrmd">Vignette 6: Connected_Systems.Rmd<a class="anchor" aria-label="anchor" href="#vignette-6-connected_systemsrmd"></a>
+<h3 id="vignette-7-connected_systemsrmd">Vignette 7: Connected_Systems.Rmd<a class="anchor" aria-label="anchor" href="#vignette-7-connected_systemsrmd"></a>
 </h3>
 <p>Data inputs: data/scenario_results.rda</p>
 <p>Details: This vignette tests how connected systems (wild and captive separated by a fence line) differ in outbreak characteristics, compared to isolated scenario. When these scenarios are connected, there may be differences in prevalence, cumulative cases, and persistence due to fence line interactions. This analysis corresponds with Objective 5 of <em>Rosenblatt et al. In Prep</em>.</p>
 <p>Outputs: N/A</p>
 </div>
 <div class="section level3">
-<h3 id="vignette-7-management_alternatives_systemsrmd">Vignette 7: Management_Alternatives_Systems.Rmd<a class="anchor" aria-label="anchor" href="#vignette-7-management_alternatives_systemsrmd"></a>
+<h3 id="vignette-8-management_alternatives_systemsrmd">Vignette 8: Management_Alternatives_Systems.Rmd<a class="anchor" aria-label="anchor" href="#vignette-8-management_alternatives_systemsrmd"></a>
 </h3>
 <p>Data inputs: N/A</p>
 <p>Details: This vignette runs outbreak simulations to estimate the effects of various management alternatives on the dynamics of a SARS-CoV-2 outbreak in wild and captive white-tailed deer. We considered captive:wild systems that are separated by a fence. These management alternatives may be implemented in both wild and captive populations, or in one scenario. We focus on 11 alternatives, ranging across agriculture, public health, and wildlife sectors. These alternatives are detailed in Cook et al. In Prep..</p>
@@ -250,104 +265,11 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
-</h2>
-<p>Below is a basic example to run a simple projection using basic functions and fake data. Functions in <code>whitetailedSIRS</code> allow more complex calculations, but the core concepts remain the same.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/disease-decision-analysis-and-research/whitetailedSIRS" class="external-link">whitetailedSIRS</a></span><span class="op">)</span></span>
-<span><span class="co">## basic example code</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">example_inits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S_wild <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>                   I_wild <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>                   R_wild <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                   I_wild_cumulative <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                   S_captive <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                   I_captive <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                   R_captive <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                   I_captive_cumulative <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">example_inits_steady</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S_wild <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>                   I_wild <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>                   R_wild <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                   S_captive <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                   I_captive <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                   R_captive <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># length of time to run this for  </span></span>
-<span><span class="va">example_times</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">500</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># The parameters we are using in the simulation</span></span>
-<span><span class="va">example_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>alpha_immunity <span class="op">=</span> <span class="fl">0.03</span>,</span>
-<span>                    beta_aero_ww <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    beta_aero_cw <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    beta_aero_cc <span class="op">=</span> <span class="fl">0.02</span>,</span>
-<span>                    beta_aero_hw <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    beta_aero_hc <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>                    beta_dc_ww <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    beta_dc_cw <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    beta_dc_cc <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    phi_cw <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                    phi_wc <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                    gamma_recov <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>                    I_human <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>                    boost <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://desolve.r-forge.r-project.org/" class="external-link">deSolve</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">rootSolve</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">example_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits</span>, times <span class="op">=</span> <span class="va">example_times</span>, parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="reference/simple_sirs_with_cumulative.html">simple_sirs_with_cumulative</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">example_eq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rootSolve/man/runsteady.html" class="external-link">runsteady</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">example_inits_steady</span>, parms <span class="op">=</span> <span class="va">example_params</span>, func <span class="op">=</span> <span class="fu">whitetailedSIRS</span><span class="fu">::</span><span class="va"><a href="reference/simple_sirs.html">simple_sirs</a></span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span><span class="va">example_out</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="op">-</span><span class="va">I_wild_cumulative</span>, <span class="op">-</span><span class="va">I_captive_cumulative</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="op">-</span><span class="va">time</span>, names_to <span class="op">=</span> <span class="st">"compartment"</span>, values_to <span class="op">=</span> <span class="st">"proportion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/separate.html" class="external-link">separate</a></span><span class="op">(</span><span class="va">compartment</span>, sep <span class="op">=</span> <span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sir_type"</span>, <span class="st">"pop_type"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sir_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sir_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="st">"I"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>          pop_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pop_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wild"</span>, <span class="st">"captive"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">proportion</span>, color <span class="op">=</span> <span class="va">sir_type</span>, linetype <span class="op">=</span> <span class="va">pop_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"SIR dynamics"</span>, y <span class="op">=</span> <span class="st">"Proportion of population"</span>, x <span class="op">=</span> <span class="st">"Time in days"</span>,</span>
-<span>        color <span class="op">=</span> <span class="st">"SIR"</span>, linetype <span class="op">=</span> <span class="st">"Population type"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-viz_results-1.png" width="100%"></p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">example_out</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="op">-</span><span class="va">S_wild</span>, <span class="op">-</span><span class="va">I_wild</span>, <span class="op">-</span><span class="va">R_wild</span>, <span class="op">-</span><span class="va">S_captive</span>, <span class="op">-</span><span class="va">I_captive</span>, <span class="op">-</span><span class="va">R_captive</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">.</span>, Wild <span class="op">=</span> <span class="va">I_wild_cumulative</span>, Captive <span class="op">=</span> <span class="va">I_captive_cumulative</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="op">-</span><span class="va">time</span>, names_to <span class="op">=</span> <span class="st">"population"</span>, values_to <span class="op">=</span> <span class="st">"cumulative_proportion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>population <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">population</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wild"</span>, <span class="st">"Captive"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">cumulative_proportion</span>, linetype <span class="op">=</span> <span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Cumulative infections"</span>, y <span class="op">=</span> <span class="st">"Proportion of population"</span>, x <span class="op">=</span> <span class="st">"Time in days"</span>,</span>
-<span>        linetype <span class="op">=</span> <span class="st">"Population type"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-cumulative_cases-1.png" width="100%"></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">example_eq</span><span class="op">$</span><span class="va">y</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble_row</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"compartment"</span>, values_to <span class="op">=</span> <span class="st">"proportion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/separate.html" class="external-link">separate</a></span><span class="op">(</span><span class="va">compartment</span>, sep <span class="op">=</span> <span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sir_type"</span>, <span class="st">"pop_type"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sir_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sir_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="st">"I"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>          pop_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pop_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wild"</span>, <span class="st">"captive"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sir_type</span>, </span>
-<span>              alpha <span class="op">=</span> <span class="va">pop_type</span>,</span>
-<span>              y <span class="op">=</span> <span class="va">proportion</span>, fill <span class="op">=</span> <span class="va">sir_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Equilibrium proportions"</span>, x <span class="op">=</span> <span class="st">"Compartment"</span>, alpha <span class="op">=</span> <span class="st">"Population type"</span>, fill <span class="op">=</span> <span class="st">"SIR"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_alpha.html" class="external-link">scale_alpha_discrete</a></span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.4</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-2-1.png" width="100%"></p>
-</div>
-<div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Cook, J.D., E. Rosenblatt, G.V. Direnzo, E.H.C. Grant, B.A. Mosher, F. Arce, S. Christensen, R. Ghai, M.C. Runge. In Prep. Using decision science to evaluate the risk and management of SARS-CoV-2 zoonotic transmission between humans and white-tailed deer.</p>
-<p>Rosenblatt, E., J.D. Cook, G.V. Direnzo, E.H.C. Grant, F. Arce, K. Pepin, F.J. Rudolph, M.C. Runge, S. Shriner, D. Walsh, B.A. Mosher. In Prep. Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission.</p>
+<p>Habib, T.J., Merrill, E.H., Pybus, M.J. and Coltman, D.W., 2011. Modelling landscape effects on density–contact rate relationships of deer in eastern Alberta: implications for chronic wasting disease. Ecological Modelling, 222(15), pp.2722-2732.</p>
+<p>Rosenblatt, E.G., Cook, J.D., DiRenzo, G.V., Grant, E.H.C., Arce, F., Pepin K.M., Rudolph, F.J., Runge, M.C., Shriner, S., Walsh, D.P., and Mosher B.A. (2023). Epidemiological modeling of SARS-CoV-2 in white-tailed deer (Odocoileus virginianus) reveals conditions for introduction and widespread transmission. bioRxiv 2023.08.30.555493; doi: <a href="https://doi.org/10.1101/2023.08.30.555493" class="external-link uri">https://doi.org/10.1101/2023.08.30.555493</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
