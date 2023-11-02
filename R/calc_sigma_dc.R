@@ -39,8 +39,7 @@
 #' @examples
 #' \dontrun{
 #' calc_sigma_dc() # will run the defaults
-#' calc_sigma_dc(nsamples = 10) # use defaults with a random draw for values of
-#' C_nu from expert elicitation}
+#' calc_sigma_dc(nsamples = 10)}
 #'
 calc_sigma_dc <- function(V_DC = NULL,
                       C_nu = NULL,
