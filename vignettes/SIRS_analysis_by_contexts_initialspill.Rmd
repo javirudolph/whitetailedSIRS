@@ -60,7 +60,7 @@ We set a seed so the results here are repeatable, and set the number of samples 
 
 ```{r base_simulations}
 set.seed(23)
-nsamples <- 100
+nsamples <- 1000
 ```
 
 ## 2. Sample parameters for simulations
@@ -131,7 +131,7 @@ Below, we list additional parameters used for the "Intensive captive facility" s
 omega_ww_intensive <- rep(0, nsamples)
 omega_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)")
 omega_hw_intensive <- rep(0, nsamples)
-omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Captive (per 120 days)") /120
 
 sigma_aero_deer_deer_intensive <- calc_sigma_aero(C_nu = C_nu_deer,
                                             t_contact = t_contact_deer_deer_null / 60,
