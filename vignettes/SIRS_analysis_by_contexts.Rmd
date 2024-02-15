@@ -60,7 +60,7 @@ We set a seed so the results here are repeatable, and set the number of samples 
 
 ```{r base_simulations}
 set.seed(23)
-nsamples <- 100
+nsamples <- 1000
 ```
 
 ## 2. Sample parameters for simulations
@@ -87,6 +87,7 @@ Next, we define various proximity rates for the ranch context. Object names refl
 ```{r}
 omega_ww_ranch <- rep(0, nsamples) #Deer-to-deer proximity rate in wild (set to 0; events per day).
 omega_cw_null <- rep(0, nsamples) #Deer-to-deer proximity rate along fenceline (set to 0; events per day).
+omega_cc_ranch_no_bait <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild)
 omega_cc_ranch <- calc_contact_rate(nsamples = nsamples, type_contact = habitat, N_w = nWild, rho_attractant = get_EE_param_vals(data = elicitation_data, my_param = "Proximity rate with baiting (17 events without baiting)")/17) #Deer-to-deer proximity rate in ranch context, mimicing wild proximity rates with the influence of baiting (events per day).
 
 omega_hw_ranch <- rep(0, nsamples) #Human-to-deer proximity rate in wild (set to 0; events per day).
@@ -131,7 +132,7 @@ Below, we list additional parameters used for the "Intensive captive facility" s
 omega_ww_intensive <- rep(0, nsamples)
 omega_cc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Deer Proximity Rate, Captive (per day)")
 omega_hw_intensive <- rep(0, nsamples)
-omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Captive (per 120 days)") /120
 
 sigma_aero_deer_deer_intensive <- calc_sigma_aero(C_nu = C_nu_deer,
                                             t_contact = t_contact_deer_deer_null / 60,
@@ -324,8 +325,8 @@ df %>%
   group_by(., Context) %>% 
   reframe(., R0.Median = round(quantile(r0,probs = c(0.5)),2), 
           R0.80CI = paste0(round(quantile(r0,probs = c(0.1)),2)," - ",round(quantile(r0,probs = c(0.9)),2)), 
-          FOI.Median = round((quantile(FOI*100,probs = c(0.5))),2), 
-          FOI.80CI = paste0(round((quantile(FOI*100,probs = c(0.1))),2)," - ",round((quantile(FOI*100,probs = c(0.9))),2)), 
+          FOI.Median = round((quantile(FOI*100,probs = c(0.5))),4), 
+          FOI.80CI = paste0(round((quantile(FOI*100,probs = c(0.1))),4)," - ",round((quantile(FOI*100,probs = c(0.9))),4)), 
           Percent.Prob.1in1000.Infected.Median = round((1-(exp(-last(times)*quantile(FOI, probs = c(0.5)))^1000))*100, 1),
           Percent.Prob.1in1000.80CI = paste0(round((1-(exp(-last(times)*quantile(FOI, probs = c(0.1)))^1000))*100, 1)," - ",round((1-(exp(-last(times)*quantile(FOI, probs = c(0.9)))^1000))*100, 1)), 
           Prevalence.Median = round(quantile(Prevalence, probs = c(0.5)),6), 
