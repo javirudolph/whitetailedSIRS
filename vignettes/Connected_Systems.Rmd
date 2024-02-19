@@ -175,7 +175,7 @@ sigma_aero_deer_deer_intensive <- calc_sigma_aero(C_nu = C_nu_deer,
                                             r = r_deer, nsamples = nsamples, AER = rep(1, nsamples))
 
 #Human-to-deer proximity rate in intensive facilities.
-omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Suburban (per 120 days)") /120
+omega_hc_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Rate, Captive (per 120 days)") /120
 
 #Duration of human-deer proximity event
 t_contact_deer_human_intensive <- get_EE_param_vals(data = elicitation_data, my_param = "Deer-Human Proximity Duration, Captive (minutes)") 
@@ -432,9 +432,9 @@ sirs_results_systems <- rbind(ranch_suburban_results,intensive_suburban_results,
 sirs_results_systems %>% 
    group_by(., System) %>% 
    summarise(., Wild_Prevalence_Change = paste0(round(median(Change_Prev_Wild)*100,4), " (", round(quantile(Change_Prev_Wild,probs = 0.1)*100,4), "-",round(quantile(Change_Prev_Wild,probs = 0.9)*100,4),")"), Captive_Prevalence_Change = paste0(round(median(Change_Prev_Captive)*100,4), " (", round(quantile(Change_Prev_Captive,probs = 0.1)*100,4), "-",round(quantile(Change_Prev_Captive,probs = 0.9)*100,4),")"), 
-             Wild_Prevalence_Proportional_Change = paste0(round(median(Proportional_Change_Prev_Wild)*100,4), " (", round(quantile(Proportional_Change_Prev_Wild,probs = 0.1)*100,4), "-",round(quantile(Proportional_Change_Prev_Wild,probs = 0.9)*100,4),")"), Proportional_Captive_Prevalence_Change = paste0(round(median(Proportional_Change_Prev_Captive)*100,4), " (", round(quantile(Proportional_Change_Prev_Captive,probs = 0.1)*100,4), "-",round(quantile(Proportional_Change_Prev_Captive,probs = 0.9)*100,4),")"),
-             Wild_Incidence_Change = paste0(round(median(Change_Cumulative_Wild)*100,4), " (", round(quantile(Change_Cumulative_Wild,probs = 0.1)*100,4), "-",round(quantile(Change_Cumulative_Wild,probs = 0.9)*100,4),")"), Captive_Incidence_Change = paste0(round(median(Change_Cumulative_Captive)*100,4), " (", round(quantile(Change_Cumulative_Captive,probs = 0.1)*100,4), "-",round(quantile(Change_Cumulative_Captive,probs = 0.9)*100,4),")"), 
-             Wild_Persist_Change = paste0(round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact")$mean,2), " (", round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact", conf.level = 0.80)$lower,4), "-", round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact", conf.level = 0.80)$upper,4), ")"),
+             Wild_Prevalence_Proportional_Change = paste0(round(median(Proportional_Change_Prev_Wild)*100, 6), " (", round(quantile(Proportional_Change_Prev_Wild,probs = 0.1)*100,6), "-",round(quantile(Proportional_Change_Prev_Wild,probs = 0.9)*100,6),")"), Proportional_Captive_Prevalence_Change = paste0(round(median(Proportional_Change_Prev_Captive)*100,6), " (", round(quantile(Proportional_Change_Prev_Captive,probs = 0.1)*100,6), "-",round(quantile(Proportional_Change_Prev_Captive,probs = 0.9)*100,4),")"),
+             Wild_Incidence_Change = paste0(round(median(Change_Cumulative_Wild)*100,6), " (", round(quantile(Change_Cumulative_Wild,probs = 0.1)*100,6), "-",round(quantile(Change_Cumulative_Wild,probs = 0.9)*100,6),")"), Captive_Incidence_Change = paste0(round(median(Change_Cumulative_Captive)*100,6), " (", round(quantile(Change_Cumulative_Captive,probs = 0.1)*100,6), "-",round(quantile(Change_Cumulative_Captive,probs = 0.9)*100,6),")"), 
+             Wild_Persist_Change = paste0(round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact")$mean,4), " (", round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact", conf.level = 0.80)$lower,4), "-", round(binom.confint(sum(Change_Persist_Wild),nsamples,methods = "exact", conf.level = 0.80)$upper,4), ")"),
              Captive_Persist_Change = sum(Change_Persist_Captive)) ->fence_effect
 
 fence_effect %>%
